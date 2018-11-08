@@ -1,6 +1,7 @@
 package com.alchemi.al;
 
 import org.bukkit.ChatColor;
+import org.bukkit.craftbukkit.libs.it.unimi.dsi.fastutil.Arrays;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -27,21 +28,32 @@ public class Messenger{
 	}
 	
 	public static String cc(String msg){
-		String translated_message = ChatColor.translateAlternateColorCodes('&', msg);
-		return translated_message;
+		return ChatColor.translateAlternateColorCodes('&', msg);
 	}
 	
 	public static String parseVars(String msg, String...vals) {
-		if (msg.contains("$player$")) msg = msg.replaceAll("$player$", vals[0]);
-		if (msg.contains("$sender$")) msg = msg.replaceAll("$sender$", vals[1]);
-		if (msg.contains("$amount$")) msg = msg.replaceAll("$amount$", vals[2]);
-		if (msg.contains("$item$")) msg = msg.replaceAll("$item$", vals[3]);
-		if (msg.contains("$price$")) msg = msg.replaceAll("$price$", vals[4]);
-		if (msg.contains("$valuta$")) msg = msg.replaceAll("$valuta$", vals[5]);
-		if (msg.contains("$duration$")) msg = msg.replaceAll("$duration$", vals[6]);
-		if (msg.contains("$inc$")) msg = msg.replaceAll("$inc$", vals[7]);
-		if (msg.contains("$reason$")) msg = msg.replaceAll("$reason$", vals[8]);
+		String[] val = new String[9];
 		
+		for (int x = 0; x < 9 ; x++) {
+			if (vals.length >= x+1 && vals[x] != null) val[x] = vals[x];
+			else val[x] = "";
+		}
+		
+		
+		while (msg.contains("$player$")) msg = msg.replace("$player$", val[0]);
+		while (msg.contains("$sender$")) msg = msg.replace("$sender$", val[1]);
+		while (msg.contains("$amount$")) msg = msg.replace("$amount$", val[2]);
+		while (msg.contains("$item$")) msg = msg.replace("$item$", val[3]);
+		while (msg.contains("$price$")) msg = msg.replace("$price$", val[4]);
+		while (msg.contains("$valuta$")) msg = msg.replace("$valuta$", val[5]);
+		while (msg.contains("$duration$")) msg = msg.replace("$duration$", val[6]);
+		while (msg.contains("$inc$")) msg = msg.replace("$inc$", val[7]);
+		while (msg.contains("$reason$")) msg = msg.replace("$reason$", val[8]);
+		/*
+		System.out.println("PRIINNNT");
+		System.out.println(val[0]);
+		System.out.println("$player$".replaceAll("$player$", val[0]));
+		System.out.println(msg.replaceAll("$player$", val[0]));*/
 		return msg;
 	}
 		
@@ -57,7 +69,7 @@ public class Messenger{
 			return;
 		}
 		
-		Library.instance.getServer().broadcastMessage(getTag() + cc(msg));
+		Library.instance.getServer().broadcastMessage(getTag() + " " + cc(msg));
 	}
 	
 	public void broadcast(String msg, String...p) {

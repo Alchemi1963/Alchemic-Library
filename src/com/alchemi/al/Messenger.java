@@ -1,7 +1,7 @@
 package com.alchemi.al;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.craftbukkit.libs.it.unimi.dsi.fastutil.Arrays;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -32,9 +32,9 @@ public class Messenger{
 	}
 	
 	public static String parseVars(String msg, String...vals) {
-		String[] val = new String[9];
+		String[] val = new String[10];
 		
-		for (int x = 0; x < 9 ; x++) {
+		for (int x = 0; x < 10 ; x++) {
 			if (vals.length >= x+1 && vals[x] != null) val[x] = vals[x];
 			else val[x] = "";
 		}
@@ -44,21 +44,23 @@ public class Messenger{
 		while (msg.contains("$sender$")) msg = msg.replace("$sender$", val[1]);
 		while (msg.contains("$amount$")) msg = msg.replace("$amount$", val[2]);
 		while (msg.contains("$item$")) msg = msg.replace("$item$", val[3]);
-		while (msg.contains("$price$")) msg = msg.replace("$price$", val[4]);
-		while (msg.contains("$valuta$")) msg = msg.replace("$valuta$", val[5]);
-		while (msg.contains("$duration$")) msg = msg.replace("$duration$", val[6]);
-		while (msg.contains("$inc$")) msg = msg.replace("$inc$", val[7]);
-		while (msg.contains("$reason$")) msg = msg.replace("$reason$", val[8]);
-		/*
-		System.out.println("PRIINNNT");
-		System.out.println(val[0]);
-		System.out.println("$player$".replaceAll("$player$", val[0]));
-		System.out.println(msg.replaceAll("$player$", val[0]));*/
+		while (msg.contains("$name$")) msg = msg.replace("$name$", val[4]);
+		while (msg.contains("$price$")) msg = msg.replace("$price$", val[5]);
+		while (msg.contains("$valuta$")) msg = msg.replace("$valuta$", val[6]);
+		while (msg.contains("$duration$")) msg = msg.replace("$duration$", val[7]);
+		while (msg.contains("$inc$")) msg = msg.replace("$inc$", val[8]);
+		while (msg.contains("$reason$")) msg = msg.replace("$reason$", val[9]);
+		
 		return msg;
 	}
-		
-	public static void print(Object msg, String pluginname){
-		System.out.println("[" + pluginname + "] " + cc(msg.toString()));
+	
+	public void print(Object msg, String...vals) {
+		print(msg, true, vals);
+	}
+	
+	public void print(Object msg, boolean tag, String...vals) {
+		if (tag) Bukkit.getConsoleSender().sendMessage(getTag() + " " + cc(parseVars(msg.toString(), vals)));
+		else Bukkit.getConsoleSender().sendMessage(cc(parseVars(msg.toString(), vals)));
 	}
 		
 	public void broadcast(String msg) {

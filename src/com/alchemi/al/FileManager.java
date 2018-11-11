@@ -67,13 +67,13 @@ public class FileManager {
         // Look for defaults in the jar
         try {
             
-        	Reader defConfigStream = new InputStreamReader(plugin.getResource("messages.yml"));
+        	Reader defConfigStream = new InputStreamReader(plugin.getResource(yml));
             if(defConfigStream != null) {
                 YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(defConfigStream);
                 this.confs.get(yml).setDefaults(defConfig);
             }
         } catch(Exception e) {
-            Messenger.print("System could not reload configuration!", plugin.getDescription().getName());
+        	(new Messenger(plugin, this)).print("System could not reload configuration!");
             e.printStackTrace();
         }
     }

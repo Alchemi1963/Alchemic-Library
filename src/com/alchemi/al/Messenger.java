@@ -17,13 +17,13 @@ public class Messenger{
 	
 	public String getMessage(String key) {
 		
-		String msg = this.fm.getFileConfig("messages.yml").getString(this.plugin.getDescription().getName() + "." + key);
+		String msg = this.fm.getConfig("messages.yml").getString(this.plugin.getDescription().getName() + "." + key);
 		return cc(msg);
 		
 	}
 	
 	public String getTag() {
-		String msg = this.fm.getFileConfig("messages.yml").getString(this.plugin.getDescription().getName() + ".Tag");
+		String msg = this.fm.getConfig("messages.yml").getString(this.plugin.getDescription().getName() + ".Tag");
 		return cc(msg);
 	}
 	
@@ -53,6 +53,8 @@ public class Messenger{
 		
 		return msg;
 	}
+	
+	public void print(Object msg) { print(msg, true); }
 	
 	public void print(Object msg, String...vals) {
 		print(msg, true, vals);

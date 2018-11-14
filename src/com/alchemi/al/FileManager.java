@@ -24,7 +24,7 @@ public class FileManager {
     public FileManager(JavaPlugin plugin, String[] names, FileConfiguration...configurations) {
         this.plugin = plugin;
         
-        for (int x = 0 ; x < names.length ; x++) {
+        for (int x = 0 ; x < names.length; x++) {
         	
         	this.confs.put(names[x], configurations[x]);
         	this.files.put(names[x], new File(plugin.getDataFolder(), names[x]));
@@ -113,21 +113,25 @@ public class FileManager {
         }
     }
     
+    public void reloadDefaultConfig() {
+    	for (String f : files.keySet()) reloadConfig(f);
+    }
+    
+    public void reloadDefaultConfig(String file) {
+    	
+    	FileConfiguration c = new YamlConfiguration();
+    	try {
+			c.loadFromString(stringFromInputStream(plugin.getResource(file)));
+		} catch (InvalidConfigurationException ignored) {}
+    	
+    	try {
+			c.save(new File(plugin.getDataFolder(), file));
+		} catch (IOException ignored) {}
+    	
+    }
+    
     private HashMap<String, Object> getConfigVals(String file) {
         HashMap<String, Object> var = new HashMap<String, Object>();
-        /*YamlConfiguration config = new YamlConfiguration();
-        try {
-            config.loadFromString(stringFromInputStream(AuctionStorm.class.getResourceAsStream("/" + file)));
-        } catch(InvalidConfigurationException ignored) {
-        }
-        for(String key : config.getKeys(false)) {
-            var.put(key, config.get(key));
-        }
-        
-        if (!this.confs.containsKey(file) || this.confs.get(file) == null) {
-        	reloadConfig(file);
-        }*/
-        
         YamlConfiguration c = new YamlConfiguration();
         try {
         	c.loadFromString(stringFromInputStream(plugin.getResource(file)));

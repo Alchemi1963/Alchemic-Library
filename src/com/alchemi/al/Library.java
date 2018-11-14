@@ -1,7 +1,5 @@
 package com.alchemi.al;
 
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class Library extends JavaPlugin{
@@ -28,13 +26,6 @@ public class Library extends JavaPlugin{
 			if (string.contains(String.valueOf(c))) return true;
 		}
 		
-		return false;
-	}
-	
-	public static boolean checkCmdPermission(Command cmd, CommandSender sender, String permission, String command){
-		if (cmd.getName().equalsIgnoreCase(command) && (sender.hasPermission(permission)) || cmd.getName().equalsIgnoreCase(command) && sender.isOp()) {
-			return true;
-		}
 		return false;
 	}
 }

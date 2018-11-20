@@ -29,6 +29,13 @@ public class FileManager {
 		}
 	}
 	
+	public FileManager(JavaPlugin plugin, String name, FileConfiguration fileConfiguration) {
+
+		this.plugin = plugin;
+		this.confs.put(name, fileConfiguration);
+		
+	}
+
 	public boolean hasConfig(String file) {
 		return confs.containsKey(file);
 	}

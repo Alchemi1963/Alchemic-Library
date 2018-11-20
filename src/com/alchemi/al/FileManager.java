@@ -7,7 +7,6 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.HashMap;
 import java.util.Scanner;
-import java.util.logging.Level;
 
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -16,137 +15,195 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class FileManager {
 
-    private final JavaPlugin plugin;
+	private final JavaPlugin plugin;
 
-    private HashMap<String, FileConfiguration> confs = new HashMap<String, FileConfiguration>();
-    private HashMap<String, File> files = new HashMap<String, File>();
+	private HashMap<String, FileConfiguration> confs = new HashMap<String, FileConfiguration>();
 
-    public FileManager(JavaPlugin plugin, String[] names, FileConfiguration...configurations) {
-        this.plugin = plugin;
-        
-        for (int x = 0 ; x < names.length; x++) {
-        	
-        	this.confs.put(names[x], configurations[x]);
-        	this.files.put(names[x], new File(plugin.getDataFolder(), names[x]));
-        	
-        }
-    }
-    
-    public boolean hasConfig(String file) {
-    	return confs.containsKey(file) && files.containsKey(file);
-    }
-    
-    public HashMap<String, FileConfiguration> getFiles() {
+	public FileManager(JavaPlugin plugin, String[] names, FileConfiguration...configurations) {
+		this.plugin = plugin;
+		
+		for (int x = 0 ; x < names.length; x++) {
+			
+			this.confs.put(names[x], configurations[x]);
+			
+		}
+	}
+	
+	public boolean hasConfig(String file) {
+		return confs.containsKey(file);
+	}
+	
+	public HashMap<String, FileConfiguration> getFiles() {
 		return confs;
 	}
-    
-    public JavaPlugin getPlugin(){ return plugin;}
+	
+	public JavaPlugin getPlugin(){ return plugin;}
 
-    public void saveDefaultYML(String yml) {
-        if(!files.containsKey(yml) || files.get(yml) == null) {
-            this.files.put(yml, new File(plugin.getDataFolder(), yml));
-        }
-        if(!this.files.get(yml).exists()) {
-            plugin.saveResource(yml, false);
-        }
-    }
+	public void saveDefaultYML(String yml) {
+		if (!new File(plugin.getDataFolder(), yml).exists()) plugin.saveResource(yml, false);
+	}
 
-    public FileConfiguration getConfig(String yml) {
-        if (!confs.containsKey(yml) || confs.get(yml) == null) {
-        	
-        	reloadConfig(yml);
-        	
-        }
-        return confs.get(yml);
-    }
+	public FileConfiguration getConfig(String yml) {
+		if (!confs.containsKey(yml) || confs.get(yml) == null) {
+			
+			reloadConfig(yml);
+			
+		}
+		return confs.get(yml);
+	}
 
-    public void reloadConfig(String yml) {
-    	if(!files.containsKey(yml) || files.get(yml) == null) {
-            this.files.put(yml, new File(plugin.getDataFolder(), yml));
-        }
-    	this.confs.put(yml, YamlConfiguration.loadConfiguration(this.files.get(yml)));
-        
-        // Look for defaults in the jar
-        try {
-            
-        	Reader defConfigStream = new InputStreamReader(plugin.getResource(yml));
-            if(defConfigStream != null) {
-                YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(defConfigStream);
-                this.confs.get(yml).setDefaults(defConfig);
-            }
-        } catch(Exception e) {
-        	(new Messenger(plugin, this)).print("System could not reload configuration!");
-            e.printStackTrace();
-        }
-    }
+	public void reloadConfig(String yml) {
+		
+		this.confs.put(yml, YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), yml)));
+		// Look for defaults in the jar
+		try {
+			
+			Reader defConfigStream = new InputStreamReader(plugin.getResource(yml));
+			if(defConfigStream != null) {
+				YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(defConfigStream);
+				this.confs.get(yml).setDefaults(defConfig);
+			}
+			
+		} catch(Exception e) {
+			(new Messenger(plugin, this)).print("System could not reload configuration!");
+			e.printStackTrace();
+		}
+	}
 
-    public void saveConfig(String yml) {
-        if(!this.files.containsKey(yml) || this.files.get(yml) == null || !this.confs.containsKey(yml) || this.confs.get(yml) == null) {
-            return;
-        }
-        try {
-            getConfig(yml).save(this.files.get(yml));
-        } catch(IOException ex) {
-            plugin.getLogger().log(Level.SEVERE, "Could not save config to " + this.files.get(yml), ex);
-        }
-    }
-    
-    public void updateConfig(String file) {
-        HashMap<String, Object> newConfig = getConfigVals(file);
-        FileConfiguration c;
-        if(file.equals("config.yml")) {
-            c = plugin.getConfig();
-        } else {
-            c = getConfig(file);
-        }
-        for(String var : c.getKeys(true)) {
-            newConfig.remove(var);
-        }
-        if(newConfig.size() != 0) {
-            for(String key : newConfig.keySet()) {
-                c.set(key, newConfig.get(key));
-            }
-            try {
-                c.save(new File(plugin.getDataFolder(), file));
-            } catch(IOException ignored) {
-            }
-        }
-    }
-    
-    public void reloadDefaultConfig() {
-    	for (String f : files.keySet()) reloadConfig(f);
-    }
-    
-    public void reloadDefaultConfig(String file) {
-    	
-    	FileConfiguration c = new YamlConfiguration();
-    	try {
+	public void saveConfig(String yml) {
+		if(!this.confs.containsKey(yml) || this.confs.get(yml) == null) {
+			return;
+		}
+		
+		save(getConfig(yml), yml);
+	}
+	
+	public void updateConfig(String file) {
+		HashMap<String, Object> newConfig = getConfigVals(file);
+		FileConfiguration c = getConfig(file);
+		
+		for(String var : c.getKeys(true)) {
+			newConfig.remove(var);
+		}
+		
+		if(newConfig.size() != 0) {
+			for(String key : newConfig.keySet()) {
+				c.set(key, newConfig.get(key));
+			}
+		}
+		
+		try {
+			c.save(new File(plugin.getDataFolder(), file));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void save(FileConfiguration c, String file) {
+		try {
+			c.save(new File(plugin.getDataFolder(), file));
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+		return;
+		
+		/*String newConf = c.saveToString();
+		
+		InputStream vile = plugin.getResource(file);
+		Scanner scanner = new Scanner(vile);
+		List<String> vile2 = Arrays.asList(scanner.useDelimiter("\\A").next().split("\n"));
+		scanner.close();
+		
+		List<String> nca1 = Arrays.asList(newConf.split("\n"));
+		ArrayList<String> nca = new ArrayList<String>();
+		nca.addAll(nca1);
+		String nc = "";
+		for (String s : vile2) {
+			
+			int index = vile2.indexOf(s);
+			
+			if (!s.contains("#")) {
+				
+				if (s.contains(" - ")) continue;
+				else if (!s.contains(":")) {
+					if (s.endsWith("\n")) nc = nc + s;
+					else nc = nc + s + "\n";
+					continue;
+				}
+				int i3 = s.lastIndexOf(":");
+				
+				for (String s2 : nca) {
+					if (s.contains(s2)) {
+						s = s2 + "\n";
+					}
+					if (!s2.contains(":")) continue;
+					
+					int i = s2.lastIndexOf(":");
+					if (s.substring(0, i3).equals(s2.substring(0, i))) {
+						
+						s = s2 + "\n";
+						
+						if (vile2.size() > index + 1 && vile2.get(index + 1).contains(" - ")) {
+		 				int i2 = nca.indexOf(s2) + 1;
+		 				
+		 				while (nca.size() > i2 && nca.get(i2).contains(" - ")) {
+		 					s = s + nca.get(i2) + "\n";
+		 					i2 ++;
+		 				}
+						}
+						nca.remove(s2);
+						break;
+						
+					}
+				}
+			}
+			if (s.endsWith("\n")) nc = nc + s;
+			else nc = nc + s + "\n";
+			
+			
+		}	 
+		
+		if (c.contains("File-Version-Do-Not-Edit")) {
+			nc = nc + "File-Version-Do-Not-Edit: " + c.getInt("File-Version-Do-Not-Edit");
+		}
+		PrintWriter writer;
+		try {
+			writer = new PrintWriter(new File(plugin.getDataFolder(), file), "UTF-8");
+			writer.print(nc);
+			writer.close();
+		} catch (FileNotFoundException | UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}*/
+	}
+	
+	public void reloadDefaultConfig() {
+		for (String f : confs.keySet()) reloadDefaultConfig(f);
+	}
+	
+	public void reloadDefaultConfig(String file) {
+		plugin.saveResource(file, true);
+		confs.put(file, YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), file)));
+		
+	}
+	
+	private HashMap<String, Object> getConfigVals(String file) {
+		HashMap<String, Object> var = new HashMap<String, Object>();
+		YamlConfiguration c = new YamlConfiguration();
+		try {
 			c.loadFromString(stringFromInputStream(plugin.getResource(file)));
 		} catch (InvalidConfigurationException ignored) {}
-    	
-    	try {
-			c.save(new File(plugin.getDataFolder(), file));
-		} catch (IOException ignored) {}
-    	
-    }
-    
-    private HashMap<String, Object> getConfigVals(String file) {
-        HashMap<String, Object> var = new HashMap<String, Object>();
-        YamlConfiguration c = new YamlConfiguration();
-        try {
-        	c.loadFromString(stringFromInputStream(plugin.getResource(file)));
-        } catch (InvalidConfigurationException ignored) {}
-        
-        for (String key : c.getKeys(false)) {
-        	var.put(key, c.get(key));
-        }
-        return var;
-    }
-    
-    private String stringFromInputStream(InputStream in) {
-    	Scanner scanner = new Scanner(in);
-    	String next = scanner.useDelimiter("\\A").next();
-    	scanner.close();
-        return next;
-    }
+		
+		for (String key : c.getKeys(false)) {
+			var.put(key, c.get(key));
+		}
+		return var;
+	}
+	
+	private String stringFromInputStream(InputStream in) {
+		Scanner scanner = new Scanner(in);
+		String next = scanner.useDelimiter("\\A").next();
+		scanner.close();
+		return next;
+	}
 }

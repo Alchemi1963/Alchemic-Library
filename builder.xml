@@ -5,6 +5,7 @@
         <jar destfile="../Test-Server/plugins/Alchemic-Library-1.2.jar">
             <fileset dir="bin/"></fileset>
             <fileset file="plugin.yml"></fileset>
+            <fileset file="sc.yml"></fileset>
         </jar>
     </target>
 </project>

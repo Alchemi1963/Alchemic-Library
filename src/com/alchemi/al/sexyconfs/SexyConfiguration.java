@@ -86,7 +86,6 @@ public class SexyConfiguration extends YamlConfiguration {
 			if (data.equals("")) data = line;
 			else data = data.concat("\n" + line);
 		}
-		System.out.println(data);
 		return data;
 	}
 	

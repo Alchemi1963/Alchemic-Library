@@ -73,7 +73,11 @@ public class Messenger{
 			return;
 		}
 		
-		Library.instance.getServer().broadcastMessage(getTag() + " " + cc(msg));
+		for (Player r : Library.instance.getServer().getOnlinePlayers()) {
+			sendMsg(getTag() + " " + cc(msg), r);
+		}
+//		Bukkit.broadcastMessage(getTag() + " " + cc(msg));
+		
 	}
 	
 	public void broadcast(String msg, String...p) {

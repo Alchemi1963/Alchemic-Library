@@ -107,6 +107,13 @@ public class FileManager {
 		}
 	}
 	
+	public void updateConfig(String file, FileConfiguration conf) {
+		
+		confs.put(file, conf);
+		save(conf, file);
+		
+	}
+	
 	public void save(FileConfiguration c, String file) {
 		try {
 			c.save(new File(plugin.getDataFolder(), file));

@@ -1,7 +1,12 @@
 package com.alchemi.al;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -31,36 +36,24 @@ public class Messenger{
 		return ChatColor.translateAlternateColorCodes('&', msg);
 	}
 	
-	public static String parseVars(String msg, String...vals) {
-		String[] val = new String[10];
-		
-		for (int x = 0; x < 10 ; x++) {
-			if (vals.length >= x+1 && vals[x] != null) val[x] = vals[x];
-			else val[x] = "";
+	public static String parseVars(String msg, Map<String, String> vals) {
+		for (Entry<String, String> ent : vals.entrySet()) {
+			
+			while (msg.contains(ent.getKey())) msg = msg.replace(ent.getKey(), ent.getValue());	
 		}
-		
-		
-		while (msg.contains("$player$")) msg = msg.replace("$player$", val[0]);
-		while (msg.contains("$sender$")) msg = msg.replace("$sender$", val[1]);
-		while (msg.contains("$amount$")) msg = msg.replace("$amount$", val[2]);
-		while (msg.contains("$item$")) msg = msg.replace("$item$", val[3]);
-		while (msg.contains("$name$")) msg = msg.replace("$name$", val[4]);
-		while (msg.contains("$price$")) msg = msg.replace("$price$", val[5]);
-		while (msg.contains("$valuta$")) msg = msg.replace("$valuta$", val[6]);
-		while (msg.contains("$duration$")) msg = msg.replace("$duration$", val[7]);
-		while (msg.contains("$inc$")) msg = msg.replace("$inc$", val[8]);
-		while (msg.contains("$reason$")) msg = msg.replace("$reason$", val[9]);
 		
 		return msg;
 	}
 	
-	public void print(Object msg) { print(msg, true); }
+	public void print(Object msg) { print(msg, true, new HashMap<String, String>()); }
 	
-	public void print(Object msg, String...vals) {
+	public void print(Object msg, boolean tag) { print(msg, tag, new HashMap<String, String>()); } 
+	
+	public void print(Object msg, Map<String, String> vals) {
 		print(msg, true, vals);
 	}
 	
-	public void print(Object msg, boolean tag, String...vals) {
+	public void print(Object msg, boolean tag, Map<String, String> vals) {
 		if (tag) Bukkit.getConsoleSender().sendMessage(getTag() + " " + cc(parseVars(msg.toString(), vals)));
 		else Bukkit.getConsoleSender().sendMessage(cc(parseVars(msg.toString(), vals)));
 	}
@@ -80,15 +73,15 @@ public class Messenger{
 		
 	}
 	
-	public void broadcast(String msg, String...p) {
-		broadcast(parseVars(msg, p));
+	public void broadcast(String msg, Map<String, String> vs) {
+		broadcast(parseVars(msg, vs));
 	}
 	
-	public static void sendMsg(String msg, Player reciever){
+	public static void sendMsg(String msg, CommandSender reciever){
 		reciever.sendMessage(cc(msg));
 	}
 	
-	public static void sendMsg(String msg, Player reciever, String...vars) {
+	public static void sendMsg(String msg, CommandSender reciever, Map<String, String> vars) {
 		reciever.sendMessage(cc(parseVars(msg, vars)));
 	}
 	

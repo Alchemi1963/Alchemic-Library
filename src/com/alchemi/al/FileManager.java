@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.HashMap;
+import java.util.Map.Entry;
 import java.util.Scanner;
 
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -87,22 +88,29 @@ public class FileManager {
 	
 	public void updateConfig(String file) {
 		HashMap<String, Object> newConfig = getConfigVals(file);
-		FileConfiguration c = getConfig(file);
-		
-		for(String var : c.getKeys(true)) {
-			newConfig.remove(var);
+		FileConfiguration c = new YamlConfiguration();
+		try {
+			c.load(new File(plugin.getDataFolder(), file));
+		} catch (IOException | InvalidConfigurationException e1) {
+			e1.printStackTrace();
+			return;
 		}
 		
-		if(newConfig.size() != 0) {
-			for(String key : newConfig.keySet()) {
-				c.set(key, newConfig.get(key));
+		for(Entry<String, Object> key : newConfig.entrySet()) {
+			
+			if (!c.contains(key.getKey())) {
+				c.set(key.getKey(), key.getValue());
+				c.addDefault(key.getKey(), key.getValue());
 			}
+			
 		}
 		
 		try {
+			System.out.println(c.saveToString());
 			c.save(new File(plugin.getDataFolder(), file));
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			confs.put(file, c);
+		} catch (Exception e) {
+
 			e.printStackTrace();
 		}
 	}
@@ -198,7 +206,6 @@ public class FileManager {
 	public void reloadDefaultConfig(String file) {
 		plugin.saveResource(file, true);
 		confs.put(file, YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), file)));
-		
 	}
 	
 	private HashMap<String, Object> getConfigVals(String file) {
@@ -208,7 +215,7 @@ public class FileManager {
 			c.loadFromString(stringFromInputStream(plugin.getResource(file)));
 		} catch (InvalidConfigurationException ignored) {}
 		
-		for (String key : c.getKeys(false)) {
+		for (String key : c.getKeys(true)) {
 			var.put(key, c.get(key));
 		}
 		return var;

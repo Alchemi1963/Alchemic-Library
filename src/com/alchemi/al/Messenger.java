@@ -59,7 +59,7 @@ public class Messenger{
 	}
 	
 	public void print(Object msg, boolean tag, Map<String, String> vals) {
-		if (tag) Bukkit.getConsoleSender().sendMessage(getTag() + " " + cc(parseVars(msg.toString(), vals)));
+		if (tag) Bukkit.getConsoleSender().sendMessage(cc(getTag() + " " + parseVars(msg.toString(), vals)));
 		else Bukkit.getConsoleSender().sendMessage(cc(parseVars(msg.toString(), vals)));
 	}
 		

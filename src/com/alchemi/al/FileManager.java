@@ -106,7 +106,6 @@ public class FileManager {
 		}
 		
 		try {
-			System.out.println(c.saveToString());
 			c.save(new File(plugin.getDataFolder(), file));
 			confs.put(file, c);
 		} catch (Exception e) {

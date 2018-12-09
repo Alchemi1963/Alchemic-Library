@@ -1,6 +1,5 @@
 package com.alchemi.al;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -122,11 +121,8 @@ public class Messenger{
 	public static void sendHoverMsg(Player reciever, String mainText, String hoverText) {
 		if (hoverText.substring(0, 1).equals("\n")) hoverText = hoverText.replaceFirst("\n", "");
 		
-//		String subText = mainText;
 		String mod = "&9";
 		String newText = "";
-		
-		System.out.println(mainText);
 		
 		for (String s : mainText.split(" ")) {
 			
@@ -145,16 +141,11 @@ public class Messenger{
 			
 		}
 		
-		System.out.println(Arrays.asList(mainText.split(" ")));
-		System.out.println(newText);
-		
 		mainText = newText;
 		
 		TextComponent mainComponent = new TextComponent(cc(mainText));
 		mainComponent.setHoverEvent(new HoverEvent( HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(cc(hoverText)).create() ));
 		
 		reciever.spigot().sendMessage(mainComponent);
-		
 	}
-	
 }

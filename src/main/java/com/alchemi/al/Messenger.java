@@ -58,8 +58,15 @@ public class Messenger{
 	}
 	
 	public void print(Object msg, boolean tag, Map<String, String> vals) {
-		if (tag) Bukkit.getConsoleSender().sendMessage(cc(getTag() + " " + parseVars(msg.toString(), vals)));
-		else Bukkit.getConsoleSender().sendMessage(cc(parseVars(msg.toString(), vals)));
+		if (String.valueOf(msg).contains("\n")) {
+			for (String m : String.valueOf(msg).split("\n")) {
+				print(m, tag, vals);
+			}
+			return;
+		}
+		
+		if (tag) Bukkit.getConsoleSender().sendMessage(cc(getTag() + " " + parseVars(String.valueOf(msg), vals)));
+		else Bukkit.getConsoleSender().sendMessage(cc(parseVars(String.valueOf(msg), vals)));
 	}
 		
 	public void broadcast(String msg) {
@@ -90,6 +97,9 @@ public class Messenger{
 	}
 	
 	public void broadcastHover(String mainText, String hoverText, Map<String, String> vars) {
+		
+		mainText = colourMessage(mainText);
+		
 		if (mainText.contains("\n")) {
 			for (String msg : mainText.split("\n")) {
 				broadcastHover(msg, hoverText, vars);
@@ -102,6 +112,9 @@ public class Messenger{
 	}
 	
 	public void broadcastHover(String mainText, String hoverText) {
+		
+		mainText = colourMessage(mainText);
+		
 		if (mainText.contains("\n")) {
 			for (String msg : mainText.split("\n")) {
 				broadcastHover(msg, hoverText);
@@ -119,33 +132,43 @@ public class Messenger{
 	}
 	
 	public static void sendHoverMsg(Player reciever, String mainText, String hoverText) {
+		
 		if (hoverText.substring(0, 1).equals("\n")) hoverText = hoverText.replaceFirst("\n", "");
 		
-		String mod = "&9";
+		mainText = colourMessage(mainText);
+		
+		TextComponent mainComponent = new TextComponent(cc(mainText));
+		mainComponent.setHoverEvent(new HoverEvent( HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(cc(hoverText)).create() ));
+		
+		reciever.spigot().sendMessage(mainComponent);
+	}
+	
+	public static String colourMessage(String message) { return colourMessage(message, "&9"); }
+	
+	public static String colourMessage(String message, String defaultCol) {
+		
+		String mod = defaultCol;
 		String newText = "";
 		
-		for (String s : mainText.split(" ")) {
+		for (String s : message.split(" ")) {
 			
 			if (s.contains("&")) {
 				int i = s.indexOf("&") + 1;
 				if (s.charAt(i) != ' ')	mod = "&" + s.charAt(i);
 			}
 			
-			if (mainText.split(" ")[0].equals(s)) newText = s;
+			if (message.split(" ")[0].equals(s)) newText = s;
 			else {
 				
-				if (s.charAt(0) == '&')	newText += " " + mod + s;
-				else newText += " " + s + mod;
+				if (s.contains("&")) newText += " " + s;
+				else newText += " " + mod + s;
 				
 			}
 			
+			continue;
 		}
 		
-		mainText = newText;
+		return newText;
 		
-		TextComponent mainComponent = new TextComponent(cc(mainText));
-		mainComponent.setHoverEvent(new HoverEvent( HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(cc(hoverText)).create() ));
-		
-		reciever.spigot().sendMessage(mainComponent);
 	}
 }

@@ -96,6 +96,8 @@ public class FileManager {
 			return;
 		}
 		
+		if (c.getValues(false).size() == 0) return;
+		
 		for(Entry<String, Object> key : newConfig.entrySet()) {
 			
 			if (!c.contains(key.getKey())) {

@@ -1,5 +1,5 @@
 name: AlchemicLibrary
 main: com.alchemi.al.Library
-version: 1.3.2
+version: ${project.version}
 author: Alchemi
 description: A library for all my plugins

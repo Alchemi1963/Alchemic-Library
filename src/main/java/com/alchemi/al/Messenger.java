@@ -40,24 +40,24 @@ public class Messenger{
 		return ChatColor.translateAlternateColorCodes('&', msg);
 	}
 	
-	public static String parseVars(String msg, Map<String, String> vals) {
-		for (Entry<String, String> ent : vals.entrySet()) {
+	public static String parseVars(String msg, Map<String, Object> vals) {
+		for (Entry<String, Object> ent : vals.entrySet()) {
 			
-			while (msg.contains(ent.getKey())) msg = msg.replace(ent.getKey(), ent.getValue());	
+			while (msg.contains(ent.getKey())) msg = msg.replace(ent.getKey(), String.valueOf(ent.getValue()));	
 		}
 		
 		return msg;
 	}
 	
-	public void print(Object msg) { print(msg, true, new HashMap<String, String>()); }
+	public void print(Object msg) { print(msg, true, new HashMap<String, Object>()); }
 	
-	public void print(Object msg, boolean tag) { print(msg, tag, new HashMap<String, String>()); } 
+	public void print(Object msg, boolean tag) { print(msg, tag, new HashMap<String, Object>()); } 
 	
-	public void print(Object msg, Map<String, String> vals) {
+	public void print(Object msg, Map<String, Object> vals) {
 		print(msg, true, vals);
 	}
 	
-	public void print(Object msg, boolean tag, Map<String, String> vals) {
+	public void print(Object msg, boolean tag, Map<String, Object> vals) {
 		if (String.valueOf(msg).contains("\n")) {
 			for (String m : String.valueOf(msg).split("\n")) {
 				print(m, tag, vals);
@@ -84,7 +84,7 @@ public class Messenger{
 		
 	}
 	
-	public void broadcast(String msg, Map<String, String> vs) {
+	public void broadcast(String msg, Map<String, Object> vs) {
 		broadcast(parseVars(msg, vs));
 	}
 	
@@ -92,11 +92,11 @@ public class Messenger{
 		reciever.sendMessage(cc(msg));
 	}
 	
-	public static void sendMsg(String msg, CommandSender reciever, Map<String, String> vars) {
+	public static void sendMsg(String msg, CommandSender reciever, Map<String, Object> vars) {
 		reciever.sendMessage(cc(parseVars(msg, vars)));
 	}
 	
-	public void broadcastHover(String mainText, String hoverText, Map<String, String> vars) {
+	public void broadcastHover(String mainText, String hoverText, Map<String, Object> vars) {
 		
 		mainText = colourMessage(mainText);
 		
@@ -126,7 +126,7 @@ public class Messenger{
 		}
 	}
 	
-	public static void sendHoverMsg(Player reciever, String mainText, String hoverText, Map<String, String> vars) {
+	public static void sendHoverMsg(Player reciever, String mainText, String hoverText, Map<String, Object> vars) {
 		sendHoverMsg(reciever, parseVars(mainText, vars), parseVars(hoverText, vars));
 		
 	}
@@ -141,6 +141,22 @@ public class Messenger{
 		mainComponent.setHoverEvent(new HoverEvent( HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(cc(hoverText)).create() ));
 		
 		reciever.spigot().sendMessage(mainComponent);
+	}
+	
+	public void sendBroadcast(String key) {
+		broadcast(getMessage(key));
+	}
+	
+	public void sendBroadcast(String key, Map<String, Object>vals) {
+		broadcast(getMessage(key), vals);
+	}
+	
+	public void sendMessage(String key, CommandSender reciever) {
+		sendMsg(getMessage(key), reciever);
+	}
+	
+	public void sendMessage(String key, CommandSender reciever, Map<String, Object>vals) {
+		sendMsg(getMessage(key), reciever, vals);
 	}
 	
 	public static String colourMessage(String message) { return colourMessage(message, "&9"); }

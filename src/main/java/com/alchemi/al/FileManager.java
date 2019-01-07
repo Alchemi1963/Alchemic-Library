@@ -14,13 +14,24 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.alchemi.al.sexyconfs.SexyConfiguration;
+
 public class FileManager {
 
 	private final JavaPlugin plugin;
 
-	private HashMap<String, FileConfiguration> confs = new HashMap<String, FileConfiguration>();
+	private HashMap<String, SexyConfiguration> confs = new HashMap<String, SexyConfiguration>();
 
-	public FileManager(JavaPlugin plugin, String[] names, FileConfiguration...configurations) {
+	
+	/** 
+	 * Create a FileManager instance.
+	 * 
+	 * @param plugin	The current plugin
+	 * @param names		Names of the config files (should end in .yml)
+	 * @param configurations	The FileConfigurations
+	 * @see	{@link FileConfiguration} & {@link JavaPlugin}
+	 */
+	public FileManager(JavaPlugin plugin, String[] names, SexyConfiguration...configurations) {
 		this.plugin = plugin;
 		
 		for (int x = 0 ; x < names.length; x++) {
@@ -30,28 +41,89 @@ public class FileManager {
 		}
 	}
 	
-	public FileManager(JavaPlugin plugin, String name, FileConfiguration fileConfiguration) {
-
+	/** 
+	 * Create a FileManager instance without existing FileConfigurations
+	 * 
+	 * @param plugin	The current plugin
+	 * @param names		Name(s) of the config files (should end in .yml)
+	 * @see	{@link JavaPlugin}
+	 */
+	public FileManager(JavaPlugin plugin, String...names) {
+		this.plugin = plugin;
+		
+		for (String name : names) {
+			this.confs.put(name, new SexyConfiguration(new File(plugin.getDataFolder(), name)));
+		}
+	}
+	
+	/** 
+	 * Create a FileManager instance with only one existing FileConfiguration.
+	 * 
+	 * @param plugin 	The current plugin
+	 * @param name		Name of the config file (should end in .yml)
+	 * @param fileConfiguration	The existing FileConfiguration
+	 * @see	{@link FileConfiguration} & {@link JavaPlugin}
+	 */
+	public FileManager(JavaPlugin plugin, String name, SexyConfiguration fileConfiguration) {
 		this.plugin = plugin;
 		this.confs.put(name, fileConfiguration);
-		
 	}
 
+	/** 
+	 * Test if the config file exists
+	 * 
+	 * @param file Name of the config file (should end in .yml) 
+	 * @return	true or false
+	 */
 	public boolean hasConfig(String file) {
 		return confs.containsKey(file);
 	}
 	
-	public HashMap<String, FileConfiguration> getFiles() {
+	/** 
+	 * Get the files map.
+	 * 
+	 * @return HashMap of the file names and their respective FileConfigurations
+	 * @see {@link FileConfiguration}
+	 */
+	public HashMap<String, SexyConfiguration> getFiles() {
 		return confs;
 	}
 	
+	/** 
+	 * Returns the plugin
+	 * 
+	 * @return The plugin this instance belongs to.
+	 * @see {@link JavaPlugin}
+	 */
 	public JavaPlugin getPlugin(){ return plugin;}
 
+	/** 
+	 * Save the default YML of a specific config file
+	 * 
+	 * @param yml The name of the config file (should end in .yml)
+	 */
 	public void saveDefaultYML(String yml) {
 		if (!new File(plugin.getDataFolder(), yml).exists()) plugin.saveResource(yml, false);
 	}
+	
+	/**
+	 * Save all the default YMLs.
+	 */
+	public void saveDefaultYMLs() {
+		for (String ent : confs.keySet()) {
+			if (!new File(plugin.getDataFolder(), ent).exists()) plugin.saveResource(ent, false);
+			
+			confs.put(ent, SexyConfiguration.loadConfiguration(new File(plugin.getDataFolder(), ent)));
+		}
+	}
 
-	public FileConfiguration getConfig(String yml) {
+	/**
+	 * Get a config from name
+	 * 
+	 * @param yml 	Name of the config file (should end in .yml)
+	 * @return		The FileConfiguration
+	 */
+	public SexyConfiguration getConfig(String yml) {
 		if (!confs.containsKey(yml) || confs.get(yml) == null) {
 			
 			reloadConfig(yml);
@@ -60,9 +132,14 @@ public class FileManager {
 		return confs.get(yml);
 	}
 
+	/**
+	 * Reload a config.
+	 * 
+	 * @param yml The config file (should end in .yml) 
+	 */
 	public void reloadConfig(String yml) {
 		
-		this.confs.put(yml, YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), yml)));
+		this.confs.put(yml, SexyConfiguration.loadConfiguration(new File(plugin.getDataFolder(), yml)));
 		// Look for defaults in the jar
 		try {
 			
@@ -73,22 +150,32 @@ public class FileManager {
 			}
 			
 		} catch(Exception e) {
-			(new Messenger(plugin, this)).print("System could not reload configuration!");
+			Messenger.printStatic("System could not reload configuration!", "[" + plugin.getName() + "]");
 			e.printStackTrace();
 		}
 	}
 
+	/**
+	 * Save a config file.
+	 * 
+	 * @param yml The config file (should end in .yml)
+	 */
 	public void saveConfig(String yml) {
 		if(!this.confs.containsKey(yml) || this.confs.get(yml) == null) {
 			return;
 		}
 		
-		save(getConfig(yml), yml);
+		save(getConfig(yml));
 	}
 	
+	/**
+	 * Try to update the config file with new values.
+	 * 
+	 * @param file File to be updated (should end in .yml)
+	 */
 	public void updateConfig(String file) {
 		HashMap<String, Object> newConfig = getConfigVals(file);
-		FileConfiguration c = new YamlConfiguration();
+		SexyConfiguration c = new SexyConfiguration(new File(plugin.getDataFolder(), file));
 		try {
 			c.load(new File(plugin.getDataFolder(), file));
 		} catch (IOException | InvalidConfigurationException e1) {
@@ -108,7 +195,7 @@ public class FileManager {
 		}
 		
 		try {
-			c.save(new File(plugin.getDataFolder(), file));
+			c.save();
 			confs.put(file, c);
 		} catch (Exception e) {
 
@@ -116,102 +203,40 @@ public class FileManager {
 		}
 	}
 	
-	public void updateConfig(String file, FileConfiguration conf) {
-		
-		confs.put(file, conf);
-		save(conf, file);
-		
-	}
-	
-	public void save(FileConfiguration c, String file) {
+	/**
+	 * Try to save a SexyConfiguration
+	 * 
+	 * @param config The configuration to be saved.
+	 */
+	public void save(SexyConfiguration config) {
 		try {
-			c.save(new File(plugin.getDataFolder(), file));
+			config.save();
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
 		return;
-		
-		/*String newConf = c.saveToString();
-		
-		InputStream vile = plugin.getResource(file);
-		Scanner scanner = new Scanner(vile);
-		List<String> vile2 = Arrays.asList(scanner.useDelimiter("\\A").next().split("\n"));
-		scanner.close();
-		
-		List<String> nca1 = Arrays.asList(newConf.split("\n"));
-		ArrayList<String> nca = new ArrayList<String>();
-		nca.addAll(nca1);
-		String nc = "";
-		for (String s : vile2) {
-			
-			int index = vile2.indexOf(s);
-			
-			if (!s.contains("#")) {
-				
-				if (s.contains(" - ")) continue;
-				else if (!s.contains(":")) {
-					if (s.endsWith("\n")) nc = nc + s;
-					else nc = nc + s + "\n";
-					continue;
-				}
-				int i3 = s.lastIndexOf(":");
-				
-				for (String s2 : nca) {
-					if (s.contains(s2)) {
-						s = s2 + "\n";
-					}
-					if (!s2.contains(":")) continue;
-					
-					int i = s2.lastIndexOf(":");
-					if (s.substring(0, i3).equals(s2.substring(0, i))) {
-						
-						s = s2 + "\n";
-						
-						if (vile2.size() > index + 1 && vile2.get(index + 1).contains(" - ")) {
-		 				int i2 = nca.indexOf(s2) + 1;
-		 				
-		 				while (nca.size() > i2 && nca.get(i2).contains(" - ")) {
-		 					s = s + nca.get(i2) + "\n";
-		 					i2 ++;
-		 				}
-						}
-						nca.remove(s2);
-						break;
-						
-					}
-				}
-			}
-			if (s.endsWith("\n")) nc = nc + s;
-			else nc = nc + s + "\n";
-			
-			
-		}	 
-		
-		if (c.contains("File-Version-Do-Not-Edit")) {
-			nc = nc + "File-Version-Do-Not-Edit: " + c.getInt("File-Version-Do-Not-Edit");
-		}
-		PrintWriter writer;
-		try {
-			writer = new PrintWriter(new File(plugin.getDataFolder(), file), "UTF-8");
-			writer.print(nc);
-			writer.close();
-		} catch (FileNotFoundException | UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}*/
 	}
 	
+	/**
+	 * Reload all default configs
+	 */
 	public void reloadDefaultConfig() {
 		for (String f : confs.keySet()) reloadDefaultConfig(f);
 	}
 	
+	/**
+	 * Reload the default config (from within the plugin)
+	 * 
+	 * @param file The config to reload (should end in .yml)
+	 */
 	public void reloadDefaultConfig(String file) {
 		plugin.saveResource(file, true);
-		confs.put(file, YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), file)));
+		confs.put(file, SexyConfiguration.loadConfiguration(new File(plugin.getDataFolder(), file)));
 	}
 	
 	private HashMap<String, Object> getConfigVals(String file) {
 		HashMap<String, Object> var = new HashMap<String, Object>();
-		YamlConfiguration c = new YamlConfiguration();
+		SexyConfiguration c = new SexyConfiguration();
 		try {
 			c.loadFromString(stringFromInputStream(plugin.getResource(file)));
 		} catch (InvalidConfigurationException ignored) {}

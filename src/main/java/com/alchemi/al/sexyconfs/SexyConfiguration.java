@@ -1,251 +1,135 @@
 package com.alchemi.al.sexyconfs;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.io.Writer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Scanner;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
-import org.bukkit.configuration.MemorySection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
-import com.google.common.base.Charsets;
-import com.google.common.io.Files;
-
 public class SexyConfiguration extends YamlConfiguration {
-
-	private HashMap<Integer, String> comments = new HashMap<Integer, String>(); //line, comment
-	private HashMap<String, Integer> keys = new HashMap<String, Integer>();     //key, line
 	
-	private ArrayList<String> source = new ArrayList<String>();
+	private HashMap<String, String> comments = new HashMap<String, String>();
 	
-	@SuppressWarnings("unused") //line 61 - ugh
+	private File file;
+	
+	/**
+	 * Create an empty configuration
+	 */
+	public SexyConfiguration() {}
+	
+	/**
+	 * Create a SexyConfiguration with this file.
+	 * However, {@linkplain SexyConfiguration.loadConfiguration} is preferred.
+	 * 
+	 * @param file File to be used
+	 * @see {@link File}
+	 */
+	public SexyConfiguration(File file) {
+		this.setFile(file);
+		
+		try {
+			this.load(file);
+		} catch (IOException | InvalidConfigurationException e) {
+			Bukkit.getLogger().log(Level.SEVERE, "Cannot load configuration!", e);
+		}
+	}
+	
+	private SexyConfiguration(File file, boolean loaded) {
+		this.setFile(file);
+	}
+	
+	/**
+	 * Set a comment on a key.
+	 * 
+	 * @param key The key to set the comment above
+	 * @param comment	The comment
+	 */
+	public void setComment(String key, String comment) {
+		comments.put(key, comment);
+	}
+	
 	@Override
 	public String saveToString() {
 		
-		String data = "";
-		
-		if (source.isEmpty()) {
-			Bukkit.getLogger().log(Level.WARNING, "Source not set! Use setSource to set it!");
-			return super.saveToString();
+		ArrayList<String> output = new ArrayList<String>();
+		int I = 0;
+		for (String s : super.saveToString().split("\n")) {
+			
+			if (s.contains(":") && I < super.saveToString().split("\n").length - 1 
+					&& super.saveToString().split("\n")[I+1].contains(":") ||
+					I < super.saveToString().split("\n").length - 1 && !super.saveToString().split("\n")[I+1].contains("-") &&
+					s.contains("-")) output.add(s + "\n");
+			else output.add(s);
+			I ++;
 		}
 		
-		for (String key : keys.keySet()) {
+		ArrayList<String> output2 = new ArrayList<String>();
+		
+		for (String line : output) {
 			
-			
-			
-			if (!(getValues(true).get(key) instanceof MemorySection) && !isConfigurationSection(key)) {
+			Matcher m = Pattern.compile("\\b[A-z]*").matcher(line);
+			if (line.contains(":") && m.find()) {
+				output2.add(m.group());
+			} else {
+				output2.add(line);
+			}
+		}
+		
+		for (String key : this.getKeys(true)) {
+			if (comments.containsKey(key)) {
 				
-				String value = "";
-				if (get(key) instanceof List<?>) {
+				int i = 0;
+				for (String subPath : key.split("\\.")) {
 					
-					for (Object v : getList(key)) {
-						String indentation = "\n";
-						for (String ugh : key.split("[.]")) indentation = indentation.concat("  ");
-						indentation = indentation.concat("- ");
-						value = value.concat(indentation + String.valueOf(v));
-					}
-					
-				} else value = String.valueOf(getValues(true).get(key));
-				
-				value = value.concat("\n");
-				source.set(keys.get(key), source.get(keys.get(key)).concat(" " + value));
-				
-			}
-			
-		}
-		
-		for (String line : source) {
-			int index = source.indexOf(line);
-			if (comments.containsKey(index)) {
-				
-				Pattern pat = Pattern.compile("\\w");
-				Matcher mat = pat.matcher(line);
-				
-				line = line.concat("\n" + (mat.find() ? line.substring(0, mat.start()) : "")  + line.split("^\\S")[0] + comments.get(index));
-				source.set(index, line);
-			}
-			if (data.equals("")) data = line;
-			else data = data.concat("\n" + line);
-		}
-		return data;
-	}
-	
-	public void setSource(InputStream input) {
-		Validate.notNull(input, "Source cannot be null!");
-		
-		Scanner scanner = new Scanner(input);
-		String sc = scanner.useDelimiter("\\A").next();
-		scanner.close();
-		
-		ArrayList<String> l = new ArrayList<String>();
-		
-		for (String line : Arrays.asList(sc.split("\n"))) {
-			
-			if (line.contains("#")) {
-				comments.put(l.size() - 1, line.substring(line.indexOf("#")));
-				if (!line.substring(0, line.indexOf("#")).contains(":") && !line.substring(0, line.indexOf("#")).contains("-")) {
-					line = line.substring(0, line.indexOf("#")) + "\n";
-					continue;
-				}
-				line = line.substring(0, line.indexOf("#"));
-			}
-			if (line.contains(":")) {
-				line = line.substring(0, line.indexOf(":") + 1);
-			}
-			if (line.contains(" - ")) {
-				continue;
-			}
-			
-			l.add(line);
-		}
-		
-		source = l;
-	}
-	
-	@Override
-	public void load(File file) throws FileNotFoundException, IOException, InvalidConfigurationException {
-        Validate.notNull(file, "File cannot be null");
-
-        final FileInputStream stream = new FileInputStream(file);
-
-        load(new InputStreamReader(stream, Charsets.UTF_8));
-	}
-	
-	@Override
-	public void load(Reader reader) throws IOException, InvalidConfigurationException {
-		BufferedReader input = reader instanceof BufferedReader ? (BufferedReader) reader : new BufferedReader(reader);
-
-        StringBuilder builder = new StringBuilder();
-
-        try {
-            String line;
-
-            while ((line = input.readLine()) != null) {
-                builder.append(line);
-                builder.append('\n');
-            }
-        } finally {
-            input.close();
-        }
-
-        loadFromString(builder.toString());
-        parseLines(builder.toString());
-	}
-	
-	@Override
-	public void loadFromString(String content) throws InvalidConfigurationException {
-		ArrayList<String> contents = new ArrayList<String>();
-		contents.addAll(Arrays.asList(content.split("\n")));
-		
-		/*for (String s : contents) {
-			
-			if (s.contains("#")) {
-				
-				int i = s.indexOf("#");
-				comments.put(contents.indexOf(s), s.substring(i));
-				
-			}
-			
-		}*/
-		
-		super.loadFromString(content);
-
-	}
-	
-	public void parseLines(String contents) {
-		ArrayList<String> content = new ArrayList<String>();
-		for (String coke : Arrays.asList(contents.split("\n"))) {
-			//coke.snort("A LOT");
-			if (coke.contains(":")) content.add(coke);
-		}
-		
-		parseLines(content);
-	}
-	
-	public void parseLines(ArrayList<String> contents) {
-		
-		
-		Set<String> keyset = getKeys(true);
-		
-		for (String s : keyset) {
-			
-			List<String> key = Arrays.asList(s.split("[.]"));
-			String indentation = "  ";
-			int current_indent = 0;
-			int total_indent = key.size();
-			
-			
-			for (String k : key) {
-				
-				for (String line : contents) {
-					
-					
-					if (line.substring(0, line.contains(":") ? line.indexOf(":") : line.length()).replaceAll(" ", "").equals(k)) {
-						indentation.concat("  ");
-						current_indent ++;
-						if (current_indent == total_indent) {
-							keys.put(s, contents.indexOf(line));
+					for (String testFor : output2.subList(i, output2.size() - 1)) {
+						if (subPath.equals(testFor)) {
+							i = output2.subList(i, output2.size() - 1).indexOf(testFor) + i;
+							break;
 						}
-						
-						break;
+					}
+				}
+				
+				if (i != 0) output.add(i, comments.get(key));
+				
+				output2 = new ArrayList<String>();
+				
+				for (String line : output) {
+					
+					Matcher m = Pattern.compile("\\b[A-z]*").matcher(line);
+					if (line.contains(":") && m.find()) {
+						output2.add(m.group());
+					} else {
+						output2.add(line);
 					}
 				}
 			}
 		}
-	}
-
-	@Override
-	protected String buildHeader() {
-		return null;
-	}
-	
-	@Override
-	public void save(String file) throws IOException {
-
-		Validate.notNull(file, "File cannot be null");
 		
-		save(new File(file));
+		String realOutput = "";
+		for (String l : output) {
+			realOutput += l + "\n";
+		}
+		
+		return realOutput;
+		
 	}
 	
-	@Override
-	public void save(File file) throws IOException {
-		Validate.notNull(file, "File cannot be null");
-
-        Files.createParentDirs(file);
-
-        String data = saveToString();
-
-        Writer writer = new OutputStreamWriter(new FileOutputStream(file), Charsets.UTF_8);
-
-        try {
-            writer.write(data);
-        } finally {
-            writer.close();
-        }
-	}
-	
+	/**
+	 * Does practically the same as the {@link SexyConfiguration} constructor, but this one is preferred.
+	 * 
+	 * @param file
+	 * @return
+	 */
 	public static SexyConfiguration loadConfiguration(File file) {
 		
-		SexyConfiguration config = new SexyConfiguration();
+		SexyConfiguration config = new SexyConfiguration(file, true);
 		try {
 			config.load(file);
 		} catch (IOException | InvalidConfigurationException e) {
@@ -256,5 +140,47 @@ public class SexyConfiguration extends YamlConfiguration {
 		
 	}
 	
+	/**
+	 * Loads the file from the internally saved file.
+	 * 
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 * @throws InvalidConfigurationException
+	 */
+	public void load() throws FileNotFoundException, IOException, InvalidConfigurationException {
+		this.load(file);
+	}
+	
+	/**
+	 * Saves the configuration file to the internally determined file.
+	 * 
+	 * @throws IOException
+	 */
+	public void save() throws IOException {
+		this.save(file);
+	}
 
+	/**
+	 * Gets the config file.
+	 * 
+	 * @return The config file.
+	 * @see {@link File}
+	 */
+	public File getFile() {
+		return file;
+	}
+
+	/**
+	 * Sets a new config file.
+	 * 
+	 * @param file New config file to load from.
+	 */
+	public void setFile(File file) {
+		this.file = file;
+		try {
+			this.load(file);
+		} catch (IOException | InvalidConfigurationException e) {
+			Bukkit.getLogger().log(Level.SEVERE, "Cannot load configuration!", e);
+		}
+	}
 }

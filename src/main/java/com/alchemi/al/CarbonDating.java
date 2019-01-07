@@ -14,16 +14,33 @@ public class CarbonDating {
 	public String hour;
 	public String minute;
 	
-	
+	/** Returns an instance of a dating system, 
+	 * using seperate strings as input.
+	 * 
+	 * @param	day		The day (number) as a string
+	 * @param	month	The month (number) as a string
+	 * @param	year	The year as a string
+	 * @param	hour	The hour as a string
+	 * @param	minute	The minute as a string
+	 * @return			CarbonDating instance
+	 * */
 	public CarbonDating(String day, String month, String year, String hour, String minute) {
 		try{
 			carbondate = day + "-" + month + "-" + year  + "-" + hour + "-" + minute;
+			readCarbonDate();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		readCarbonDate();
+		
 	}
 	
+	
+	/** Return an instance of a dating system,
+	 * using a carbondate string as input.
+	 * 
+	 * @param carbondate	The carbondate string.
+	 * @return				CarbonDating instance
+	 */
 	public CarbonDating(String carbondate) {
 		try {
 			this.carbondate = carbondate;
@@ -33,6 +50,10 @@ public class CarbonDating {
 		}
 	}
 	
+	/** Get a carbondating instance using the current date and time.
+	 * 
+	 * @return CarbonDating instance;
+	 */
 	public static CarbonDating getCurrentDateTime() {
 		Calendar cal = Calendar.getInstance();
 		Date date = cal.getTime();
@@ -46,11 +67,17 @@ public class CarbonDating {
 		return new CarbonDating(day, month, year, hour, minute);
 	}
 	
+	/** Get the carbondate string from the current instance.
+	 * 
+	 * @return The carbondate string
+	 */
 	public String getCarbonDate() {
 		return carbondate;
 	}
 	
-	//dd-MM-yyyy-hh-mm
+	/** Get the seperate day, month, year, hour and minute from the CarbonDating instance.
+	 * 
+	 */
 	public void readCarbonDate() {
 		day = carbondate.substring(0, 2);
 		month = carbondate.substring(3, 5);

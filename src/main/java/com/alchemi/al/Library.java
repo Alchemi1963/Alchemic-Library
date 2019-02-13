@@ -3,6 +3,7 @@ package com.alchemi.al;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.metadata.MetadataValueAdapter;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -75,5 +76,27 @@ public class Library extends JavaPlugin{
 			}
 		}
 		return null;
+	}
+	
+	/**
+	 * Give an itemstack to a player.
+	 * 
+	 * @param item		The itemstack to give.
+	 * @param player	The player to give it to.
+	 * @see {@link ItemStack}, {@link Player}
+	 */
+	public static void giveItemStack(ItemStack item, Player player) {
+		if (item.getAmount() > item.getMaxStackSize()) { 
+			ItemStack item2 = item.clone();
+			item2.setAmount(item.getAmount() - item.getMaxStackSize());
+			giveItemStack(item2, player);
+			item.setAmount(item.getMaxStackSize());
+		}
+		
+		if (player.getInventory().firstEmpty() == -1) {
+			player.getWorld().dropItem(player.getLocation(), item);
+		} else {
+			player.getPlayer().getInventory().addItem(item);
+		}
 	}
 }

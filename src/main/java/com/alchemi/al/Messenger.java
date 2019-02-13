@@ -226,6 +226,27 @@ public class Messenger{
 	}
 	
 	/**
+	 * Sends a string to a {@link Player}
+	 * 
+	 * @param msg		The string to be sent
+	 * @param reciever	The {@link Player}
+	 */
+	public static void sendMsg(String msg, Player reciever){
+		reciever.sendMessage(cc(msg));
+	}
+	
+	/**
+	 * Sends a string to a {@link Player}
+	 * 
+	 * @param msg		The string to be sent
+	 * @param reciever	The {@link Player}
+	 * @param vals		A {@link HashMap} containing the variables and their values
+	 */
+	public static void sendMsg(String msg, Player reciever, Map<String, Object> vals) {
+		reciever.sendMessage(cc(parseVars(msg, vals)));
+	} 
+	
+	/**
 	 * Broadcasts a message with hovering text.
 	 * 
 	 * @param mainText	The main text to be broadcast

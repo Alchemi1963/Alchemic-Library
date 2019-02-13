@@ -52,7 +52,7 @@ public class FileManager {
 		this.plugin = plugin;
 		
 		for (String name : names) {
-			this.confs.put(name, new SexyConfiguration(new File(plugin.getDataFolder(), name)));
+			this.confs.put(name, new SexyConfiguration());
 		}
 	}
 	

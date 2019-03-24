@@ -3,8 +3,6 @@ package com.alchemi.al.objects.meta;
 import org.bukkit.metadata.MetadataValueAdapter;
 import org.bukkit.plugin.Plugin;
 
-import com.alchemi.al.Library;
-
 public abstract class BaseMeta extends MetadataValueAdapter{
 
 	protected final Object value;
@@ -15,16 +13,12 @@ public abstract class BaseMeta extends MetadataValueAdapter{
 		this.value = value;
 	}
 	
-	protected BaseMeta() {
-		super(Library.instance);
-		value = null;
-	}
+	@Override
+	public void invalidate() {}
 	
 	@Override
 	public Object value() {
 		return value;
 	}
-
-	public abstract String name();
 	
 }

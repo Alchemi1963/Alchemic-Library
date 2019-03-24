@@ -1,13 +1,10 @@
 package com.alchemi.al;
 
-import java.lang.reflect.InvocationTargetException;
-
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.MetadataValue;
-import org.bukkit.metadata.MetadataValueAdapter;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.alchemi.al.configurations.SexyConfiguration;
@@ -51,15 +48,9 @@ public class Library extends JavaPlugin{
 	 */
 	public static boolean hasMeta(Player player, Class<? extends BaseMeta> clazz) {
 		
-		String metaKey = "";
-		try {
-			metaKey = clazz.getConstructor().newInstance().name();
-		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
-				| NoSuchMethodException | SecurityException e) {}
+		if (!player.hasMetadata(clazz.getSimpleName())) return false;
 		
-		if (!player.hasMetadata(metaKey)) return false;
-		
-		for (MetadataValue meta : player.getMetadata(metaKey)) {
+		for (MetadataValue meta : player.getMetadata(clazz.getSimpleName())) {
 			if (clazz.isInstance(meta)) {
 				return true;
 			}
@@ -74,19 +65,11 @@ public class Library extends JavaPlugin{
 	 * @param metaKey	The meta key to get
 	 * @param clazz		The class the key belongs to
 	 * @return			{@link MetadataValue} of the key, {@code null} of not found
-	 * @throws IllegalAccessException 
-	 * @throws InstantiationException 
 	 */
 	public static MetadataValue getMeta(Player player, Class<? extends BaseMeta> clazz) {
 		if (!hasMeta(player, clazz)) return null;
-		
-		String metaKey = "";
-		try {
-			metaKey = clazz.getConstructor().newInstance().name();
-		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
-				| NoSuchMethodException | SecurityException e) {}
-		
-		for (MetadataValue meta : player.getMetadata(metaKey)) {
+	
+		for (MetadataValue meta : player.getMetadata(clazz.getSimpleName())) {
 			if (clazz.isInstance(meta)) {
 				return meta;
 			}

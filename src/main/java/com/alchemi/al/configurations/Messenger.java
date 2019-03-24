@@ -1,7 +1,6 @@
 package com.alchemi.al.configurations;
 
 import java.io.File;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -108,14 +107,14 @@ public class Messenger{
 	 * @param msg	The message to be displayed
 	 * @param tag	The plugin tag to be put in front of the message
 	 */
-	public static void printStatic(Object msg, String tag) {System.out.println(tag + " " + String.valueOf(msg));}
+	public static void printStatic(Object msg, String tag) { System.out.println(tag + " " + String.valueOf(msg)); }
 	
 	/**
 	 * Sends a message to the console.
 	 * 
 	 * @param msg	The message to be sent
 	 */
-	public void print(Object msg) { print(msg, true, new HashMap<String, Object>()); }
+	public void print(Object msg) { print(msg, true); }
 	
 	/**
 	 * Sends a message to the console.
@@ -123,7 +122,17 @@ public class Messenger{
 	 * @param msg	The message to be sent
 	 * @param tag	Whether the plugin tag should be displayed or not
 	 */
-	public void print(Object msg, boolean tag) { print(msg, tag, new HashMap<String, Object>()); } 
+	public void print(Object msg, boolean tag) { 
+		if (String.valueOf(msg).contains("\n")) {
+			for (String m : String.valueOf(msg).split("\n")) {
+				print(m, tag);
+			}
+			return;
+		}
+		
+		if (tag) Bukkit.getConsoleSender().sendMessage(cc(getTag() + " " + String.valueOf(msg)));
+		else Bukkit.getConsoleSender().sendMessage(cc(String.valueOf(msg)));
+	} 
 	
 	@Deprecated
 	/**
@@ -193,8 +202,8 @@ public class Messenger{
 		
 		
 		for (Player r : Bukkit.getOnlinePlayers()) {
-			if (Tag) sendMsg(cc(getTag() + " " + msg), r);
-			else sendMsg(cc(msg), r);
+			if (Tag) r.sendMessage(cc(getTag() + " " + msg));
+			else r.sendMessage(cc(msg));
 		}
 		 
 //		Bukkit.getServer().broadcastMessage(getTag() + " " + cc(msg));

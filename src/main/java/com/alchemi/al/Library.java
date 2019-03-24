@@ -1,5 +1,7 @@
 package com.alchemi.al;
 
+import java.lang.reflect.InvocationTargetException;
+
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -8,7 +10,8 @@ import org.bukkit.metadata.MetadataValue;
 import org.bukkit.metadata.MetadataValueAdapter;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.alchemi.al.sexyconfs.SexyConfiguration;
+import com.alchemi.al.configurations.SexyConfiguration;
+import com.alchemi.al.objects.meta.BaseMeta;
 
 public class Library extends JavaPlugin{
 	public static Library instance;
@@ -38,7 +41,6 @@ public class Library extends JavaPlugin{
 		}
 		return null;
 	}
-	
 	/**
 	 * Test if a player has a certain meta value.
 	 * 
@@ -47,7 +49,13 @@ public class Library extends JavaPlugin{
 	 * @param clazz		The class of the key
 	 * @return			true or false
 	 */
-	public static boolean hasMeta(Player player, String metaKey, Class<? extends MetadataValueAdapter> clazz) {
+	public static boolean hasMeta(Player player, Class<? extends BaseMeta> clazz) {
+		
+		String metaKey = "";
+		try {
+			metaKey = clazz.getConstructor().newInstance().name();
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+				| NoSuchMethodException | SecurityException e) {}
 		
 		if (!player.hasMetadata(metaKey)) return false;
 		
@@ -66,9 +74,17 @@ public class Library extends JavaPlugin{
 	 * @param metaKey	The meta key to get
 	 * @param clazz		The class the key belongs to
 	 * @return			{@link MetadataValue} of the key, {@code null} of not found
+	 * @throws IllegalAccessException 
+	 * @throws InstantiationException 
 	 */
-	public static MetadataValue getMeta(Player player, String metaKey, Class<? extends MetadataValueAdapter> clazz) {
-		if (!hasMeta(player, metaKey, clazz)) return null;
+	public static MetadataValue getMeta(Player player, Class<? extends BaseMeta> clazz) {
+		if (!hasMeta(player, clazz)) return null;
+		
+		String metaKey = "";
+		try {
+			metaKey = clazz.getConstructor().newInstance().name();
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+				| NoSuchMethodException | SecurityException e) {}
 		
 		for (MetadataValue meta : player.getMetadata(metaKey)) {
 			if (clazz.isInstance(meta)) {

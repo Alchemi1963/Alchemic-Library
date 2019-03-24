@@ -1,4 +1,4 @@
-package com.alchemi.al;
+package com.alchemi.al.deprecated;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,7 +14,8 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.alchemi.al.sexyconfs.SexyConfiguration;
+import com.alchemi.al.configurations.Messenger;
+import com.alchemi.al.configurations.SexyConfiguration;
 
 public class FileManager {
 

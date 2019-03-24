@@ -2,9 +2,10 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.alchemi</groupId>
   <artifactId>AlchemicLibrary</artifactId>
-  <version>1.4.2</version>
+  <version>1.4.3</version>
   <name>AlchemicLibrary</name>
   <build>
+    <finalName>${project.name}</finalName>
     <sourceDirectory>src/main/java</sourceDirectory>
     <plugins>
       <plugin>
@@ -49,6 +50,12 @@
   </repositories>
   
   <dependencies>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>LATEST</version>
+      <scope>provided</scope>
+    </dependency>
     <dependency>
       <groupId>org.spigotmc</groupId>
       <artifactId>spigot-api</artifactId>

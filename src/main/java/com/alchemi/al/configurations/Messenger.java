@@ -1,5 +1,6 @@
-package com.alchemi.al;
+package com.alchemi.al.configurations;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -10,6 +11,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.alchemi.al.Library;
+import com.alchemi.al.deprecated.FileManager;
+
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -17,8 +21,7 @@ import net.md_5.bungee.api.chat.TextComponent;
 public class Messenger{
 
 	private final JavaPlugin plugin;
-	private final FileManager fm;
-	private final String messagesFile;
+	private final SexyConfiguration messages;
 	
 	/**
 	 * Creates a Messenger instance.
@@ -26,10 +29,9 @@ public class Messenger{
 	 * @param fileManager	The {@link FileManager} to base the Messenger instance from.
 	 * @see {@link FileManager}
 	 */
-	public Messenger(FileManager fileManager) {
-		this.plugin = fileManager.getPlugin();
-		this.fm = fileManager;
-		this.messagesFile = "messages.yml";
+	public Messenger(JavaPlugin plugin) {
+		this.plugin = plugin;
+		this.messages = SexyConfiguration.loadConfiguration(new File(plugin.getDataFolder(), "messages.yml"));
 	}
 	
 	/**
@@ -39,12 +41,12 @@ public class Messenger{
 	 * @param messagesFile	The messages file (should end in .yml) - default is messages.yml
 	 * @see {@link FileManager}
 	 */
-	public Messenger(FileManager fileManager, String messagesFile) {
-		this.plugin = fileManager.getPlugin();
-		this.fm = fileManager;
-		this.messagesFile = messagesFile;
+	public Messenger(JavaPlugin plugin, String messagesFile) {
+		this.plugin = plugin;
+		this.messages = SexyConfiguration.loadConfiguration(new File(plugin.getDataFolder(), messagesFile));
 	}
 	
+	@Deprecated
 	/**
 	 * Gets a message from the messages file.
 	 * 
@@ -53,7 +55,7 @@ public class Messenger{
 	 */
 	public String getMessage(String key) {
 		
-		String msg = this.fm.getConfig(this.messagesFile).getString(this.plugin.getDescription().getName() + "." + key);
+		String msg = messages.getString(this.plugin.getDescription().getName() + "." + key);
 		return msg;
 		
 	}
@@ -64,7 +66,7 @@ public class Messenger{
 	 * @return The plugin tag, null if it isn't found
 	 */
 	public String getTag() {
-		return this.fm.getConfig(this.messagesFile).getString(this.plugin.getDescription().getName() + ".Tag");
+		return messages.getString(this.plugin.getDescription().getName() + ".Tag");
 	}
 	
 	/**
@@ -77,6 +79,7 @@ public class Messenger{
 		return ChatColor.translateAlternateColorCodes('&', msg);
 	}
 	
+	@Deprecated
 	/**
 	 * Parse a string with variables.
 	 * 
@@ -122,6 +125,7 @@ public class Messenger{
 	 */
 	public void print(Object msg, boolean tag) { print(msg, tag, new HashMap<String, Object>()); } 
 	
+	@Deprecated
 	/**
 	 * Sends a message to the console.
 	 * 
@@ -132,6 +136,7 @@ public class Messenger{
 		print(msg, true, vals);
 	}
 	
+	@Deprecated
 	/**
 	 * Sends a message to the console.
 	 * 
@@ -151,6 +156,7 @@ public class Messenger{
 		else Bukkit.getConsoleSender().sendMessage(cc(parseVars(String.valueOf(msg), vals)));
 	}
 	
+	@Deprecated
 	/**
 	 * Broadcasts a message to the whole server.
 	 * 
@@ -194,6 +200,8 @@ public class Messenger{
 //		Bukkit.getServer().broadcastMessage(getTag() + " " + cc(msg));
 		
 	}
+	
+	@Deprecated
 	/**
 	 * Broadcasts a message to the whole server.
 	 * 
@@ -204,6 +212,7 @@ public class Messenger{
 		broadcast(parseVars(msg, vs), true);
 	}
 	
+	@Deprecated
 	/**
 	 * Sends a string to a {@link CommandSender}
 	 * 
@@ -214,6 +223,7 @@ public class Messenger{
 		reciever.sendMessage(cc(msg));
 	}
 	
+	@Deprecated
 	/**
 	 * Sends a string to a {@link CommandSender}
 	 * 
@@ -225,6 +235,7 @@ public class Messenger{
 		reciever.sendMessage(cc(parseVars(msg, vals)));
 	}
 	
+	@Deprecated
 	/**
 	 * Sends a string to a {@link Player}
 	 * 
@@ -235,6 +246,7 @@ public class Messenger{
 		reciever.sendMessage(cc(msg));
 	}
 	
+	@Deprecated
 	/**
 	 * Sends a string to a {@link Player}
 	 * 
@@ -246,6 +258,7 @@ public class Messenger{
 		reciever.sendMessage(cc(parseVars(msg, vals)));
 	} 
 	
+	@Deprecated
 	/**
 	 * Broadcasts a message with hovering text.
 	 * 
@@ -289,6 +302,7 @@ public class Messenger{
 		}
 	}
 	
+	@Deprecated
 	/**
 	 * Sends a message with hovering text.
 	 * 
@@ -319,46 +333,6 @@ public class Messenger{
 		mainComponent.setHoverEvent(new HoverEvent( HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(cc(hoverText)).create() ));
 		
 		reciever.spigot().sendMessage(mainComponent);
-	}
-	
-	/**
-	 * Broadcasts a message directly from the messages file.
-	 * 
-	 * @param key	The key in the messages file
-	 */
-	public void sendBroadcast(String key) {
-		broadcast(getMessage(key), true);
-	}
-	
-	/**
-	 * Broadcasts a message directly from the messages file.
-	 * 
-	 * @param key	The key in the messages file
-	 * @param vals	A {@link HashMap} containing the variables and their values
-	 */
-	public void sendBroadcast(String key, Map<String, Object> vals) {
-		broadcast(getMessage(key), vals);
-	}
-	
-	/**
-	 * Sends a message directly from the messages file.
-	 * 
-	 * @param key		The key in the messages file
-	 * @param reciever	The {@link CommandSender} receiver
-	 */
-	public void sendMessage(String key, CommandSender reciever) {
-		sendMsg(getMessage(key), reciever);
-	}
-	
-	/**
-	 * Sends a messages directly from the messages file.
-	 * 
-	 * @param key		The key in the messages file
-	 * @param reciever	The {@link CommandSender} receiver
-	 * @param vals		A {@link HashMap} containing the variables and their values
-	 */
-	public void sendMessage(String key, CommandSender reciever, Map<String, Object>vals) {
-		sendMsg(getMessage(key), reciever, vals);
 	}
 	
 	/**

@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.alchemi</groupId>
   <artifactId>AlchemicLibrary</artifactId>
-  <version>1.5.1</version>
+  <version>1.5.2</version>
   <name>AlchemicLibrary</name>
   <build>
     <finalName>${project.name}</finalName>

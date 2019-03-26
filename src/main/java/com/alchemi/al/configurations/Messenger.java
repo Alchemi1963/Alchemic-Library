@@ -210,6 +210,16 @@ public class Messenger{
 		
 	}
 	
+	/**
+	 * Sends a string to a {@link CommandSender}
+	 * 
+	 * @param msg		The string to be sent
+	 * @param reciever	The {@link CommandSender}
+	 */
+	public void sendMessage(String msg, CommandSender reciever){
+		reciever.sendMessage(cc(getTag() + msg));
+	}
+	
 	@Deprecated
 	/**
 	 * Broadcasts a message to the whole server.

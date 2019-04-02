@@ -21,6 +21,7 @@ public class Messenger{
 
 	private final JavaPlugin plugin;
 	private final SexyConfiguration messages;
+	private final String Tag;
 	
 	/**
 	 * Creates a Messenger instance.
@@ -28,9 +29,18 @@ public class Messenger{
 	 * @param fileManager	The {@link FileManager} to base the Messenger instance from.
 	 * @see {@link FileManager}
 	 */
+	
 	public Messenger(JavaPlugin plugin) {
 		this.plugin = plugin;
-		this.messages = SexyConfiguration.loadConfiguration(new File(plugin.getDataFolder(), "messages.yml"));
+		
+		if (new File(plugin.getDataFolder(), "messages.yml").exists()) {
+			this.messages = SexyConfiguration.loadConfiguration(new File(plugin.getDataFolder(), "messages.yml"));
+			Tag = getTag();
+		} else {
+			this.messages = null;
+			Tag = "[" + plugin.getName() + "]";
+		}
+		
 	}
 	
 	/**
@@ -42,7 +52,14 @@ public class Messenger{
 	 */
 	public Messenger(JavaPlugin plugin, String messagesFile) {
 		this.plugin = plugin;
-		this.messages = SexyConfiguration.loadConfiguration(new File(plugin.getDataFolder(), messagesFile));
+		
+		if (new File(plugin.getDataFolder(), messagesFile).exists()) {
+			this.messages = SexyConfiguration.loadConfiguration(new File(plugin.getDataFolder(), messagesFile));
+			Tag = getTag();
+		} else {
+			this.messages = null;
+			Tag = "[" + plugin.getName() + "]";
+		}
 	}
 	
 	@Deprecated
@@ -130,7 +147,7 @@ public class Messenger{
 			return;
 		}
 		
-		if (tag) Bukkit.getConsoleSender().sendMessage(cc(getTag() + " " + String.valueOf(msg)));
+		if (tag) Bukkit.getConsoleSender().sendMessage(cc(Tag + " " + String.valueOf(msg)));
 		else Bukkit.getConsoleSender().sendMessage(cc(String.valueOf(msg)));
 	} 
 	
@@ -161,7 +178,7 @@ public class Messenger{
 			return;
 		}
 		
-		if (tag) Bukkit.getConsoleSender().sendMessage(cc(getTag() + " " + parseVars(String.valueOf(msg), vals)));
+		if (tag) Bukkit.getConsoleSender().sendMessage(cc(Tag + " " + parseVars(String.valueOf(msg), vals)));
 		else Bukkit.getConsoleSender().sendMessage(cc(parseVars(String.valueOf(msg), vals)));
 	}
 	
@@ -202,11 +219,11 @@ public class Messenger{
 		
 		
 		for (Player r : Bukkit.getOnlinePlayers()) {
-			if (Tag) r.sendMessage(cc(getTag() + " " + msg));
+			if (Tag) r.sendMessage(cc(Tag + " " + msg));
 			else r.sendMessage(cc(msg));
 		}
 		 
-//		Bukkit.getServer().broadcastMessage(getTag() + " " + cc(msg));
+//		Bukkit.getServer().broadcastMessage(Tag + " " + cc(msg));
 		
 	}
 	
@@ -217,7 +234,7 @@ public class Messenger{
 	 * @param reciever	The {@link CommandSender}
 	 */
 	public void sendMessage(String msg, CommandSender reciever){
-		reciever.sendMessage(cc(getTag() + msg));
+		reciever.sendMessage(cc(Tag + msg));
 	}
 	
 	@Deprecated
@@ -296,7 +313,7 @@ public class Messenger{
 			return;
 		}
 		for (Player r : Library.instance.getServer().getOnlinePlayers()) {
-			sendHoverMsg(r, getTag() + " " + mainText, hoverText, vals);
+			sendHoverMsg(r, Tag + " " + mainText, hoverText, vals);
 		}
 	}
 	
@@ -317,7 +334,7 @@ public class Messenger{
 			return;
 		}
 		for (Player r : Library.instance.getServer().getOnlinePlayers()) {
-			sendHoverMsg(r, getTag() + " " + mainText, hoverText);
+			sendHoverMsg(r, Tag + " " + mainText, hoverText);
 		}
 	}
 	

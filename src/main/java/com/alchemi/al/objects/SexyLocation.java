@@ -67,4 +67,64 @@ public class SexyLocation {
 		return new Location(w, x, y, z, yaw, pitch);
 	}
 	
+	@Override
+	public boolean equals(Object obj) {
+		
+		if (obj instanceof SexyLocation) {
+			SexyLocation sl = (SexyLocation) obj;
+			if (!sl.getWorld().equals(this.world)) return false;
+			if (sl.getX() != this.x) return false;
+			if (sl.getY() != this.y) return false;
+			if (sl.getZ() != this.z) return false;
+			if (sl.getPitch() != this.pitch) return false;
+			if (sl.getYaw() != this.yaw) return false;
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * @return the world
+	 */
+	public String getWorld() {
+		return world;
+	}
+
+	/**
+	 * @return the x
+	 */
+	public double getX() {
+		return x;
+	}
+
+	/**
+	 * @return the y
+	 */
+	public double getY() {
+		return y;
+	}
+
+	/**
+	 * @return the z
+	 */
+	public double getZ() {
+		return z;
+	}
+
+	/**
+	 * @return the yaw
+	 */
+	public float getYaw() {
+		return yaw;
+	}
+
+	/**
+	 * @return the pitch
+	 */
+	public float getPitch() {
+		return pitch;
+	}
+	
+	
+	
 }

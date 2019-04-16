@@ -2,9 +2,11 @@ package com.alchemi.al;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.MetadataValue;
+import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.alchemi.al.configurations.SexyConfiguration;
@@ -97,5 +99,42 @@ public class Library extends JavaPlugin{
 		} else {
 			player.getPlayer().getInventory().addItem(item);
 		}
+	}
+	
+	/**
+	 * Test if a string is an integer.
+	 * 
+	 * @param input the integer to test
+	 * @return Wether the string is an integer or not.
+	 */
+	public static boolean testIfInt(String input) {
+		try {
+			Integer.valueOf(input);
+			return true;
+		} catch(NumberFormatException e) {
+			return false;
+		}
+	}
+	
+	/**
+	 * Test if a {@link CommandSender} has a permission.
+	 * 
+	 * @param sender the sender to test on.
+	 * @param perm the permission to test for.
+	 * @return true if the sender has the permission, false if otherwise
+	 */
+	public static boolean hasPermission(CommandSender sender, String perm) {
+		return sender instanceof Player ? sender.isOp() || sender.hasPermission(perm) : true; 
+	}
+	
+	/**
+	 * Test if a {@link CommandSender} has a permission.
+	 * 
+	 * @param sender the sender to test on.
+	 * @param perm the permission to test for.
+	 * @return true if the sender has the permission, false if otherwise
+	 */
+	public static boolean hasPermission(CommandSender sender, Permission perm) {
+		return sender instanceof Player ? sender.isOp() || sender.hasPermission(perm) : true;
 	}
 }

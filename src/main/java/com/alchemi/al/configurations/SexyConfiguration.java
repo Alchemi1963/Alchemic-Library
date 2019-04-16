@@ -62,12 +62,13 @@ public class SexyConfiguration extends YamlConfiguration {
 		
 		ArrayList<String> output = new ArrayList<String>();
 		int I = 0;
-		for (String s : super.saveToString().split("\n")) {
+		String[] savedString = super.saveToString().split("\n");
+		for (String s : savedString) {
 			
-			if (s.contains(":") && I < super.saveToString().split("\n").length - 1 
-					&& super.saveToString().split("\n")[I+1].contains(":") ||
-					I < super.saveToString().split("\n").length - 1 && !super.saveToString().split("\n")[I+1].contains("-") &&
-					s.contains("-")) output.add(s + "\n");
+			if (s.contains(":") && I < savedString.length - 1 
+					&& savedString[I+1].contains(":") ||
+					I < savedString.length - 1 && !savedString[I+1].contains("-") &&
+					s.contains("-")) output.add(s);
 			else output.add(s);
 			I ++;
 		}
@@ -98,7 +99,7 @@ public class SexyConfiguration extends YamlConfiguration {
 					}
 				}
 				
-				if (i != 0) output.add(i, comments.get(key));
+				if (i != 0) output.add(i, "\n" + comments.get(key));
 				
 				output2 = new ArrayList<String>();
 				

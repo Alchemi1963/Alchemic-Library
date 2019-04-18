@@ -13,16 +13,17 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryType.SlotType;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.alchemi.al.configurations.Messenger;
 import com.google.common.base.Charsets;
 
-public class GuiListener implements Listener {
+public class GUIListener implements Listener {
 
-	private final HashMap<UUID, GuiBase> guis = new HashMap<UUID, GuiBase>();
+	private final HashMap<UUID, GUIBase> guis = new HashMap<UUID, GUIBase>();
 	
 	@SuppressWarnings("unused")
 	private final JavaPlugin plugin; 
 	
-	public GuiListener(JavaPlugin plug) {
+	public GUIListener(JavaPlugin plug) {
 		plugin = plug;
 	}
 	
@@ -31,12 +32,15 @@ public class GuiListener implements Listener {
 		
 		Player pl = (Player) e.getWhoClicked();
 		
-		if (guis.containsKey(createUUID(e.getView().getTitle(), pl)) && e.getSlotType() != SlotType.OUTSIDE) {
+		if (guis.containsKey(createUUID(e.getView().getTitle(), pl)) 
+				&& e.getSlotType() != SlotType.OUTSIDE 
+				&& e.getSlotType() != SlotType.QUICKBAR
+				&& e.getRawSlot() >= 0 && e.getRawSlot() < e.getView().getTopInventory().getSize()) {
 			
 			e.setCancelled(true);
 			
 			try {
-				guis.get(createUUID(e.getView().getTitle(), pl)).onClicked(e.getSlot(), pl);
+				guis.get(createUUID(e.getView().getTitle(), pl)).onClicked(e.getSlot(), pl, e.getClick());
 			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
 					| InstantiationException e1) {}
 			
@@ -48,25 +52,25 @@ public class GuiListener implements Listener {
 		
 		UUID id = createUUID(e.getView().getTitle(), (OfflinePlayer) e.getPlayer());
 		if (guis.containsKey(id)) {
-			guis.get(id);
+			guis.get(id).onClose();
 		}
 	}
 	
-	public void registerGui(GuiBase gui) {
-		guis.put(createUUID(gui.getGuiName(), gui.getPlayer()), gui);
+	public void registerGui(GUIBase gui) {
+		guis.put(createUUID(Messenger.cc(gui.getGuiName()), gui.getPlayer()), gui);
 	}
 	
-	public void unregisterGui(GuiBase gui) {
-		UUID id = createUUID(gui.getGuiName(), gui.getPlayer());
+	public void unregisterGui(GUIBase gui) {
+		UUID id = createUUID(Messenger.cc(gui.getGuiName()), gui.getPlayer());
 		if (guis.containsKey(id)) guis.remove(id);
 	}
 	
-	public GuiBase getGui(String name, OfflinePlayer player) {
+	public GUIBase getGui(String name, OfflinePlayer player) {
 		if (guis.containsKey(createUUID(name, player))) return guis.get(createUUID(name, player));
 		return null;
 	}
 	
-	protected static UUID createUUID(String guiTitle, OfflinePlayer player) {
+	public static UUID createUUID(String guiTitle, OfflinePlayer player) {
 		String pName = player.getName();
 		return UUID.nameUUIDFromBytes((guiTitle + "_" + pName).getBytes(Charsets.UTF_8));
 	}

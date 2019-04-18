@@ -24,6 +24,20 @@ public class ItemFactory extends ItemStack{
 		this.setAmount(1);
 	}
 	
+	public ItemFactory(ItemStack item) {
+		this.setAmount(item.getAmount());
+		this.setData(item.getData());
+		this.setType(item.getType());
+		
+		ItemMeta meta = item.getItemMeta();
+		ItemMeta metaMe = getItemMeta();
+		metaMe.setAttributeModifiers(meta.getAttributeModifiers());
+		metaMe.setDisplayName(meta.getDisplayName());
+		metaMe.setLore(meta.getLore());
+		metaMe.setUnbreakable(meta.isUnbreakable());
+		setItemMeta(metaMe);
+	}
+	
 	public ItemFactory setName(String name) {
 		ItemMeta meta = getItemMeta();
 		meta.setDisplayName(Messenger.cc(name));
@@ -39,6 +53,13 @@ public class ItemFactory extends ItemStack{
 		meta.setLore(lore2);
 		setItemMeta(meta);
 		return this;
+	}
+	
+	public List<String> getLore() {
+		if (hasItemMeta() && getItemMeta().hasLore()) {
+			return getItemMeta().getLore();
+		}
+		throw new IllegalArgumentException("Lore not available on item!");
 	}
 	
 	public ItemFactory setNum(int amount) {

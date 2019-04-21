@@ -206,7 +206,7 @@ public class SexyConfiguration extends YamlConfiguration {
 				
 			} else if (Pattern.compile("#.+").matcher(content[i]).find()) {
 				String comment = content[i];
-				while (Pattern.compile("#.+").matcher(content[i+1]).find()) {
+				while (content.length < i+1 && Pattern.compile("#.+").matcher(content[i+1]).find()) {
 					i++;
 					comment = comment.concat("\n" + content[i]);
 				}
@@ -228,7 +228,10 @@ public class SexyConfiguration extends YamlConfiguration {
 		
 		Pattern keyPattern = Pattern.compile("(\\w+:)");
 		
+		if (content == null) return "";
+		
 		for (int i = 0; i < content.size(); i++) {
+			if (content.get(i) == null || content.get(i).isEmpty()) return "";
 			Matcher m = keyPattern.matcher(content.get(i));
 			
 			if (m.find()) {

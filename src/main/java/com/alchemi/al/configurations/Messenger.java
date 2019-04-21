@@ -19,9 +19,9 @@ import net.md_5.bungee.api.chat.TextComponent;
 
 public class Messenger{
 
-	private final JavaPlugin plugin;
-	private final SexyConfiguration messages;
-	private final String tag;
+	protected final JavaPlugin plugin;
+	protected final SexyConfiguration messages;
+	protected final String tag;
 	
 	/**
 	 * Creates a Messenger instance.
@@ -218,9 +218,13 @@ public class Messenger{
 		}
 		
 		
-		for (Player r : Bukkit.getOnlinePlayers()) {
-			if (useTag) r.sendMessage(cc(tag + " " + msg));
-			else r.sendMessage(cc(msg));
+		for (Player reciever : Bukkit.getOnlinePlayers()) {
+			if (useTag) {
+				if (msg.isEmpty()) return;
+				if (tag.endsWith(" ")) reciever.sendMessage(cc(tag + msg));
+				else reciever.sendMessage(cc(tag + " " + msg));
+			}
+			else reciever.sendMessage(cc(msg));
 		}
 		 
 //		Bukkit.getServer().broadcastMessage(Tag + " " + cc(msg));
@@ -234,7 +238,10 @@ public class Messenger{
 	 * @param reciever	The {@link CommandSender}
 	 */
 	public void sendMessage(String msg, CommandSender reciever){
-		reciever.sendMessage(cc(tag + msg));
+		if (msg.isEmpty()) return;
+		
+		if (tag.endsWith(" ")) reciever.sendMessage(cc(tag + msg));
+		else reciever.sendMessage(cc(tag + " " + msg));
 	}
 	
 	@Deprecated

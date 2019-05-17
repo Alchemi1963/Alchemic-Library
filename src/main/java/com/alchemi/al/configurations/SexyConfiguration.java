@@ -118,6 +118,8 @@ public class SexyConfiguration extends YamlConfiguration {
 		String realOutput = "";
 		for (String l : output) {
 			if (!l.isEmpty()) realOutput += l + "\n";
+			else if(realOutput.endsWith("|2-\n") || realOutput.endsWith("|1-\n")) realOutput += l + "\n";
+			
 		}
 		
 		return realOutput;

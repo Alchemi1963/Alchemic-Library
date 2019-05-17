@@ -2,29 +2,45 @@ package com.alchemi.al;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.metadata.MetadataValue;
-import org.bukkit.permissions.Permission;
-import org.bukkit.plugin.java.JavaPlugin;
 
+import com.alchemi.al.configurations.Messenger;
 import com.alchemi.al.configurations.SexyConfiguration;
-import com.alchemi.al.objects.meta.BaseMeta;
+import com.alchemi.al.objects.base.PluginBase;
+import com.alchemi.al.objects.handling.UpdateChecker;
+import com.alchemi.al.objects.meta.PersistentMeta;
 
-public class Library extends JavaPlugin{
+public class Library extends PluginBase{
+	
 	public static Library instance;
 	
 	public SexyConfiguration sc;
 	
+	public UpdateChecker uc;
+	
+	@Override
 	public void onEnable() {
-		System.out.println("Hello Stonehenge!");
 		instance = this;
+		
+		this.SPIGOT_ID = 62777;
+		this.setMessenger(new Messenger(this));
+		
+		uc = new UpdateChecker(this);
+		
+		PersistentMeta.enable();
+		
+		getLogger().info(Messenger.cc("&8Hello Stonehenge!"));
 	}
 	
 	public void onDisable(){
-		System.out.println("I don't wanna go...");
-		saveConfig();
+	
+		getLogger().info(Messenger.cc("&6Saving player metadata..."));
+		for (Player player : Bukkit.getOnlinePlayers()) {
+			PersistentMeta.save(player);
+		}
+		
+		getLogger().info(Messenger.cc("&7I don't wanna go..."));
 	}
 	
 	/**
@@ -37,44 +53,6 @@ public class Library extends JavaPlugin{
 	public static OfflinePlayer getOfflinePlayer(String name) {
 		for (OfflinePlayer offP : Bukkit.getOfflinePlayers()) {
 			if (offP.getName().equals(name)) return offP;
-		}
-		return null;
-	}
-	/**
-	 * Test if a player has a certain meta value.
-	 * 
-	 * @param player	The player to test
-	 * @param metaKey	The meta key to test for
-	 * @param clazz		The class of the key
-	 * @return			true or false
-	 */
-	public static boolean hasMeta(Player player, Class<? extends BaseMeta> clazz) {
-		
-		if (!player.hasMetadata(clazz.getSimpleName())) return false;
-		
-		for (MetadataValue meta : player.getMetadata(clazz.getSimpleName())) {
-			if (clazz.isInstance(meta)) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	/**
-	 * Get a meta value from a player
-	 * 
-	 * @param player	The player to get the meta from
-	 * @param metaKey	The meta key to get
-	 * @param clazz		The class the key belongs to
-	 * @return			{@link MetadataValue} of the key, {@code null} of not found
-	 */
-	public static MetadataValue getMeta(Player player, Class<? extends BaseMeta> clazz) {
-		if (!hasMeta(player, clazz)) return null;
-	
-		for (MetadataValue meta : player.getMetadata(clazz.getSimpleName())) {
-			if (clazz.isInstance(meta)) {
-				return meta;
-			}
 		}
 		return null;
 	}
@@ -117,24 +95,32 @@ public class Library extends JavaPlugin{
 	}
 	
 	/**
-	 * Test if a {@link CommandSender} has a permission.
+	 * Test if a string is a number.
 	 * 
-	 * @param sender the sender to test on.
-	 * @param perm the permission to test for.
-	 * @return true if the sender has the permission, false if otherwise
+	 * @param input the string to test.
+	 * @return Wether the string is a number or not.
 	 */
-	public static boolean hasPermission(CommandSender sender, String perm) {
-		return sender instanceof Player ? sender.isOp() || sender.hasPermission(perm) : true; 
-	}
-	
-	/**
-	 * Test if a {@link CommandSender} has a permission.
-	 * 
-	 * @param sender the sender to test on.
-	 * @param perm the permission to test for.
-	 * @return true if the sender has the permission, false if otherwise
-	 */
-	public static boolean hasPermission(CommandSender sender, Permission perm) {
-		return sender instanceof Player ? sender.isOp() || sender.hasPermission(perm) : true;
+	public static boolean testIfNumber(String input) {
+		try {
+			Float.valueOf(input);
+			return true;
+		} catch(NumberFormatException e) {
+			try {
+				Double.valueOf(input);
+				return true;
+			} catch (NumberFormatException ex) {
+				try {
+					Integer.valueOf(input);
+					return true;
+				} catch (NumberFormatException exc) {
+					try {
+						Long.valueOf(input);
+						return true;
+					} catch (NumberFormatException exce) {
+						return false;
+					}
+				}
+			}
+		}
 	}
 }

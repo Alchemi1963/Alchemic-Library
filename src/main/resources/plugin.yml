@@ -4,3 +4,12 @@ version: ${project.version}
 api-version: 1.13
 author: Alchemi
 description: A library for all my plugins
+
+permissions:
+  al.notify:
+    default: op
+    description: Allows user to get notifications about plugin updates.
+    
+  al.forcecheckupdate:
+    default: false
+    description: Forces an update check when users with this node join. 

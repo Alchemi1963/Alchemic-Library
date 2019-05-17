@@ -1,17 +1,17 @@
 package com.alchemi.al.configurations;
 
 import java.io.File;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.io.IOException;
 
+import org.apache.logging.log4j.core.appender.FileManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.alchemi.al.Library;
-import com.alchemi.al.deprecated.FileManager;
 
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
@@ -20,8 +20,8 @@ import net.md_5.bungee.api.chat.TextComponent;
 public class Messenger{
 
 	protected final JavaPlugin plugin;
-	protected final SexyConfiguration messages;
-	protected final String tag;
+	protected SexyConfiguration messages;
+	protected String tag;
 	
 	/**
 	 * Creates a Messenger instance.
@@ -62,27 +62,15 @@ public class Messenger{
 		}
 	}
 	
-	@Deprecated
-	/**
-	 * Gets a message from the messages file.
-	 * 
-	 * @param key 	The key of the message (leave out the plugin name)
-	 * @return		The string the key links to
-	 */
-	public String getMessage(String key) {
-		
-		String msg = messages.getString(this.plugin.getDescription().getName() + "." + key);
-		return msg;
-		
-	}
-	
 	/**
 	 * Gets the plugin tag
 	 * 
 	 * @return The plugin tag, null if it isn't found
 	 */
 	public String getTag() {
-		return messages.getString(this.plugin.getDescription().getName() + ".Tag");
+		tag = messages.getString(this.plugin.getDescription().getName() + ".Tag");
+		if (tag.isEmpty() || tag.equals("") || tag == null) tag = "[" + plugin.getName() + "]";
+		return tag;
 	}
 	
 	/**
@@ -95,28 +83,12 @@ public class Messenger{
 		return ChatColor.translateAlternateColorCodes('&', msg);
 	}
 	
-	@Deprecated
-	/**
-	 * Parse a string with variables.
-	 * 
-	 * @param msg	The string to be parsed
-	 * @param vals	A {@link HashMap} containing the variables and their values
-	 * @return		The newly parsed string
-	 */
-	public static String parseVars(String msg, Map<String, Object> vals) {
-		for (Entry<String, Object> ent : vals.entrySet()) {
-			while (msg.contains(ent.getKey())) msg = msg.replace(ent.getKey(), String.valueOf(ent.getValue()));	
-		}
-		
-		return msg;
-	}
-	
 	/**
 	 * Prints a message to the console, without an instance.
 	 * 
 	 * @param msg	The message to be displayed
 	 */
-	public static void printStatic(Object msg) {System.out.println(String.valueOf(msg));}
+	public static void printStatic(Object msg) { Bukkit.getConsoleSender().sendMessage(cc(String.valueOf(msg))); }
 	
 	/**
 	 * Prints a message to the console, without an instance, but with a tag.
@@ -124,7 +96,7 @@ public class Messenger{
 	 * @param msg	The message to be displayed
 	 * @param tag	The plugin tag to be put in front of the message
 	 */
-	public static void printStatic(Object msg, String tag) { System.out.println(tag + " " + String.valueOf(msg)); }
+	public static void printStatic(Object msg, String tag) { Bukkit.getConsoleSender().sendMessage(cc(tag + " " + String.valueOf(msg))); }
 	
 	/**
 	 * Sends a message to the console.
@@ -147,53 +119,10 @@ public class Messenger{
 			return;
 		}
 		
-		if (tagged) Bukkit.getConsoleSender().sendMessage(cc(tag + " " + String.valueOf(msg)));
+		if (tagged) plugin.getLogger().info(cc(String.valueOf(msg)));
 		else Bukkit.getConsoleSender().sendMessage(cc(String.valueOf(msg)));
 	} 
 	
-	@Deprecated
-	/**
-	 * Sends a message to the console.
-	 * 
-	 * @param msg	The message to be send
-	 * @param vals	A {@link HashMap} containing the variables and their values
-	 */
-	public void print(Object msg, Map<String, Object> vals) {
-		print(msg, true, vals);
-	}
-	
-	@Deprecated
-	/**
-	 * Sends a message to the console.
-	 * 
-	 * @param msg	The message to be sent
-	 * @param tag	Whether the plugin tag should be displayed or not
-	 * @param vals	A {@link HashMap} containing the variables and their values
-	 */
-	public void print(Object msg, boolean tag, Map<String, Object> vals) {
-		if (String.valueOf(msg).contains("\n")) {
-			for (String m : String.valueOf(msg).split("\n")) {
-				print(m, tag, vals);
-			}
-			return;
-		}
-		
-		if (tag) Bukkit.getConsoleSender().sendMessage(cc(tag + " " + parseVars(String.valueOf(msg), vals)));
-		else Bukkit.getConsoleSender().sendMessage(cc(parseVars(String.valueOf(msg), vals)));
-	}
-	
-	@Deprecated
-	/**
-	 * Broadcasts a message to the whole server.
-	 * 
-	 * @param msg 	The message to be broadcast
-	 * @param vals	A {@link HashMap} containing the variables and their values
-	 * @param Tag	Should the tag be displayed.
-	 */
-	public void broadcast(String msg, Map<String, Object> vals, boolean Tag) {
-		broadcast(parseVars(msg, vals), Tag);
-	}
-		
 	/**
 	 * Broadcasts a message to the whole server.
 	 * 
@@ -244,86 +173,6 @@ public class Messenger{
 		else reciever.sendMessage(cc(tag + " " + msg));
 	}
 	
-	@Deprecated
-	/**
-	 * Broadcasts a message to the whole server.
-	 * 
-	 * @param msg 	The message to be broadcast
-	 * @param vals	A {@link HashMap} containing the variables and their values
-	 */
-	public void broadcast(String msg, Map<String, Object> vs) {
-		broadcast(parseVars(msg, vs), true);
-	}
-	
-	@Deprecated
-	/**
-	 * Sends a string to a {@link CommandSender}
-	 * 
-	 * @param msg		The string to be sent
-	 * @param reciever	The {@link CommandSender}
-	 */
-	public static void sendMsg(String msg, CommandSender reciever){
-		reciever.sendMessage(cc(msg));
-	}
-	
-	@Deprecated
-	/**
-	 * Sends a string to a {@link CommandSender}
-	 * 
-	 * @param msg		The string to be sent
-	 * @param reciever	The {@link CommandSender}
-	 * @param vals		A {@link HashMap} containing the variables and their values
-	 */
-	public static void sendMsg(String msg, CommandSender reciever, Map<String, Object> vals) {
-		reciever.sendMessage(cc(parseVars(msg, vals)));
-	}
-	
-	@Deprecated
-	/**
-	 * Sends a string to a {@link Player}
-	 * 
-	 * @param msg		The string to be sent
-	 * @param reciever	The {@link Player}
-	 */
-	public static void sendMsg(String msg, Player reciever){
-		reciever.sendMessage(cc(msg));
-	}
-	
-	@Deprecated
-	/**
-	 * Sends a string to a {@link Player}
-	 * 
-	 * @param msg		The string to be sent
-	 * @param reciever	The {@link Player}
-	 * @param vals		A {@link HashMap} containing the variables and their values
-	 */
-	public static void sendMsg(String msg, Player reciever, Map<String, Object> vals) {
-		reciever.sendMessage(cc(parseVars(msg, vals)));
-	} 
-	
-	@Deprecated
-	/**
-	 * Broadcasts a message with hovering text.
-	 * 
-	 * @param mainText	The main text to be broadcast
-	 * @param hoverText	The text players shouls see wehen hovering over the main text
-	 * @param vals		A {@link HashMap} containing the variables and their values
-	 */
-	public void broadcastHover(String mainText, String hoverText, Map<String, Object> vals) {
-		
-		mainText = colourMessage(mainText);
-		
-		if (mainText.contains("\n")) {
-			for (String msg : mainText.split("\n")) {
-				broadcastHover(msg, hoverText, vals);
-			}
-			return;
-		}
-		for (Player r : Library.instance.getServer().getOnlinePlayers()) {
-			sendHoverMsg(r, tag + " " + mainText, hoverText, vals);
-		}
-	}
-	
 	/**
 	 * Broadcasts a message with hovering text.
 	 * 
@@ -343,20 +192,6 @@ public class Messenger{
 		for (Player r : Library.instance.getServer().getOnlinePlayers()) {
 			sendHoverMsg(r, tag + " " + mainText, hoverText);
 		}
-	}
-	
-	@Deprecated
-	/**
-	 * Sends a message with hovering text.
-	 * 
-	 * @param reciever	The {@link CommandSender} receiver
-	 * @param mainText	The main text to be sent
-	 * @param hoverText	The text the receiver should see when hovering over the main text 
-	 * @param vars		A {@link HashMap} containing the variables and their values
-	 */
-	public static void sendHoverMsg(Player reciever, String mainText, String hoverText, Map<String, Object> vars) {
-		sendHoverMsg(reciever, parseVars(mainText, vars), parseVars(hoverText, vars));
-		
 	}
 	
 	/**
@@ -418,5 +253,14 @@ public class Messenger{
 		
 		return newText;
 		
+	}
+	
+	/**
+	 * Reloads the messages file.
+	 */
+	public void reloadMessages() {
+		try {
+			messages.load();
+		} catch (IOException | InvalidConfigurationException e) {}
 	}
 }

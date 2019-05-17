@@ -1,4 +1,4 @@
-package com.alchemi.al.objects;
+package com.alchemi.al.objects.handling;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;

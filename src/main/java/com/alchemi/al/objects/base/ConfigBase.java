@@ -1,5 +1,6 @@
 package com.alchemi.al.objects.base;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -19,8 +20,8 @@ import com.alchemi.al.configurations.SexyConfiguration;
  */
 public abstract class ConfigBase {
 
-	PluginBase plugin;
-	ConfigBase instance;
+	protected PluginBase plugin;
+	public ConfigBase instance;
 	
 	protected interface IConfig{
 		
@@ -58,30 +59,38 @@ public abstract class ConfigBase {
 		SexyConfiguration getConfig();
 	}
 	
+	public interface IConfigEnum{
+		
+		SexyConfiguration getConfig();
+		
+		File getFile();
+		
+		int getVersion();
+		
+	}
+	
 	public ConfigBase(PluginBase plugin) throws FileNotFoundException, IOException, InvalidConfigurationException {
 		instance = this;
 		this.plugin = plugin;
 		
-		for (SexyConfiguration file : getConfigs()) {
+		for (IConfigEnum ce : getConfigs()) {
 			
-			int version = 0;
+			SexyConfiguration file = ce.getConfig();
 			
-			if (plugin.getInstance().configs.containsKey(file)) {
-				version = plugin.getInstance().configs.get(file).version;
-			}
+			int version = ce.getVersion();
 			
 			if(!file.getFile().exists()) {
-				plugin.getInstance().saveResource(file.getFile().getName(), false);
+				plugin.saveResource(file.getFile().getName(), false);
 			}
 			
 			if(!file.isSet("File-Version-Do-Not-Edit") 
 					|| !file.get("File-Version-Do-Not-Edit").equals(version)) {
-				plugin.getInstance().getMessenger().print("Your $file$ is outdated! Updating...".replace("$file$", file.getFile().getName()));
-				file.load(new InputStreamReader(plugin.getInstance().getResource(file.getFile().getName())));
-				file.update(SexyConfiguration.loadConfiguration(new InputStreamReader(plugin.getInstance().getResource(file.getFile().getName()))));
+				plugin.getMessenger().print("Your $file$ is outdated! Updating...".replace("$file$", file.getFile().getName()));
+				file.load(new InputStreamReader(plugin.getResource(file.getFile().getName())));
+				file.update(SexyConfiguration.loadConfiguration(new InputStreamReader(plugin.getResource(file.getFile().getName()))));
 				file.set("File-Version-Do-Not-Edit", version);
 				file.save();
-				plugin.getInstance().getMessenger().print("File successfully updated!");
+				plugin.getMessenger().print("File successfully updated!");
 			}
 		}
 		
@@ -90,8 +99,8 @@ public abstract class ConfigBase {
 	
 	public void reload() {
 		try {
-			for (SexyConfiguration c : getConfigs()) {
-				c.load();	
+			for (IConfigEnum c : getConfigs()) {
+				c.getConfig().load();	
 			}
 			
 			for (IConfig value : getEnums()) {
@@ -118,13 +127,13 @@ public abstract class ConfigBase {
 		}
 		
 		try {
-			for (SexyConfiguration c : getConfigs()) {
-				c.save();
+			for (IConfigEnum c : getConfigs()) {
+				c.getConfig().save();
 			}
 		} catch (IOException e) {e.printStackTrace();}
 	}
 	
-	protected abstract SexyConfiguration[] getConfigs();
+	protected abstract IConfigEnum[] getConfigs();
 	
 	protected abstract Set<IConfig> getEnums();
 	

@@ -48,7 +48,7 @@ public class UpdateChecker {
 			
 		} else {
 			plugin.getMessenger().print("&6There's an update available for &o" + plugin.getDescription().getName()
-					+ "\n&6Download it at &b&nhttps://www.spigotmc.org/resources/" + plugin.SPIGOT_ID);
+					+ "\n&6Download it at &b&nhttps://www.spigotmc.org/resources/" + plugin.SPIGOT_ID + "/&r");
 			
 			if (admins) {
 				

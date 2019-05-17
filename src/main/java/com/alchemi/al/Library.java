@@ -3,6 +3,10 @@ package com.alchemi.al;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.inventory.ItemStack;
 
 import com.alchemi.al.configurations.Messenger;
@@ -11,7 +15,7 @@ import com.alchemi.al.objects.base.PluginBase;
 import com.alchemi.al.objects.handling.UpdateChecker;
 import com.alchemi.al.objects.meta.PersistentMeta;
 
-public class Library extends PluginBase{
+public class Library extends PluginBase implements Listener {
 	
 	public static Library instance;
 	
@@ -29,6 +33,8 @@ public class Library extends PluginBase{
 		uc = new UpdateChecker(this);
 		
 		PersistentMeta.enable();
+		
+		Bukkit.getPluginManager().registerEvents(this, this);
 		
 		getLogger().info(Messenger.cc("&8Hello Stonehenge!"));
 	}
@@ -121,6 +127,13 @@ public class Library extends PluginBase{
 					}
 				}
 			}
+		}
+	}
+	
+	@EventHandler
+	public void onPlayerLogin(PlayerJoinEvent e) {
+		if (e.getPlayer().hasPermission("al.forcecheckupdate")) {
+			uc.check();
 		}
 	}
 }

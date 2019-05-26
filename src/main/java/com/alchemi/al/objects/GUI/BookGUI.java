@@ -15,8 +15,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import com.alchemi.al.configurations.Messenger;
 
-import net.minecraft.server.v1_13_R2.PacketPlayInBEdit;
-
 public class BookGUI implements Listener{
 
 	private final BiFunction<Player, String, String> function;

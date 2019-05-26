@@ -36,15 +36,21 @@ public class Library extends PluginBase implements Listener {
 		
 		Bukkit.getPluginManager().registerEvents(this, this);
 		 
-		for (String l : Messenger.cc("&2 __       __   ______   ______   ______   _______         ______  __    __        __       __  ________  _______   ______   ______  \r\n" + 
-				"&2/  \\     /  | /      \\ /      | /      \\ /       \\       /      |/  \\  /  |      /  \\     /  |/        |/       \\ /      | /      \\ \r\n" + 
-				"&200  \\   /10 |/111011  |111010/ /100111  |1010111  |      100110/ 10  \\ 10 |      01  \\   /10 |01101011/ 0110100  |001110/ /011101  |\r\n" + 
-				"&2101  \\ /000 |11 |__11 |  11 |  11 |  11 |10 |__00 |        01 |  011  \\10 |      010  \\ /000 |01 |__    01 |  11 |  00 |  10 |  01 |\r\n" + 
-				"&20100  /0101 |01    11 |  01 |  10 |  10 |01    11<         01 |  0011  11 |      0001  /1011 |01    |   10 |  11 |  11 |  01 |  00 |\r\n" + 
-				"&201 10 00/01 |00000100 |  01 |  11 |  00 |0111011  |        01 |  10 01 11 |      00 10 10/00 |00110/    10 |  10 |  01 |  00 |  10 |\r\n" + 
-				"&201 |000/ 00 |10 |  01 | _00 |_ 01 \\__11 |01 |  11 |       _00 |_ 10 |0011 |      11 |100/ 00 |00 |_____ 11 |__11 | _10 |_ 00 \\__11 |\r\n" + 
-				"&201 | 0/  11 |11 |  01 |/ 11   |00    01/ 00 |  01 |      / 11   |00 | 011 |      10 | 1/  11 |10       |01    01/ / 10   |11    01/ \r\n" + 
-				"&211/      00/ 10/   11/ 000010/  101111/  10/   01/       101000/ 01/   00/       00/      10/ 11011011/ 1111011/  001110/  011101/").split("\n")) {
+		for (String l : Messenger.cc("&211        00  101001  000110  101101  110011\r\n" + 
+				"&20011    0110  11  10    10    01  00  01  01\r\n" + 
+				"&201 00  01 00  001010    10    01  11  0010  \r\n" + 
+				"&200   01   01  01  00    01    01  01  00  10\r\n" + 
+				"&201        00  11  00  100010  111001  11  00\r\n\n" + 
+				"&2110000  00    11\r\n" + 
+				"&2  00    1011  10\r\n" + 
+				"&2  11    10 00 11\r\n" + 
+				"&2  00    10  1110\r\n" + 
+				"&2  00    01    10\r\n\n" + 
+				"&201        10  001000  0111    011001  001100\r\n" + 
+				"&21011    0101  00      10  11    00    00  01\r\n" + 
+				"&200 11  01 01  0000    01  01    00    11  01\r\n" + 
+				"&211   01   10  00      10  00    10    11  01\r\n" + 
+				"&201        10  010111  1111    001001  111010").split("\n")) {
 			Bukkit.getConsoleSender().sendMessage(l);
 		}
 		
@@ -152,7 +158,14 @@ public class Library extends PluginBase implements Listener {
 	public void onPlayerChat(AsyncPlayerChatEvent e) {
 		if (e.getPlayer().hasPermission("al.beingcool") 
 				&& e.getMessage().equalsIgnoreCase("hello there")) {
-			messenger.broadcast("&8&oGeneral Kenobi...", false);
+			Bukkit.getScheduler().scheduleSyncDelayedTask(instance, new Runnable() {
+				
+				@Override
+				public void run() {
+					messenger.broadcast("&7&oGeneral Kenobi...", false);
+					
+				}
+			}, 5);
 		}
 	}
 }

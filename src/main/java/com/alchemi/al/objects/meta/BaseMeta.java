@@ -43,6 +43,7 @@ public abstract class BaseMeta extends MetadataValueAdapter{
 	public static BaseMeta deserialize(Map<String, Object> serializedObject) {
 		if (serializedObject.containsKey("==")) {
 			try {
+				@SuppressWarnings("unchecked")
 				Class<? extends BaseMeta> clazz = (Class<? extends BaseMeta>) Class.forName((String) serializedObject.get("=="));
 				Constructor<?> cons = clazz.getDeclaredConstructors()[0];
 				if (Arrays.asList(cons.getParameterTypes()).contains(JavaPlugin.class) || Arrays.asList(cons.getParameterTypes()).contains(PluginBase.class)) {

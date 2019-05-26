@@ -99,15 +99,18 @@ public abstract class ConfigBase {
 	
 	public void reload() {
 		try {
-			for (IConfigEnum c : getConfigs()) {
+			if (getConfigs() != null) for (IConfigEnum c : getConfigs()) {
+				if (c == null) continue;
 				c.getConfig().load();	
 			}
 			
-			for (IConfig value : getEnums()) {
+			if (getEnums() != null) for (IConfig value : getEnums()) {
+				if (value == null) continue;
 				value.get();
 			}
-			
-			for (IMessage value : getMessages()) {
+				
+			if (getMessages() != null) for (IMessage value : getMessages()) {
+				if (value == null) continue;
 				value.get();
 			}
 			
@@ -118,16 +121,19 @@ public abstract class ConfigBase {
 	
 	protected void save() {
 		
-		for (IConfig value : getEnums()) {
+		if (getEnums() != null) for (IConfig value : getEnums()) {
+			if (value == null) continue;
 			value.getConfig().set(value.key(), value.value());
 		}
 		
-		for (IMessage value : getMessages()) {
+		if (getMessages() != null) for (IMessage value : getMessages()) {
+			if (value == null) continue;
 			value.getConfig().set(value.key(), value.value());
 		}
 		
 		try {
-			for (IConfigEnum c : getConfigs()) {
+			if (getConfigs() != null) for (IConfigEnum c : getConfigs()) {
+				if (c == null) continue;
 				c.getConfig().save();
 			}
 		} catch (IOException e) {e.printStackTrace();}

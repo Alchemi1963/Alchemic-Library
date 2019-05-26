@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.alchemi</groupId>
   <artifactId>AlchemicLibrary</artifactId>
-  <version>1.8.3</version>
+  <version>1.8.4</version>
   <name>AlchemicLibrary</name>
   
   <build>
@@ -22,9 +22,6 @@
       <plugin>
         <artifactId>maven-jar-plugin</artifactId>
         <version>2.3.1</version>
-        <configuration>
-          <outputDirectory>${project.build.directory}\..</outputDirectory>
-        </configuration>
       </plugin>
       
       <plugin>

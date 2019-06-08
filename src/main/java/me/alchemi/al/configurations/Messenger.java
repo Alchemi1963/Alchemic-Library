@@ -108,14 +108,14 @@ public class Messenger {
 	public String getTag() {
 		tag = messages.getString(plugin.getDescription().getName() + ".Tag");
 		
-		if (tag.isEmpty() || tag == null) tag = generateTag(plugin.getName());
+		if (tag == null || tag.isEmpty()) tag = generateTag(plugin.getName());
 		
 		return tag;
 	}
 	
 	public String getHeader() {
 		header = messages.getString(plugin.getDescription().getName() + ".Header");
-		if (header.isEmpty() || header == null) {
+		if (header == null || header.isEmpty()) {
 			
 			header = generateHeader(plugin.getName());
 			

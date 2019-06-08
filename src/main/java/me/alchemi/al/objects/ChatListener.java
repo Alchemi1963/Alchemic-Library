@@ -1,4 +1,4 @@
-package com.alchemi.al.objects;
+package me.alchemi.al.objects;
 
 import java.util.function.BiFunction;
 
@@ -10,7 +10,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.alchemi.al.configurations.Messenger;
+import me.alchemi.al.configurations.Messenger;
 
 public class ChatListener implements Listener {
 	
@@ -23,7 +23,7 @@ public class ChatListener implements Listener {
 		this.biF = biF;
 		
 		Bukkit.getPluginManager().registerEvents(this, plugin);
-		holder.sendMessage(Messenger.cc(request));
+		holder.sendMessage(Messenger.formatString(request));
 	}
 	
 	@EventHandler

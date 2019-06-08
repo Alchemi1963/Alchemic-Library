@@ -1,4 +1,4 @@
-package com.alchemi.al.objects.handling.nmsutils;
+package me.alchemi.al.objects.handling.nmsutils;
 
 import org.bukkit.craftbukkit.v1_13_R2.inventory.CraftItemStack;
 import org.bukkit.inventory.ItemStack;

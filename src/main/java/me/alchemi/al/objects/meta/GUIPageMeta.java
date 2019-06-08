@@ -1,4 +1,4 @@
-package com.alchemi.al.objects.meta;
+package me.alchemi.al.objects.meta;
 
 import org.bukkit.plugin.Plugin;
 

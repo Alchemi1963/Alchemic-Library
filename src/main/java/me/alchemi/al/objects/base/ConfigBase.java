@@ -1,4 +1,4 @@
-package com.alchemi.al.objects.base;
+package me.alchemi.al.objects.base;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -12,7 +12,7 @@ import org.bukkit.Sound;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.inventory.ItemStack;
 
-import com.alchemi.al.configurations.SexyConfiguration;
+import me.alchemi.al.configurations.SexyConfiguration;
 
 /**
  * @author Alchemi
@@ -86,7 +86,7 @@ public abstract class ConfigBase {
 			if(!file.isSet("File-Version-Do-Not-Edit") 
 					|| !file.get("File-Version-Do-Not-Edit").equals(version)) {
 				plugin.getMessenger().print("Your $file$ is outdated! Updating...".replace("$file$", file.getFile().getName()));
-				file.load(new InputStreamReader(plugin.getResource(file.getFile().getName())));
+				file.load();
 				file.update(SexyConfiguration.loadConfiguration(new InputStreamReader(plugin.getResource(file.getFile().getName()))));
 				file.set("File-Version-Do-Not-Edit", version);
 				file.save();

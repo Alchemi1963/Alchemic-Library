@@ -1,4 +1,4 @@
-package com.alchemi.al.objects.meta;
+package me.alchemi.al.objects.meta;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -11,7 +11,7 @@ import org.bukkit.metadata.MetadataValueAdapter;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.alchemi.al.objects.base.PluginBase;
+import me.alchemi.al.objects.base.PluginBase;
 
 public abstract class BaseMeta extends MetadataValueAdapter{
 
@@ -50,22 +50,8 @@ public abstract class BaseMeta extends MetadataValueAdapter{
 					return (BaseMeta) clazz.getDeclaredConstructors()[0].newInstance(Bukkit.getPluginManager().getPlugin((String) serializedObject.get("owner")), serializedObject.get("value"));
 				}
 				return (BaseMeta) clazz.getDeclaredConstructors()[0].newInstance(serializedObject.get("value"));
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
-			} catch (ClassCastException e) {
-				e.printStackTrace();
-			} catch (InstantiationException e) {
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				e.printStackTrace();
-			} catch (IllegalArgumentException e) {
-				e.printStackTrace();
-			} catch (InvocationTargetException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (SecurityException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			} catch(IllegalAccessException | IllegalArgumentException | InstantiationException | InvocationTargetException 
+					| SecurityException | ClassNotFoundException e) {e.printStackTrace();
 			}
 		}
 		return null;

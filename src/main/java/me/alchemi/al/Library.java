@@ -1,4 +1,14 @@
-package com.alchemi.al;
+package me.alchemi.al;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -7,21 +17,59 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.inventory.ItemStack;
 
-import com.alchemi.al.configurations.Messenger;
-import com.alchemi.al.configurations.SexyConfiguration;
-import com.alchemi.al.objects.base.PluginBase;
-import com.alchemi.al.objects.handling.UpdateChecker;
-import com.alchemi.al.objects.meta.PersistentMeta;
+import me.alchemi.al.configurations.Messenger;
+import me.alchemi.al.configurations.SexyConfiguration;
+import me.alchemi.al.objects.base.PluginBase;
+import me.alchemi.al.objects.commands.PageCommands;
+import me.alchemi.al.objects.handling.UpdateChecker;
+import me.alchemi.al.objects.meta.PersistentMeta;
 
 public class Library extends PluginBase implements Listener {
 	
-	public static Library instance;
+	private static Library instance;
 	
 	public SexyConfiguration sc;
 	
 	public UpdateChecker uc;
+	
+	private static final Map<Character, Integer> dictionary = new HashMap<Character, Integer>() {
+		{
+			put('a', 1);
+			put('b', 2);
+			put('c', 3);
+			put('d', 4);
+			put('e', 5);
+			put('f', 6);
+			put('g', 7);
+			put('h', 8);
+			put('i', 9);
+			put('j', 10);
+			put('k', 11);
+			put('l', 12);
+			put('m', 13);
+			put('n', 14);
+			put('o', 15);
+			put('p', 16);
+			put('q', 17);
+			put('r', 18);
+			put('s', 19);
+			put('t', 20);
+			put('u', 21);
+			put('v', 22);
+			put('w', 23);
+			put('x', 24);
+			put('y', 25);
+			put('z', 26);
+			put(' ', 27);
+			put('-', 28);
+			put('_', 29);
+			put('?', 30);
+			put('*', 31);
+		}
+	};
 	
 	@Override
 	public void onEnable() {
@@ -32,11 +80,10 @@ public class Library extends PluginBase implements Listener {
 		
 		uc = new UpdateChecker(this);
 		
-		PersistentMeta.enable();
+		Bukkit.getPluginCommand(toBinary("next")).setExecutor(new PageCommands());
+		Bukkit.getPluginCommand(toBinary("previous")).setExecutor(new PageCommands());
 		
-		Bukkit.getPluginManager().registerEvents(this, this);
-		 
-		for (String l : Messenger.cc("&211        00  101001  000110  101101  110011\r\n" + 
+		for (String l : Messenger.formatString("&211        00  101001  000110  101101  110011\r\n" + 
 				"&20011    0110  11  10    10    01  00  01  01\r\n" + 
 				"&201 00  01 00  001010    10    01  11  0010  \r\n" + 
 				"&200   01   01  01  00    01    01  01  00  10\r\n" + 
@@ -56,14 +103,27 @@ public class Library extends PluginBase implements Listener {
 		
 	}
 	
+	public static Library getInstance() {
+		return instance;
+	}
+	
+	@EventHandler
+	public void onEnableEvent(PluginEnableEvent e) {
+		if (e.getPlugin().equals(this)) {
+			PersistentMeta.enable();
+			
+			Bukkit.getPluginManager().registerEvents(this, this);
+		}
+	}
+	
 	public void onDisable(){
 	
-		getLogger().info(Messenger.cc("&6Saving player metadata..."));
+		getLogger().info(Messenger.formatString("&6Saving player metadata..."));
 		for (Player player : Bukkit.getOnlinePlayers()) {
 			PersistentMeta.save(player);
 		}
 		
-		getLogger().info(Messenger.cc("&7I don't wanna go..."));
+		getLogger().info(Messenger.formatString("&7I don't wanna go..."));
 	}
 	
 	/**
@@ -103,48 +163,14 @@ public class Library extends PluginBase implements Listener {
 	}
 	
 	/**
-	 * Test if a string is an integer.
-	 * 
-	 * @param input the integer to test
-	 * @return Wether the string is an integer or not.
-	 */
-	public static boolean testIfInt(String input) {
-		try {
-			Integer.valueOf(input);
-			return true;
-		} catch(NumberFormatException e) {
-			return false;
-		}
-	}
-	
-	/**
 	 * Test if a string is a number.
 	 * 
 	 * @param input the string to test.
 	 * @return Wether the string is a number or not.
 	 */
 	public static boolean testIfNumber(String input) {
-		try {
-			Float.valueOf(input);
-			return true;
-		} catch(NumberFormatException e) {
-			try {
-				Double.valueOf(input);
-				return true;
-			} catch (NumberFormatException ex) {
-				try {
-					Integer.valueOf(input);
-					return true;
-				} catch (NumberFormatException exc) {
-					try {
-						Long.valueOf(input);
-						return true;
-					} catch (NumberFormatException exce) {
-						return false;
-					}
-				}
-			}
-		}
+		Matcher m = Pattern.compile("[A-z]").matcher(input);
+		return m.find();
 	}
 	
 	@EventHandler
@@ -167,5 +193,43 @@ public class Library extends PluginBase implements Listener {
 				}
 			}, 5);
 		}
+	}
+	
+	public static String toBinary(String from) {
+		String output = "";
+		from = from.toLowerCase();
+		
+		for (int ch = 0; ch < from.length(); ch++) {
+			output += numToBinary(letterToNumber(from.charAt(ch)));
+		}
+		return output;
+	}
+	
+	public static int letterToNumber(char input) {
+		return dictionary.containsKey(input) ? dictionary.get(input) : -1;
+	}
+	
+	public static String numToBinary(int number) {
+		String bin = "";
+		
+		while (number > 0) {
+			for (int entry : Arrays.asList(4, 3, 2, 1, 0)) {
+				if (number - Math.pow(2, entry) >= 0) {
+					number -= Math.pow(2, entry);
+					bin += "1";
+					continue;
+				}
+				bin += "0";
+			}
+		}
+		
+		return bin;
+	}
+	
+	public static <T extends Comparable<? super T>> List<T> asSortedList(Collection<T> c) {
+	  List<T> list = new ArrayList<T>(c);
+	  System.out.println(list);
+	  if (!list.isEmpty()) Collections.sort(list);
+	  return list;
 	}
 }

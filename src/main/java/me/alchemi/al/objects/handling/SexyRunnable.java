@@ -1,4 +1,4 @@
-package com.alchemi.al.objects.handling;
+package me.alchemi.al.objects.handling;
 
 @FunctionalInterface
 public interface SexyRunnable{

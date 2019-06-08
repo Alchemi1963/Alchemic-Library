@@ -1,4 +1,4 @@
-package com.alchemi.al.objects.handling;
+package me.alchemi.al.objects.handling;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -13,9 +13,10 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import com.alchemi.al.configurations.Messenger;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+
+import me.alchemi.al.configurations.Messenger;
 
 public class ItemFactory extends ItemStack{
 
@@ -40,17 +41,18 @@ public class ItemFactory extends ItemStack{
 	
 	public ItemFactory setName(String name) {
 		ItemMeta meta = getItemMeta();
-		meta.setDisplayName(Messenger.cc(name));
-		meta.setLocalizedName(Messenger.cc(name));
+		meta.setDisplayName(Messenger.formatString(name));
+		meta.setLocalizedName(Messenger.formatString(name));
 		setItemMeta(meta);
 		return this;
 	}
 	
 	public ItemFactory setLore(List<String> lore) {
 		ItemMeta meta = getItemMeta();
-		List<String> lore2 = new ArrayList<String>();
-		for (String s : lore) lore2.add(Messenger.cc(s));
-		meta.setLore(lore2);
+		if (meta == null) return this;
+		List<String> lore2 = new ArrayList<String>();		
+		for (String s : lore) lore2.add(Messenger.formatString(s));
+		if (!lore2.isEmpty()) meta.setLore(lore2);
 		setItemMeta(meta);
 		return this;
 	}
@@ -112,7 +114,7 @@ public class ItemFactory extends ItemStack{
 			case "display":
 				
 				Map<String, Object> entry = (Map<String, Object>) ent.getValue();
-				if (entry.containsKey("Name")) setName(Messenger.cc((String)entry.get("Name")));
+				if (entry.containsKey("Name")) setName(Messenger.formatString((String)entry.get("Name")));
 				if (entry.containsKey("Lore")) setLore((List<String>)entry.get("Lore"));
 				
 				continue;

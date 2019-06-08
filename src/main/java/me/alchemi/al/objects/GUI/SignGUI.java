@@ -1,4 +1,4 @@
-package com.alchemi.al.objects.GUI;
+package me.alchemi.al.objects.GUI;
 
 import java.util.function.BiFunction;
 
@@ -16,8 +16,7 @@ import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.alchemi.al.configurations.Messenger;
-
+import me.alchemi.al.configurations.Messenger;
 import net.minecraft.server.v1_13_R2.BlockPosition;
 import net.minecraft.server.v1_13_R2.EntityHuman;
 import net.minecraft.server.v1_13_R2.PacketPlayOutOpenSignEditor;
@@ -46,7 +45,7 @@ public class SignGUI implements Listener{
 		loc.getBlock().setType(Material.SIGN, false);
 		
 		sign = (Sign) loc.getBlock().getState();
-		sign.setLine(0, Messenger.cc(request));
+		sign.setLine(0, Messenger.formatString(request));
 		sign.setEditable(true);
 		sign.update(true);
 		

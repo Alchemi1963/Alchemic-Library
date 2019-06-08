@@ -1,4 +1,4 @@
-package com.alchemi.al.objects.handling;
+package me.alchemi.al.objects.handling;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -6,25 +6,24 @@ import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.alchemi.al.Library;
-import com.alchemi.al.configurations.Messenger;
-import com.alchemi.al.objects.ChatListener;
-import com.alchemi.al.objects.GUI.BookGUI;
-import com.alchemi.al.objects.GUI.SignGUI;
-
+import me.alchemi.al.Library;
+import me.alchemi.al.configurations.Messenger;
+import me.alchemi.al.objects.ChatListener;
+import me.alchemi.al.objects.GUI.BookGUI;
+import me.alchemi.al.objects.GUI.SignGUI;
 import net.wesjd.anvilgui.AnvilGUI;
 
 public class InputRequest {
 
-	public enum REQUEST_OPTION{
+	public enum RequestOption{
 		ANVIL, CHAT, BOOK, SIGN;
 	}
 	
-	public InputRequest(JavaPlugin plugin, Player object, REQUEST_OPTION preferred_option, String quest) {
+	public InputRequest(JavaPlugin plugin, Player object, RequestOption preferred_option, String quest) {
 		
 		switch(preferred_option) {
 		case ANVIL:
-			new AnvilGUI(plugin, object, Messenger.cc(quest), (player, reply) -> { 
+			new AnvilGUI(plugin, object, Messenger.formatString(quest), (player, reply) -> { 
 				Bukkit.getPluginManager().callEvent(new InputReceivedEvent(reply, object, preferred_option));
 				return null;
 			});
@@ -58,9 +57,9 @@ public class InputRequest {
 		
 		private final String input;
 		private final Player player;
-		private final REQUEST_OPTION preferred_option;
+		private final RequestOption preferred_option;
 		
-		public InputReceivedEvent(String input, Player object, REQUEST_OPTION preferred_option) {
+		public InputReceivedEvent(String input, Player object, RequestOption preferred_option) {
 			this.input = input;
 			this.player = object;
 			this.preferred_option = preferred_option;
@@ -115,7 +114,7 @@ public class InputRequest {
 		/**
 		 * @return the preferred_option
 		 */
-		public REQUEST_OPTION getPreferred_option() {
+		public RequestOption getPreferred_option() {
 			return preferred_option;
 		}
 		

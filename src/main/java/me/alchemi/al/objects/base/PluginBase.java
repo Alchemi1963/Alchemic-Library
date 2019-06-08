@@ -1,8 +1,8 @@
-package com.alchemi.al.objects.base;
+package me.alchemi.al.objects.base;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.alchemi.al.configurations.Messenger;
+import me.alchemi.al.configurations.Messenger;
 
 public abstract class PluginBase extends JavaPlugin {
 
@@ -10,6 +10,10 @@ public abstract class PluginBase extends JavaPlugin {
 	
 	public int SPIGOT_ID;
 
+	/**
+	 * 
+	 * @return the messenger
+	 */
 	public Messenger getMessenger() {
 		return messenger;
 	}

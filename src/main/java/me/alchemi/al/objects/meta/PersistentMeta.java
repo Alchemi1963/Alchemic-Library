@@ -1,4 +1,4 @@
-package com.alchemi.al.objects.meta;
+package me.alchemi.al.objects.meta;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,7 +18,7 @@ import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.metadata.MetadataValue;
 
-import com.alchemi.al.Library;
+import me.alchemi.al.Library;
 
 public class PersistentMeta implements Listener{
 
@@ -26,7 +26,7 @@ public class PersistentMeta implements Listener{
 
 	protected static List<UUID> changeUUIDs = new ArrayList<UUID>();
 	
-	protected static final File metaFiles = new File(Library.instance.getDataFolder(), "metas");
+	protected static final File metaFiles = new File(Library.getInstance().getDataFolder(), "metas");
 	
 	protected static String getName(Player player) {
 		return player.getUniqueId().toString() + ".yml";
@@ -43,7 +43,7 @@ public class PersistentMeta implements Listener{
 			initializePlayer(player);
 		}
 		
-		Bukkit.getPluginManager().registerEvents(new PersistentMeta(), Library.instance);
+		Bukkit.getPluginManager().registerEvents(new PersistentMeta(), Library.getInstance());
 	}
 	
 	protected static void initializePlayer(Player player) {

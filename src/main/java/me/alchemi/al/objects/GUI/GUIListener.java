@@ -1,4 +1,4 @@
-package com.alchemi.al.objects.GUI;
+package me.alchemi.al.objects.GUI;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -38,7 +38,7 @@ public class GUIListener implements Listener {
 			e.setCancelled(true);
 			
 			try {
-				gui.onClicked(e.getSlot(), player, e.getClick());
+				gui.onClicked(e.getSlot(), e.getClick());
 			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
 					| InstantiationException e1) {}
 			

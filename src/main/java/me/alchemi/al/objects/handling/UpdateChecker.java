@@ -1,4 +1,4 @@
-package com.alchemi.al.objects.handling;
+package me.alchemi.al.objects.handling;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -9,7 +9,7 @@ import java.net.URLConnection;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-import com.alchemi.al.objects.base.PluginBase;
+import me.alchemi.al.objects.base.PluginBase;
 
 public class UpdateChecker {
 

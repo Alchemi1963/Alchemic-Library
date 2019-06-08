@@ -1,4 +1,4 @@
-package com.alchemi.al.configurations;
+package me.alchemi.al.configurations;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.ListIterator;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -23,27 +23,21 @@ import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import com.google.common.base.Charsets;
+import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 
 public class SexyConfiguration extends YamlConfiguration {
 	
-	private HashMap<String, String> comments = new HashMap<String, String>();
+	protected HashMap<String, String> comments = new HashMap<String, String>();
 	
-	private File file;
+	protected File file;
 	
 	/**
 	 * Create an empty configuration
 	 */
 	public SexyConfiguration() {}
 	
-	/**
-	 * Create a SexyConfiguration with this file.
-	 * However, {@linkplain SexyConfiguration.loadConfiguration} is preferred.
-	 * 
-	 * @param file File to be used
-	 * @see {@link File}
-	 */
-	public SexyConfiguration(File file) {
+	protected SexyConfiguration(File file) {
 		this.setFile(file);
 	}
 	
@@ -59,71 +53,80 @@ public class SexyConfiguration extends YamlConfiguration {
 	
 	@Override
 	public String saveToString() {
+		Pattern keyPattern = Pattern.compile("\\b.*(?=:)");
+		ArrayList<String> output = new ArrayList<String>(Arrays.asList(super.saveToString().split("\n")));
 		
-		ArrayList<String> output = new ArrayList<String>();
-		int I = 0;
-		String[] savedString = super.saveToString().split("\n");
-		for (String s : savedString) {
-			
-			if (s.contains(":") && I < savedString.length - 1 
-					&& savedString[I+1].contains(":") ||
-					I < savedString.length - 1 && !savedString[I+1].contains("-") &&
-					s.contains("-")) output.add(s);
-			else output.add(s);
-			I ++;
-		}
-		
-		ArrayList<String> output2 = new ArrayList<String>();
+		ArrayList<String> fakeOutput = new ArrayList<String>();
 		
 		for (String line : output) {
 			
-			Matcher m = Pattern.compile("\\b[A-z]*").matcher(line);
-			if (line.contains(":") && m.find()) {
-				output2.add(m.group());
+			Matcher m = keyPattern.matcher(line);
+			
+			if (m.find()) {
+				fakeOutput.add(m.group());
 			} else {
-				output2.add(line);
+				fakeOutput.add(line);
 			}
+			
 		}
 		
 		for (String key : this.getKeys(true)) {
+			
 			if (comments.containsKey(key)) {
-				
 				int i = 0;
+				String comment = comments.get(key);
+				
 				for (String subPath : key.split("\\.")) {
 					
-					for (String testFor : output2.subList(i, output2.size() - 1)) {
+					for (String testFor : fakeOutput.subList(i, fakeOutput.size())) {
+						
 						if (subPath.equals(testFor)) {
-							i = output2.subList(i, output2.size() - 1).indexOf(testFor) + i;
+							i = fakeOutput.subList(i, fakeOutput.size()).indexOf(testFor) + i;
 							break;
 						}
 					}
 				}
-				
-				if (i != 0) output.add(i, "\n" + comments.get(key));
-				
-				output2 = new ArrayList<String>();
-				
-				for (String line : output) {
-					
-					Matcher m = Pattern.compile("\\b[A-z]*").matcher(line);
-					if (line.contains(":") && m.find()) {
-						output2.add(m.group());
+
+				if (calculateTabsOrSpaces(output.get(i)) > 0) {
+					String tabs;
+					if (areTabsUsed(output.get(i))) {
+						tabs = new String(new char[calculateTabsOrSpaces(output.get(i))]).replace("\0", "\t");
 					} else {
-						output2.add(line);
+						tabs = new String(new char[calculateTabsOrSpaces(output.get(i))]).replace("\0", " ");
 					}
+					
+					comment = "";
+					for (String c : comments.get(key).split("\n")) {
+						comment += tabs + c + "\n";
+					}
+					comment = comment.substring(0, comment.length() - 1);
+					
 				}
+				
+				output.set(i, comment + "\n" + output.get(i));
 			}
 		}
-		
-		String realOutput = "";
-		for (String l : output) {
-			if (!l.isEmpty()) realOutput += l + "\n";
-			else if(realOutput.endsWith("|2-\n") || realOutput.endsWith("|1-\n")) realOutput += l + "\n";
+		return listToString(output);
+	}
+	
+
+	protected static final String listToString(List<String> input) {
+		String outputString = "";
+		String previous = "";
+		for (String l : input) {
 			
+			if (( (l.isEmpty() || l.replaceAll("\\s", "").isEmpty())
+					& !(previous.endsWith("|1-")))) continue;
+			
+			if ((calculateTabsOrSpaces(previous) != calculateTabsOrSpaces(l))
+					|| (!(previous.isEmpty() || previous.replaceAll("\\s", "").isEmpty())
+							&& l.contains("#"))) outputString += "\n";
+			
+			outputString += l + "\n";
+			
+			previous = l;
 		}
-		
-		return realOutput;
-		
+		return outputString;
 	}
 	
 	public static SexyConfiguration loadConfiguration(Reader reader) {
@@ -197,70 +200,91 @@ public class SexyConfiguration extends YamlConfiguration {
 	@Override
 	public void loadFromString(String contents) throws InvalidConfigurationException {
 		
-		String[] content = contents.split("\n");
-		for (int i = 0; i < content.length; i++) {
-			if (Pattern.compile(".+#.+").matcher(content[i]).find()) {
+		List<String> contentList = Arrays.asList(contents.split("\n"));
+		ListIterator<String> content = contentList.listIterator();
+		
+		while (content.hasNext()) {
+			
+			String current = content.next();
+			
+			if (Pattern.compile(".+#.+").matcher(current).find()) {
 				
-				Matcher m = Pattern.compile("(#.+)").matcher(content[i]);
+				Matcher m = Pattern.compile("(#.+)").matcher(current);
 				if (m.find()) {
-					setComment(findKey(Arrays.copyOfRange(content, 0, i)), m.group());
+					setComment(findKey(contentList, content.nextIndex() - 1), m.group());
 				}
 				
-			} else if (Pattern.compile("#.+").matcher(content[i]).find()) {
-				String comment = content[i];
-				while (content.length < i+1 && Pattern.compile("#.+").matcher(content[i+1]).find()) {
-					i++;
-					comment = comment.concat("\n" + content[i]);
+			} else if (current.matches("([\\s\\S]*#[\\s\\S]*)")) {
+				String comment = current;
+				while (content.hasNext() && contentList.get(content.nextIndex()).matches("([\\s\\S]*#[\\s\\S]*)")) {
+					comment = comment.concat("\n").concat(content.next()); 
 				}
-				
-				setComment(findKey(Arrays.copyOfRange(content, 0, i+2)), comment);
+				setComment(findKey(contentList, content.nextIndex()), comment);
 			}
+			
 		}
+		
 		super.loadFromString(contents);
 		if (super.options().header() != null) super.options().header("");
 		
 	}
 	
-	private String findKey(String[] contents) {
+	protected static final String removeTabsAndSpaces(String input) {
+		return input.replaceAll(" ", "").replaceAll("\t", "");
+	}
+	
+	protected static final int calculateTabsOrSpaces(String input) {
+		if (!(input.startsWith(" ") 
+				|| input.startsWith("\t"))) {
+			return 0;
+		}
 		
-		List<String> content = Lists.reverse(Arrays.asList(contents));
-
+		Matcher m = Pattern.compile("\\s+").matcher(input);
+		return m.find() ? m.group().length() : 0;
+	}
+	
+	protected static boolean areTabsUsed(String input) {
+		return calculateTabsOrSpaces(input) == 0 ? false : input.startsWith("\t");
+	}
+	
+	protected static String findKey(List<String> content, int index) {
+		Pattern keyPattern = Pattern.compile("\\b.*(?=:)");
 		List<String> reverseKey = new ArrayList<String>();
-		Map<String, Integer> keyMap = new HashMap<String, Integer>();
 		
-		Pattern keyPattern = Pattern.compile("(\\w+:)");
+		ListIterator<String> iter = content.listIterator(index);
 		
-		if (content == null) return "";
+		if (!iter.hasNext()) return "";
 		
-		for (int i = 0; i < content.size(); i++) {
-			if (content.get(i) == null || content.get(i).isEmpty()) return "";
-			Matcher m = keyPattern.matcher(content.get(i));
+		int tabsOrSpaces = -1;
+		String current = iter.next();
+		
+		Matcher m = keyPattern.matcher(removeTabsAndSpaces(current));
+		while ((!m.find()) && 
+				(iter.hasNext())) {
+			current = iter.next();
+			m = keyPattern.matcher(removeTabsAndSpaces(current));
+		}
+		reverseKey.add(m.group());
+		tabsOrSpaces = calculateTabsOrSpaces(current);
+		
+		while (iter.hasPrevious()) {
+			if (tabsOrSpaces == 0) break;
 			
-			if (m.find()) {
-				if (reverseKey.isEmpty()) {
-					reverseKey.add(m.group().replace(":", ""));
-					if (content.get(i).replaceFirst("(\\w.+)", "").length() == 0) return m.group().replace(":", "");
-					keyMap.put(reverseKey.get(reverseKey.size() - 1), content.get(i).replaceFirst("(\\w.+)", "").length());
+			current = iter.previous();
+			
+			if ((calculateTabsOrSpaces(current) < tabsOrSpaces)
+					&& !current.contains("#")) {
+				
+				m = keyPattern.matcher(removeTabsAndSpaces(current));
+				if (m.find()) {
 					
-				}
-				else {
+					reverseKey.add(m.group());
+					tabsOrSpaces = calculateTabsOrSpaces(current);
 					
-					if (content.get(i).replaceFirst("(\\w.+)", "").length() < keyMap.get(reverseKey.get(reverseKey.size() - 1))) {
-						reverseKey.add(m.group().replace(";", ""));
-						if (content.get(i).replaceFirst("(\\w.+)", "").length() == 0) break;
-						keyMap.put(reverseKey.get(reverseKey.size() - 1), content.get(i).replaceFirst("(\\w.+)", "").length());
-					}
 				}
 			}
 		}
-		
-		String key = "";
-		for (String subKey : Lists.reverse(reverseKey)) {
-			if (key.isEmpty()) key = subKey;
-			else key = key.concat("." + subKey);
-		}
-		
-		return key;
+		return Joiner.on(".").join(Lists.reverse(reverseKey));
 	}
 	
 	/**
@@ -298,15 +322,16 @@ public class SexyConfiguration extends YamlConfiguration {
 		}
 	}
 	
-	public SexyConfiguration update(YamlConfiguration file) throws FileNotFoundException, IOException, InvalidConfigurationException {
-		this.load();
-		
+	public SexyConfiguration update(SexyConfiguration file) throws FileNotFoundException, IOException, InvalidConfigurationException {
 		for (String key : file.getKeys(true)) {
 			if (!this.contains(key)) {
 				this.set(key, file.get(key));
 				this.addDefault(key, file.get(key));
 			}
 		}
+		
+		this.comments.clear();
+		this.comments = (HashMap<String, String>) file.comments.clone();
 		
 		return this;
 	}

@@ -1,4 +1,4 @@
-package com.alchemi.al.objects.GUI;
+package me.alchemi.al.objects.GUI;
 
 import java.util.function.BiFunction;
 
@@ -13,7 +13,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.alchemi.al.configurations.Messenger;
+import me.alchemi.al.configurations.Messenger;
 
 public class BookGUI implements Listener{
 
@@ -36,7 +36,7 @@ public class BookGUI implements Listener{
 		this.old = holder.getInventory().getItemInMainHand().clone();
 		holder.getInventory().setItemInMainHand(book);
 		
-		holder.sendMessage(Messenger.cc(request));
+		holder.sendMessage(Messenger.formatString(request));
 		
 		Bukkit.getPluginManager().registerEvents(this, plugin);
 		
@@ -47,7 +47,7 @@ public class BookGUI implements Listener{
 		holder.getInventory().setItemInMainHand(old);
 		
 		for (String s : e.getNewBookMeta().getPages()) {
-			reply += Messenger.cc(s);
+			reply += Messenger.formatString(s);
 		}
 		
 		function.apply(holder, reply);

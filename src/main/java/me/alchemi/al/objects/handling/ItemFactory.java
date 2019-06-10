@@ -42,7 +42,13 @@ public class ItemFactory extends ItemStack{
 	public ItemFactory setName(String name) {
 		ItemMeta meta = getItemMeta();
 		meta.setDisplayName(Messenger.formatString(name));
-		meta.setLocalizedName(Messenger.formatString(name));
+		setItemMeta(meta);
+		return this;
+	}
+	
+	public ItemFactory setLocalizedName(String name) {
+		ItemMeta meta = getItemMeta();
+		meta.setLocalizedName(name);
 		setItemMeta(meta);
 		return this;
 	}
@@ -123,6 +129,10 @@ public class ItemFactory extends ItemStack{
 			
 		}
 		return this;
+	}
+	
+	public ItemFactory clone() {
+		return new ItemFactory(super.clone());
 	}
 	
 }

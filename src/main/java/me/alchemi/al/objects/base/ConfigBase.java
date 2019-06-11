@@ -119,7 +119,7 @@ public abstract class ConfigBase {
 		}
 	}
 	
-	protected void save() {
+	public void save() {
 		
 		if (getEnums() != null) for (IConfig value : getEnums()) {
 			if (value == null) continue;

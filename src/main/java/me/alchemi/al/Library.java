@@ -169,8 +169,9 @@ public class Library extends PluginBase implements Listener {
 	 * @return Wether the string is a number or not.
 	 */
 	public static boolean testIfNumber(String input) {
-		Matcher m = Pattern.compile("[A-z]").matcher(input);
-		return m.find();
+		Matcher m = Pattern.compile("\\d+(,|.)*").matcher(input);
+		
+		return m.matches();
 	}
 	
 	@EventHandler

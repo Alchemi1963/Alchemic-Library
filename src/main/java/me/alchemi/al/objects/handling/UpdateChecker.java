@@ -86,7 +86,7 @@ public class UpdateChecker {
 				
 				BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 				
-				if (br.readLine().equals(plugin.getDescription().getVersion())) {
+				if (Integer.valueOf(br.readLine().replaceAll("\\D", "")) <= Integer.valueOf(plugin.getDescription().getVersion().replaceAll("\\D", ""))) {
 					notifyServer(false, admins);
 				} else {
 					notifyServer(true, admins);

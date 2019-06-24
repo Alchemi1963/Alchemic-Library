@@ -215,17 +215,20 @@ public class Messenger {
 		
 	}
 	
+	public void sendMessage(String msg, CommandSender receiver) { sendMessage(msg, receiver, false); }
+	
 	/**
 	 * Sends a string to a {@link CommandSender}
 	 * 
 	 * @param msg		The string to be sent
 	 * @param reciever	The {@link CommandSender}
 	 */
-	public void sendMessage(String msg, CommandSender reciever){
+	public void sendMessage(String msg, CommandSender reciever, boolean tagged){
 		if (msg.isEmpty()) return;
 		
-		if (tag.endsWith(" ")) reciever.sendMessage(formatString(tag + msg));
-		else reciever.sendMessage(formatString(tag + " " + msg));
+		if (tagged && tag.endsWith(" ")) reciever.sendMessage(formatString(tag + msg));
+		else if (tagged) reciever.sendMessage(formatString(tag + " " + msg));
+		else reciever.sendMessage(formatString(msg));
 	}
 	
 	public void sendMessages(Player receiver, String...msgs) {

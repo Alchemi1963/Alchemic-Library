@@ -38,7 +38,7 @@ public class GUIListener implements Listener {
 			e.setCancelled(true);
 			
 			try {
-				gui.onClicked(e.getSlot(), e.getClick());
+				gui.onClicked(e);
 			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
 					| InstantiationException e1) {}
 			

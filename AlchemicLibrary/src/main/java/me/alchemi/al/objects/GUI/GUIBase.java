@@ -9,7 +9,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.ClickType;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -85,7 +85,9 @@ public abstract class GUIBase {
 		sender.updateInventory();
 	}
 	
-	public void onClicked(int slot, ClickType click) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, InstantiationException {
+	public void onClicked(InventoryClickEvent e) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, InstantiationException {
+		
+		int slot = e.getSlot();
 		
 		if (nextPage.isSimilar(gui.getItem(slot))) {
 			pageNext.run(sender);
@@ -118,7 +120,7 @@ public abstract class GUIBase {
 		}
 	}
 	
-	public void onOutsideClick(int slot, Inventory inventory) {}
+	public void onOutsideClick(InventoryClickEvent e) {}
 	public abstract void setContents();
 	public abstract void setCommands();
 	public abstract void onClose();

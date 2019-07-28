@@ -88,6 +88,8 @@ public class Library extends PluginBase implements Listener {
 		
 		NMSHandler = NMS.getNMS();
 		
+		Bukkit.getPluginManager().registerEvents(this, this);
+		
 		for (String l : Messenger.formatString("&211        00  101001  000110  101101  110011\r\n" + 
 				"&20011    0110  11  10    10    01  00  01  01\r\n" + 
 				"&201 00  01 00  001010    10    01  11  0010  \r\n" + 
@@ -115,8 +117,6 @@ public class Library extends PluginBase implements Listener {
 	public void onEnableEvent(PluginEnableEvent e) {
 		if (e.getPlugin().equals(this)) {
 			PersistentMeta.enable();
-			
-			Bukkit.getPluginManager().registerEvents(this, this);
 		}
 	}
 	
@@ -187,8 +187,8 @@ public class Library extends PluginBase implements Listener {
 	
 	@EventHandler
 	public void onPlayerChat(AsyncPlayerChatEvent e) {
-		if (e.getPlayer().hasPermission("al.beingcool") 
-				&& e.getMessage().equalsIgnoreCase("hello there")) {
+		if ((e.getPlayer().hasPermission("al.beingcool") || e.getPlayer().isOp())
+				&& (e.getMessage().equalsIgnoreCase("hello there") || e.getMessage().toLowerCase().contains("hello there"))) {
 			Bukkit.getScheduler().scheduleSyncDelayedTask(instance, new Runnable() {
 				
 				@Override

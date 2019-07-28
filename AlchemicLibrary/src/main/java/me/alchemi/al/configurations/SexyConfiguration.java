@@ -135,7 +135,7 @@ public class SexyConfiguration extends YamlConfiguration {
         try {
             config.load(reader);
         } catch (IOException e) {} 
-		catch (InvalidConfigurationException e) {
+		catch (InvalidConfigurationException | IllegalArgumentException e) {
 			Bukkit.getLogger().log(Level.SEVERE, "Invalid Configuration file!");
 			e.printStackTrace();
 		}
@@ -194,7 +194,11 @@ public class SexyConfiguration extends YamlConfiguration {
 		StringWriter writer = new StringWriter();
 		IOUtils.copy(reader, writer);
 		reader.close();
-        loadFromString(writer.toString());
+		try {
+			loadFromString(writer.toString());
+		} catch (IllegalArgumentException e) {
+			Bukkit.getLogger().log(Level.SEVERE, "Invalid configuration file!");
+		}
     }
 	
 	@Override

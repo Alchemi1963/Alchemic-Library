@@ -43,6 +43,12 @@ public abstract class ConfigBase {
 		
 		int asInt();
 		
+		double asDouble();
+		
+		List<Float> asFloatList();
+		
+		List<Integer> asIntList();
+		
 		ItemStack asItemStack();
 		
 		Material asMaterial();

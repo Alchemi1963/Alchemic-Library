@@ -3002,6 +3002,32 @@ public enum MaterialWrapper {
 		return material;
 	}
 	
+	public static MaterialWrapper wrap(Material material) {
+		if (valueOf(material.toString()) == null) {
+			for (MaterialWrapper wrapper : values()) {
+				if (material.toString().equalsIgnoreCase(wrapper.toString()) || wrapper.toString().contains(material.toString())) {
+					return wrapper;
+				}
+			}
+			return MaterialWrapper.AIR;
+		}
+		return valueOf(material.toString());
+	}
+	
+	public static MaterialWrapper wrap(String in) {
+		in = in.toUpperCase();
+		
+		if (valueOf(in) == null) {
+			for (MaterialWrapper wrapper : values()) {
+				if (in.equalsIgnoreCase(wrapper.toString()) || wrapper.toString().contains(in)) {
+					return wrapper;
+				}
+			}
+			return MaterialWrapper.AIR;
+		}
+		return valueOf(in);
+	}
+	
 	public static Material getWrapper(String in) {
 		in = in.toUpperCase();
 		
@@ -3017,6 +3043,7 @@ public enum MaterialWrapper {
 	}
 	
 	public static Material getFromItemStack(ItemStack stack) {
+		if (stack == null) throw new IllegalArgumentException("Stack cannot be null!");
 		String input = stack.toString().replace("ItemStack", "");
 		Matcher m = Pattern.compile("([A-Z])\\w+").matcher(input);
 		if (m.find()) {

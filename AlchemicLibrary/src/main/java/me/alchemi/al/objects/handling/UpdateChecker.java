@@ -86,11 +86,13 @@ public class UpdateChecker {
 				
 				BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 				
-				if (Integer.valueOf(br.readLine().replaceAll("\\D", "")) <= Integer.valueOf(plugin.getDescription().getVersion().replaceAll("\\D", ""))) {
-					notifyServer(false, admins);
-				} else {
-					notifyServer(true, admins);
-				}
+				try {
+					if (Integer.valueOf(br.readLine().replaceAll("\\D", "")) <= Integer.valueOf(plugin.getDescription().getVersion().replaceAll("\\D", ""))) {
+						notifyServer(false, admins);
+					} else {
+						notifyServer(true, admins);
+					}
+				} catch (NumberFormatException e) {}
 				
 			} catch (IOException e) {} catch (NullPointerException e) {
 				plugin.getMessenger().print("&cSPIGOT ID isn't initialized!");

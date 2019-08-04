@@ -51,9 +51,13 @@ public abstract class BaseMeta extends MetadataValueAdapter{
 				}
 				return (BaseMeta) clazz.getDeclaredConstructors()[0].newInstance(serializedObject.get("value"));
 			} catch(IllegalAccessException | IllegalArgumentException | InstantiationException | InvocationTargetException 
-					| SecurityException | ClassNotFoundException e) {e.printStackTrace();
+					| SecurityException | ClassNotFoundException e) {
+				
+				e.printStackTrace();
+				
 			}
 		}
+		
 		return null;
 	}
 	

@@ -14,7 +14,6 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.metadata.MetadataValue;
 
@@ -36,17 +35,17 @@ public class PersistentMeta implements Listener{
 		return new File(metaFiles, getName(player));
 	}
 	
-	public static void enable() {
+	public void enable(String plugin) {
 		if (!metaFiles.exists()) metaFiles.mkdirs();
 		
 		for (Player player : Bukkit.getOnlinePlayers()) {
-			initializePlayer(player);
+			initializePlayer(player, plugin);
 		}
 		
-		Bukkit.getPluginManager().registerEvents(new PersistentMeta(), Library.getInstance());
+		Bukkit.getPluginManager().registerEvents(Library.getMeta(), Library.getInstance());
 	}
 	
-	protected static void initializePlayer(Player player) {
+	public static void initializePlayer(Player player, String plugin) {
 		if (getFile(player).exists()) {
 			FileConfiguration file = YamlConfiguration.loadConfiguration(getFile(player));
 			persistentMetas.put(player.getUniqueId(), file);
@@ -62,7 +61,7 @@ public class PersistentMeta implements Listener{
 				}
 			}
 			for (Map<String, Object> m : desMaps) {
-				player.setMetadata((String) m.get("=="), BaseMeta.deserialize(m));
+				if (m.get("owner").equals(plugin)) player.setMetadata((String) m.get("=="), BaseMeta.deserialize(m));
 			}
 		}
 	}
@@ -134,11 +133,6 @@ public class PersistentMeta implements Listener{
 			}
 		}
 		return null;
-	}
-	
-	@EventHandler
-	public static void onLogin(PlayerLoginEvent e) {
-		initializePlayer(e.getPlayer());
 	}
 	
 	@EventHandler

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -184,7 +185,7 @@ public class Messenger {
 	 * @param msg The message to be broadcast
 	 */
 	public void broadcast(String msg) {
-		broadcast(msg, true);
+		broadcast(msg, true, null);
 	}
 	
 	/**
@@ -194,25 +195,40 @@ public class Messenger {
 	 * @param useTag Should the tag be displayed
 	 */
 	public void broadcast(String msg, boolean useTag) {
+		broadcast(msg, useTag, null);
+	}
+	
+	/**
+	 * Broadcasts a message to the whole server.
+	 * 
+	 * @param msg The message to be broadcast
+	 * @param useTag Should the tag be displayed
+	 * @param predicate The statement receivers should test true for.
+	 */
+	public void broadcast(String msg, boolean useTag, Predicate<Player> predicate) {
 		
 		if (msg.contains("\n")) {
 			for (String msg2 : msg.split("\n")) {
-				broadcast(msg2, useTag);
+				broadcast(msg2, useTag, predicate);
 			}
 			return;
 		}
 		
 		
-		for (Player reciever : Bukkit.getOnlinePlayers()) {
+		for (Player receiver : Bukkit.getOnlinePlayers()) {
+			if (predicate != null && !predicate.test(receiver)) continue;
+			
+			String sendingMsg = Library.getParser().parse(receiver, msg);
+			
 			if (useTag) {
 				if (msg.isEmpty()) return;
-				if (tag.endsWith(" ")) reciever.sendMessage(formatString(tag + msg));
-				else reciever.sendMessage(formatString(tag + " " + msg));
+				if (tag.endsWith(" ")) receiver.sendMessage(formatString(tag + sendingMsg));
+				else receiver.sendMessage(formatString(tag + " " + sendingMsg));
 			}
-			else reciever.sendMessage(formatString(msg));
+			else receiver.sendMessage(formatString(sendingMsg));
 		}
 		
-	}
+	} 
 	
 	public void sendMessage(String msg, CommandSender receiver) { sendMessage(msg, receiver, false); }
 	
@@ -225,9 +241,11 @@ public class Messenger {
 	public void sendMessage(String msg, CommandSender reciever, boolean tagged){
 		if (msg.isEmpty()) return;
 		
-		if (tagged && tag.endsWith(" ")) reciever.sendMessage(formatString(tag + msg));
-		else if (tagged) reciever.sendMessage(formatString(tag + " " + msg));
-		else reciever.sendMessage(formatString(msg));
+		String sendingMsg = Library.getParser().parse(reciever, msg);
+		
+		if (tagged && tag.endsWith(" ")) reciever.sendMessage(formatString(tag + sendingMsg));
+		else if (tagged) reciever.sendMessage(formatString(tag + " " + sendingMsg));
+		else reciever.sendMessage(formatString(sendingMsg));
 	}
 	
 	public void sendMessages(Player receiver, String...msgs) {
@@ -278,7 +296,7 @@ public class Messenger {
 				if (i == msgs.length) break;
 				
 			} else {
-				String m = msgs[i];
+				String m = Library.getParser().parse(receiver, msgs[i]);
 				if (m != null && !m.isEmpty()) msg += formatString(m) + "\n";
 				else msg += "AIR\n";
 				line ++;
@@ -328,8 +346,8 @@ public class Messenger {
 		
 		mainText = colourMessage(mainText);
 		
-		TextComponent mainComponent = new TextComponent(formatString(mainText));
-		mainComponent.setHoverEvent(new HoverEvent( HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(formatString(hoverText)).create() ));
+		TextComponent mainComponent = new TextComponent(formatString(Library.getParser().parse(reciever, mainText)));
+		mainComponent.setHoverEvent(new HoverEvent( HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(formatString(Library.getParser().parse(reciever, hoverText))).create()));
 		
 		reciever.spigot().sendMessage(mainComponent);
 	}

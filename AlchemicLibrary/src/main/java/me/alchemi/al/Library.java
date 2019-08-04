@@ -11,13 +11,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.inventory.ItemStack;
 
 import me.alchemi.al.api.NMS;
@@ -27,10 +27,17 @@ import me.alchemi.al.objects.base.PluginBase;
 import me.alchemi.al.objects.commands.PageCommands;
 import me.alchemi.al.objects.handling.UpdateChecker;
 import me.alchemi.al.objects.meta.PersistentMeta;
+import me.alchemi.al.objects.placeholder.RegularParser;
+import me.alchemi.al.objects.placeholder.PapiParser;
+import me.alchemi.al.objects.placeholder.Parser;
 
 public class Library extends PluginBase implements Listener {
 	
 	private static Library instance;
+	
+	private static PersistentMeta meta;
+	
+	private static Parser parser;
 	
 	public SexyConfiguration sc;
 	
@@ -83,12 +90,14 @@ public class Library extends PluginBase implements Listener {
 		
 		uc = new UpdateChecker(this);
 		
-		Bukkit.getPluginCommand(toBinary("next")).setExecutor(new PageCommands());
-		Bukkit.getPluginCommand(toBinary("previous")).setExecutor(new PageCommands());
+		meta = new PersistentMeta();
 		
 		NMSHandler = NMS.getNMS();
 		
+		parser = getServer().getPluginManager().getPlugin("PlaceholderAPI") != null ? new PapiParser() : new RegularParser();
+		
 		Bukkit.getPluginManager().registerEvents(this, this);
+		Bukkit.getPluginManager().registerEvents(new PageCommands(), this);
 		
 		for (String l : Messenger.formatString("&211        00  101001  000110  101101  110011\r\n" + 
 				"&20011    0110  11  10    10    01  00  01  01\r\n" + 
@@ -113,13 +122,6 @@ public class Library extends PluginBase implements Listener {
 		return instance;
 	}
 	
-	@EventHandler
-	public void onEnableEvent(PluginEnableEvent e) {
-		if (e.getPlugin().equals(this)) {
-			PersistentMeta.enable();
-		}
-	}
-	
 	public void onDisable(){
 	
 		getLogger().info(Messenger.formatString("&6Saving player metadata..."));
@@ -140,6 +142,15 @@ public class Library extends PluginBase implements Listener {
 	public static OfflinePlayer getOfflinePlayer(String name) {
 		for (OfflinePlayer offP : Bukkit.getOfflinePlayers()) {
 			if (offP.getName().equals(name)) return offP;
+		}
+		return null;
+	}
+	
+	
+	public static Player getPlayer(String name) {
+		name = ChatColor.stripColor(Messenger.formatString(name));
+		for (Player player : Bukkit.getOnlinePlayers()) {
+			if (player.getName().equals(name) || ChatColor.stripColor(Messenger.formatString(player.getDisplayName())).equals(name)) return player;
 		}
 		return null;
 	}
@@ -236,5 +247,13 @@ public class Library extends PluginBase implements Listener {
 	  System.out.println(list);
 	  if (!list.isEmpty()) Collections.sort(list);
 	  return list;
+	}
+	
+	public static PersistentMeta getMeta() {
+		return meta;
+	}
+	
+	public static Parser getParser() {
+		return parser;
 	}
 }

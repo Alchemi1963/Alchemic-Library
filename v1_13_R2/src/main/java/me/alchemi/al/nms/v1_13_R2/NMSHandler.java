@@ -1,6 +1,8 @@
 package me.alchemi.al.nms.v1_13_R2;
 
+import org.bukkit.Bukkit;
 import org.bukkit.block.Sign;
+import org.bukkit.craftbukkit.v1_13_R2.CraftServer;
 import org.bukkit.craftbukkit.v1_13_R2.block.CraftSign;
 import org.bukkit.craftbukkit.v1_13_R2.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_13_R2.inventory.CraftItemStack;
@@ -37,6 +39,24 @@ public class NMSHandler implements NMS{
 		
 		PacketPlayOutOpenSignEditor packet = new PacketPlayOutOpenSignEditor(cSign.getPosition());
 		((CraftPlayer)player).getHandle().playerConnection.sendPacket(packet);
+		
+	}
+
+	@Override
+	public void removePlayer(Player player) {
+		
+		CraftServer server = (CraftServer) Bukkit.getServer();
+		
+		server.getHandle().players.remove(((CraftPlayer)player).getHandle());
+		
+	}
+	
+	@Override
+	public void addPlayer(Player player) {
+		
+CraftServer server = (CraftServer) Bukkit.getServer();
+		
+		server.getHandle().players.add(((CraftPlayer)player).getHandle());
 		
 	}
 	

@@ -1,9 +1,10 @@
 name: AlchemicLibrary
 main: me.alchemi.al.Library
 version: ${project.version}
-api-version: 1.13
 author: Alchemi
 description: A library for all my plugins
+softdepend:
+- PlaceholderAPI
 
 permissions:
   al.notify:
@@ -14,8 +15,3 @@ permissions:
     default: false
     description: Forces an update check when users with this node join. 
     
-commands:
-  "01110001011100010100":
-    description: Next chat page
-  "1000010010001011011001001011111010110011":
-    description: Previous chat page 

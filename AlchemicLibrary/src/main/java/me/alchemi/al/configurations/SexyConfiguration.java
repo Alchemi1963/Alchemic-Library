@@ -326,6 +326,7 @@ public class SexyConfiguration extends YamlConfiguration {
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	public SexyConfiguration update(SexyConfiguration file) throws FileNotFoundException, IOException, InvalidConfigurationException {
 		for (String key : file.getKeys(true)) {
 			if (!this.contains(key)) {

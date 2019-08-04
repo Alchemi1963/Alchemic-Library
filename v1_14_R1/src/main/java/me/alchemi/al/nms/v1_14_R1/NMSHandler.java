@@ -40,5 +40,17 @@ public class NMSHandler implements NMS{
 		((CraftPlayer)player).getHandle().playerConnection.sendPacket(packet);
 		
 	}
+
+	@Override
+	public void removePlayer(Player player) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void addPlayer(Player player) {
+		// TODO Auto-generated method stub
+		
+	}
 	
 }

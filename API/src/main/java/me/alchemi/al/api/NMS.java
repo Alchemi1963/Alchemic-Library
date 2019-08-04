@@ -15,6 +15,10 @@ public interface NMS {
 	
 	public void openSign(Sign sign, Player player);
 	
+	public void removePlayer(Player player);
+	
+	public void addPlayer(Player player);
+	
 	public static NMS getNMS() {
 		
 		String packageName = Bukkit.getServer().getClass().getPackage().getName();

@@ -18,6 +18,7 @@ import org.bukkit.entity.Player;
 import me.alchemi.al.Library;
 import me.alchemi.al.objects.base.PluginBase;
 import me.alchemi.al.objects.meta.ChatPagesMeta;
+import me.alchemi.al.objects.placeholder.IStringer;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
@@ -179,6 +180,12 @@ public class Messenger {
 		else Bukkit.getConsoleSender().sendMessage(formatString(String.valueOf(msg)));
 	} 
 	
+	public void broadcast(IStringer string) { broadcast(string.create()); }
+	
+	public void broadcast(IStringer string, boolean useTag) { broadcast(string.create(), useTag); }
+	
+	public void broadcast(IStringer string, boolean useTag, Predicate<Player> predicate) { broadcast(string.create(), useTag, predicate); }
+	
 	/**
 	 * Broadcasts a message to the whole server.
 	 * 
@@ -229,6 +236,10 @@ public class Messenger {
 		}
 		
 	} 
+	
+	public void sendMessage(IStringer string, CommandSender receiver) { sendMessage(string.create(), receiver, false); }
+	
+	public void sendMessage(IStringer string, CommandSender receiver, boolean tagged) { sendMessage(string.create(), receiver, tagged); }
 	
 	public void sendMessage(String msg, CommandSender receiver) { sendMessage(msg, receiver, false); }
 	

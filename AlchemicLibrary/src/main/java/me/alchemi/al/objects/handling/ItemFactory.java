@@ -16,12 +16,18 @@ import org.bukkit.inventory.meta.ItemMeta;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import me.alchemi.al.api.MaterialWrapper;
 import me.alchemi.al.configurations.Messenger;
 
 public class ItemFactory extends ItemStack{
 
 	public ItemFactory(Material type) {
 		this.setType(type);
+		this.setAmount(1);
+	}
+	
+	public ItemFactory(MaterialWrapper type) {
+		this.setType(type.getMaterial());
 		this.setAmount(1);
 	}
 	

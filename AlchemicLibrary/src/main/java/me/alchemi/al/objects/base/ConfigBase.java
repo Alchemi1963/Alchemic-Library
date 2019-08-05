@@ -23,7 +23,7 @@ public abstract class ConfigBase {
 	protected PluginBase plugin;
 	public ConfigBase instance;
 	
-	protected interface IConfig{
+	public interface IConfig{
 		
 		Object value();
 		
@@ -54,7 +54,7 @@ public abstract class ConfigBase {
 		Material asMaterial();
 	}
 	
-	protected interface IMessage {
+	public interface IMessage {
 		
 		public void get();
 		

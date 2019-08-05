@@ -7,6 +7,7 @@ import java.util.TreeMap;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -24,7 +25,7 @@ public abstract class GUIBase {
 	protected String guiName = "";
 	protected int guiSize = 0;
 	protected static JavaPlugin plugin;
-	protected final Player owningPlayer;
+	protected final OfflinePlayer owningPlayer;
 	protected final Player sender;
 	protected Inventory gui;
 	
@@ -35,7 +36,7 @@ public abstract class GUIBase {
 	protected ItemStack nextPage = new ItemFactory(Material.REDSTONE_TORCH).setName("Next Page");
 	protected ItemStack prevPage = new ItemFactory(Material.LEVER).setName("Previous Page");
 	
-	public GUIBase(JavaPlugin plug, String name, int size, Player player, Player sender) {
+	public GUIBase(JavaPlugin plug, String name, int size, OfflinePlayer player, Player sender) {
 		GUIBase.plugin = plug;
 		guiName = name;
 		guiSize = size;
@@ -140,7 +141,7 @@ public abstract class GUIBase {
 	/**
 	 * @return the player
 	 */
-	public Player getPlayer() {
+	public OfflinePlayer getPlayer() {
 		return owningPlayer;
 	}
 

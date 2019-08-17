@@ -152,32 +152,28 @@ public class Messenger {
 	public static void printStatic(Object msg, String tag) { 
 		Bukkit.getConsoleSender().sendMessage(formatString(tag + " " + String.valueOf(msg))); 
 	}
-	
 	/**
 	 * Sends a message to the console.
 	 * 
 	 * @param msg	The message to be sent
 	 */
-	public void print(Object msg) { 
-		print(msg, true); 
-	}
-	
-	/**
-	 * Sends a message to the console.
-	 * 
-	 * @param msg	The message to be sent
-	 * @param tagged	Whether the plugin tag should be displayed or not
-	 */
-	public void print(Object msg, boolean tagged) { 
-		if (String.valueOf(msg).contains("\n")) {
-			for (String m : String.valueOf(msg).split("\n")) {
-				print(m, tagged);
+	public void print(Object... msgs) { 
+		String msg = "";
+		
+		for (Object m : msgs) {
+			msg += String.valueOf(m) + "\t";
+		}
+		
+		msg = msg.trim();
+		
+		if (msg.contains("\n")) {
+			for (String m : msg.split("\n")) {
+				print(m);
 			}
 			return;
 		}
 		
-		if (tagged) plugin.getLogger().info(formatString(String.valueOf(msg)));
-		else Bukkit.getConsoleSender().sendMessage(formatString(String.valueOf(msg)));
+		plugin.getLogger().info(formatString(String.valueOf(msg)));
 	} 
 	
 	public void broadcast(IStringer string) { broadcast(string.create()); }

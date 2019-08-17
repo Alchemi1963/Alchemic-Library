@@ -58,9 +58,15 @@ public abstract class GUIBase {
 		
 		TreeMap<Integer, ItemStack> mapped = new TreeMap<>(contents);
 		
+		System.out.println(mapped.lastEntry());
+		System.out.println(guiSize);
+		
 		for (Entry<Integer, ItemStack> ent : mapped.entrySet()) {
 			if (mapped.lastKey() > guiSize - 1) {
-				int pageMax = mapped.lastKey()/(guiSize-9) > Integer.valueOf(Float.valueOf(mapped.lastKey()/(guiSize-9)).toString().replaceAll("\\..*", "")) ? Integer.valueOf(Float.valueOf(mapped.lastKey()/(guiSize-9)).toString().replaceAll("\\..*", "")) + 1 : Integer.valueOf(Float.valueOf(mapped.lastKey()/(guiSize-9)).toString().replaceAll("\\..*", "")); 
+				int theoPage = Integer.valueOf(Float.valueOf(mapped.lastKey()/(guiSize-9)).toString().replaceAll("\\..*", ""));
+				int pageMax = mapped.lastKey()/(guiSize-9) > theoPage 
+						? theoPage + 1 
+						: theoPage; 
 				
 				if (ent.getKey() <= guiSize - 9 && page == 0) gui.setItem(ent.getKey(), ent.getValue());
 				else if (page >= 1) {

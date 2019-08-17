@@ -86,7 +86,7 @@ public abstract class ConfigBase {
 			int version = ce.getVersion();
 			
 			if(!file.getFile().exists()) {
-				plugin.saveResource(file.getFile().getName(), false);
+				plugin.saveResource(file.getFile().getName(), true);
 			}
 			
 			if(!file.isSet("File-Version-Do-Not-Edit") 
@@ -123,6 +123,14 @@ public abstract class ConfigBase {
 		} catch (IOException | InvalidConfigurationException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public void revertDefault() {
+		for (IConfigEnum c : getConfigs()) {
+			plugin.getMessenger().print("Reverting $file$ to default.".replace("$file$", c.getFile().getName()));
+			plugin.saveResource(c.getFile().getName(), true);
+		}
+		reload();
 	}
 	
 	public void save() {

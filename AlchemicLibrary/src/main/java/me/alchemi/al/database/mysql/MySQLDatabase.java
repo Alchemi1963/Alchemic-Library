@@ -4,8 +4,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,11 +47,18 @@ public class MySQLDatabase implements IDatabase {
 		
 		if (!driverAvailable) return;
 		
-		try {
-			connection = DriverManager.getConnection(url, user, password);
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+		new BukkitRunnable() {
+			@Override
+			public void run() {
+				
+				try {
+					connection = DriverManager.getConnection(url, user, password);
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+				
+			}
+		}.runTaskAsynchronously(plugin);
 	}
 	
 	public static void load() {
@@ -100,6 +105,31 @@ public class MySQLDatabase implements IDatabase {
 		}
 		
 		return true;
+	}
+	
+	@Override
+	public boolean insertValues(Table table, Map<Column, Object> values) {
+		if (tables.contains(table)) {
+			
+			String[] columns = (String[]) values.keySet().stream()
+					.filter(Column -> table.hasColumn(Column))
+					.map(Column::getName)
+					.toArray();
+			
+			Object[] elements = values.entrySet().stream()
+					.filter(Entry -> table.hasColumn(Entry.getKey()))
+					.map(Entry::getValue)
+					.toArray();
+			
+			executeUpdate(new StatementBuilder()
+					.insert(table.getName())
+					.columns(columns)
+					.values(elements)
+					.build());
+			return true;
+			
+		}
+		return false;
 	}
 	
 	/* Execute an update.
@@ -196,15 +226,22 @@ public class MySQLDatabase implements IDatabase {
 	}
 
 	@Override
-	public boolean updateValue(Table table, Column column, Object oldValue, Object newValue, @Nullable Map<Column, Object> conditionalValues) {
+	public boolean updateValue(Table table, Column column, Object newValue, @Nullable Map<Column, Object> conditionalValues) {
 		
 		if (tables.contains(table) && table.hasColumn(column) && column.testObject(newValue)) {
+			
+			Map<String, Object> conditions = new HashMap<String, Object>();
+			
+			for (Entry<Column, Object> entry : conditionalValues.entrySet()) {
+				if (!table.hasColumn(entry.getKey())) return false;
+				conditions.put(entry.getKey().getName(), entry.getValue());
+			} 
 			
 			executeUpdate(new StatementBuilder()
 					.update()
 					.table(table.getName())
 					.set(column.getName(), newValue)
-					.where(column.getName(), oldValue)
+					.wheres(conditions)
 					.build());
 			
 		}
@@ -261,7 +298,7 @@ public class MySQLDatabase implements IDatabase {
 	}
 
 	@Override
-	public void getValues(Callback<ResultSet> callback) {
+	public void getValuesAsync(Callback<ResultSet> callback) {
 		
 		for (Table t : tables) {
 			executeQuery(new StatementBuilder()
@@ -269,6 +306,28 @@ public class MySQLDatabase implements IDatabase {
 					.build(), callback);
 		}
 		
+	}
+	
+	@Override
+	public void getValueAsync(Table table, Column column, Column conditionColumn, Object conditionValue, Callback<ResultSet> callback) {
+		
+		if (!(tables.contains(table) && table.hasColumn(column) && table.hasColumn(conditionColumn))) return;
+		
+		executeQuery(new StatementBuilder()
+				.select(column.getName(), table.getName())
+				.where(conditionColumn.getName(), conditionValue)
+				.build(), callback);
+		
+	}
+	
+	@Override
+	public ResultSet getValue(Table table, Column column, Column conditionColumn, Object conditionValue) throws SQLException {
+		if (!(tables.contains(table) && table.hasColumn(column) && table.hasColumn(conditionColumn))) return null;
+		
+		return connection.prepareStatement(new StatementBuilder()
+				.select(column.getName(), table.getName())
+				.where(conditionColumn.getName(), conditionValue)
+				.build()).executeQuery();
 	}
 
 	@Override

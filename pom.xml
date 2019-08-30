@@ -58,6 +58,7 @@
   		<artifactId>annotations</artifactId>
   		<version>LATEST</version>
   		<scope>provided</scope>
+  		<optional>false</optional>
   	</dependency>
   </dependencies>
 </project>

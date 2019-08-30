@@ -2,6 +2,7 @@ package me.alchemi.al.database;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -16,7 +17,9 @@ public interface IDatabase {
 	
 	public boolean insertValue(Table table, Column column, Object value);
 	
-	public boolean updateValue(Table table, Column column, Object oldValue, Object newValue, @Nullable Map<Column, Object> conditionalValues);
+	public boolean updateValue(Table table, Column column, Object newValue, @Nullable Map<Column, Object> conditionalValues);
+	
+	public boolean insertValues(Table table, @NotNull Map<Column, Object> values);
 	
 	public boolean removeRow(Table table, @NotNull Map<Column, Object> conditionalValues);
 	
@@ -28,7 +31,11 @@ public interface IDatabase {
 	
 	public Table getTable(String table);
 	
-	public void getValues(Callback<ResultSet> callback);
+	public void getValuesAsync(Callback<ResultSet> callback);
+	
+	public void getValueAsync(Table table, Column column, Column conditionColumn, Object conditionValue, Callback<ResultSet> callback);
+	
+	public ResultSet getValue(Table table, Column column, Column conditionColumn, Object conditionValue) throws SQLException;
 	
 	public boolean doesTableExist(String table);
 	

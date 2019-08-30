@@ -23,6 +23,7 @@ import org.bukkit.inventory.ItemStack;
 import me.alchemi.al.api.NMS;
 import me.alchemi.al.configurations.Messenger;
 import me.alchemi.al.configurations.SexyConfiguration;
+import me.alchemi.al.database.mysql.MySQLDatabase;
 import me.alchemi.al.objects.base.PluginBase;
 import me.alchemi.al.objects.commands.PageCommands;
 import me.alchemi.al.objects.handling.UpdateChecker;
@@ -83,6 +84,9 @@ public class Library extends PluginBase implements Listener {
 	
 	@Override
 	public void onEnable() {
+		
+		MySQLDatabase.load();
+		
 		instance = this;
 		
 		this.SPIGOT_ID = 62777;

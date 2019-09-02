@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,7 @@ public class MySQLDatabase implements IDatabase {
 	private final String user;
 	private final String password;
 	private final String url;
+	private boolean initialized = false;
 	
 	private List<Table> tables;
 	
@@ -47,18 +49,18 @@ public class MySQLDatabase implements IDatabase {
 		
 		if (!driverAvailable) return;
 		
-		new BukkitRunnable() {
-			@Override
-			public void run() {
-				
-				try {
-					connection = DriverManager.getConnection(url, user, password);
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-				
-			}
-		}.runTaskAsynchronously(plugin);
+		tables = new ArrayList<Table>();
+		
+		try {
+			connection = DriverManager.getConnection(url, user, password);
+			initialized = true;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public boolean isInitialized() {
+		return initialized;
 	}
 	
 	public static void load() {

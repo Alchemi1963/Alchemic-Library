@@ -58,9 +58,6 @@ public abstract class GUIBase {
 		
 		TreeMap<Integer, ItemStack> mapped = new TreeMap<>(contents);
 		
-		System.out.println(mapped.lastEntry());
-		System.out.println(guiSize);
-		
 		for (Entry<Integer, ItemStack> ent : mapped.entrySet()) {
 			if (mapped.lastKey() > guiSize - 1) {
 				int theoPage = Integer.valueOf(Float.valueOf(mapped.lastKey()/(guiSize-9)).toString().replaceAll("\\..*", ""));

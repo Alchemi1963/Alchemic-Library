@@ -46,11 +46,11 @@ public class Column {
 			string = string.concat(mod.getName() + " ");
 			if (mod == ColumnModifier.DEFAULT) string = string.concat(String.valueOf(defValue) + " ");
 		}
-		return string;
+		return string.trim();
 	}
 	
 	public String getDeclaration() {
-		return name + " " + datatype.toString() + "(" + datatype.getMaxlength() + ") " + getStringedModifiers();
+		return name + " " + datatype.toString() + " " + getStringedModifiers();
 	}
 	
 	@Override

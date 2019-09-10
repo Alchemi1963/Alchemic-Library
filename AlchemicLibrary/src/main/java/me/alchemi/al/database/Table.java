@@ -69,7 +69,7 @@ public class Table {
 	}
 	
 	public String getDeclaration() {
-		return name + "(" + String.join(",", columns.stream().map(Column::getDeclaration).collect(Collectors.toSet())) + ")";
+		return name + "(" + String.join(", ", columns.stream().map(Column::getDeclaration).collect(Collectors.toSet())) + ")";
 	}
 	
 	@Override

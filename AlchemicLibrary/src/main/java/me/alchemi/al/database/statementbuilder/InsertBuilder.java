@@ -7,7 +7,7 @@ public class InsertBuilder extends StatementBuilder {
 	}
 	
 	public final InsertBuilder column(String column) {
-		if (statement.endsWith("(")) statement = statement.concat(column);
+		if (!statement.contains("(")) statement = statement.concat(" (" + column);
 		else statement = statement.concat("," + column);
 		return this;
 	}
@@ -21,8 +21,8 @@ public class InsertBuilder extends StatementBuilder {
 		return this;
 	}
 	
-	private final InsertBuilder value(Object value) {
-		if (!statement.endsWith("VALUES (")) statement = statement.concat("VALUES (" + String.valueOf(value));
+	private final InsertBuilder value(Object value) {		
+		if (!statement.contains("VALUES (")) statement = statement.concat("VALUES (" + String.valueOf(value));
 		else if (statement.endsWith(")") && statement.contains("VALUES ")) statement = statement.concat(",(" + String.valueOf(value));
 		else statement = statement.concat("," + String.valueOf(value));
 		return this;

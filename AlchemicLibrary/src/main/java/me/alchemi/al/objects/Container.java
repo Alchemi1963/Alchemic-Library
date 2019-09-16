@@ -3,7 +3,6 @@ package me.alchemi.al.objects;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -18,20 +17,14 @@ import org.bukkit.configuration.serialization.ConfigurationSerializable;
 public class Container<T extends StringSerializable> implements StringSerializable, Serializable, ConfigurationSerializable {
 
 	private Map<T, Integer> contained_items;
-	private Class<T> clazz;
+	private Class<? extends T> clazz;
 	
-	public Container() {
+	public Container(Class<? extends T> clazz) {
 		contained_items = new LinkedHashMap<T, Integer>();
-		clazz = (Class<T>) ((ParameterizedType)getClass().getGenericSuperclass()).getActualTypeArguments()[0];
-		System.out.println(clazz.getGenericSuperclass());
+		this.clazz = clazz;
 	}
 	
 	public Container(Collection<T> elements) {
-		contained_items = new LinkedHashMap<T, Integer>();
-		addAll(elements);
-	}
-	
-	public Container(T... elements) {
 		contained_items = new LinkedHashMap<T, Integer>();
 		addAll(elements);
 	}
@@ -40,8 +33,8 @@ public class Container<T extends StringSerializable> implements StringSerializab
 		if (clazz == null) clazz = (Class<T>) element.getClass();
 		
 		if (contained_items.containsKey(element)) {
-			int amount = contained_items.get(element);
-			contained_items.put(element, amount++);
+			int amount = contained_items.get(element) + 1;
+			contained_items.put(element, amount);
 		} else {
 			contained_items.put(element, 1);
 		}
@@ -131,6 +124,7 @@ public class Container<T extends StringSerializable> implements StringSerializab
 		
 		String content = "";
 		for (Entry<T, Integer> ent : contained_items.entrySet()) {
+			System.out.println(contained_items);
 			if (content.isEmpty()) content = "{" + ent.getKey().serialize_string() + ":" + ent.getValue() + "}";
 			else content = content.concat(", {" + ent.getKey().serialize_string() + ":" + ent.getValue() + "}");
 		}
@@ -153,11 +147,14 @@ public class Container<T extends StringSerializable> implements StringSerializab
 		} else {
 			return null;
 		}
-
-		Method serializeMethod = StringSerializable.getDeserializeMethod((Class<? extends StringSerializable>) clazz);
-		String[] parts = serialized.replaceFirst("(" + Container.class.getName() + "<" + clazz.getName() + ">\\[\\{)", "").replaceFirst("(\\}]$)", "").split("\\}, \\{");
 		
-		Container<StringSerializable> container = new Container<StringSerializable>();
+		if (serialized.matches(Container.class.getName() + "<" + clazz.getName() + ">\\[\\]")) return new Container<StringSerializable>(clazz);
+
+		Method serializeMethod = StringSerializable.getDeserializeMethod(clazz);
+		
+		String[] parts = serialized.replaceFirst(Container.class.getName() + "<" + clazz.getName() + ">\\[\\{", "").replaceFirst("(\\}\\]$)", "").split("\\}, \\{");
+		
+		Container<StringSerializable> container = new Container<StringSerializable>(clazz);
 		for (String part : parts) {
 			String serializePart = part.replaceFirst("(:\\d+$)", "");
 			int amount = Integer.parseInt(part.replace(serializePart + ":", ""));
@@ -167,7 +164,7 @@ public class Container<T extends StringSerializable> implements StringSerializab
 				e.printStackTrace();
 			}
 		}
-		
+		System.out.println(container.contained_items);
 		return container;
 	}
 	
@@ -187,15 +184,14 @@ public class Container<T extends StringSerializable> implements StringSerializab
 		return result;
 	}
 	
-	public static Container<? extends StringSerializable> deserialize(Map<String, Object> serialized){
+	public static Container<?> deserialize(Map<String, Object> serialized){
 		Container<StringSerializable> container;
 		try {
 			Class<? extends StringSerializable> clazz = (Class<? extends StringSerializable>) Class.forName((String) serialized.get("type"));
 			serialized.remove("type");
 			
 			Method serializeMethod = StringSerializable.getDeserializeMethod(clazz);
-			
-			container = new Container<StringSerializable>();
+			container = new Container<StringSerializable>(clazz);
 			for (Entry<String, Integer> entry : ((Map<String, Integer>) serialized.get("contained_items")).entrySet()) {
 				container.set((StringSerializable) serializeMethod.invoke(null, entry.getKey()), entry.getValue());
 			}
@@ -208,5 +204,4 @@ public class Container<T extends StringSerializable> implements StringSerializab
 		return container;
 		
 	}
-	
 }

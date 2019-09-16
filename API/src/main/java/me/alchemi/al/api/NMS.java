@@ -1,13 +1,12 @@
 package me.alchemi.al.api;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 import org.bukkit.Bukkit;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-
-import me.alchemi.al.api.MaterialWrapper.IMaterialWrapper;
 
 public interface NMS {
 	
@@ -28,13 +27,13 @@ public interface NMS {
 			Class<?> clazz1 = Class.forName("me.alchemi.al.nms." + packageName + ".MaterialWrapper");
 			
 			if (clazz1.isEnum() && MaterialWrapper.IMaterialWrapper.class.isAssignableFrom(clazz1)) {
-				for (Object o : clazz1.getEnumConstants()) {			
-					MaterialWrapper.valueOf(o.toString()).setMaterial(((IMaterialWrapper)o).getMaterial());
-				}
+				
+				Method setwrapper = clazz1.getMethod("setWrapper");
+				setwrapper.invoke(null);
 				
 			}
 			
-		} catch (ClassNotFoundException | SecurityException  | IllegalArgumentException e1) {
+		} catch (ClassNotFoundException | SecurityException  | IllegalArgumentException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e1) {
 			e1.printStackTrace();
 		}
 		

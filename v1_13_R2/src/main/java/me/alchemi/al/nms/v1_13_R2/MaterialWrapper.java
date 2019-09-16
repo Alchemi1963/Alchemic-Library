@@ -1,9 +1,5 @@
 package me.alchemi.al.nms.v1_13_R2;
 
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.stream.Collectors;
-
 import org.bukkit.Material;
 
 import me.alchemi.al.api.MaterialWrapper.IMaterialWrapper;
@@ -89,16 +85,20 @@ public enum MaterialWrapper implements IMaterialWrapper{
 		return material;
 	}
 	
-	static Iterator<Material> getMaterials() {
-		return Arrays.asList(values()).stream()
-				.map(MaterialWrapper -> MaterialWrapper.getMaterial())
-				.collect(Collectors.toList()).iterator();
+	public static MaterialWrapper getMaterialWrapper(String name) {
+		
+		try {
+			return valueOf(name.toUpperCase());
+		} catch (IllegalArgumentException e) {
+			return null;
+		}
+		
 	}
 	
 	public static void setWrapper() {
 		for (me.alchemi.al.api.MaterialWrapper wrapper : me.alchemi.al.api.MaterialWrapper.values()) {
 			Material material = Material.getMaterial(wrapper.toString());
-			if (material == null && valueOf(wrapper.toString()) == null) {
+			if (material == null && getMaterialWrapper(wrapper.toString()) == null) {
 				wrapper.setMaterial(Material.BARRIER);
 				continue;
 			} else if (material == null) {

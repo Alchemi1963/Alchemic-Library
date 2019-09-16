@@ -28,9 +28,9 @@ import me.alchemi.al.objects.base.PluginBase;
 import me.alchemi.al.objects.commands.PageCommands;
 import me.alchemi.al.objects.handling.UpdateChecker;
 import me.alchemi.al.objects.meta.PersistentMeta;
-import me.alchemi.al.objects.placeholder.RegularParser;
 import me.alchemi.al.objects.placeholder.PapiParser;
 import me.alchemi.al.objects.placeholder.Parser;
+import me.alchemi.al.objects.placeholder.RegularParser;
 
 public class Library extends PluginBase implements Listener {
 	

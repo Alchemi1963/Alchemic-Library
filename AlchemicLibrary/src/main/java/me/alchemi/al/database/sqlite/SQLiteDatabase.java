@@ -39,7 +39,8 @@ public class SQLiteDatabase implements IDatabase {
 	private SQLiteDatabase(PluginBase plugin, File dbFile, Connection connection) {
 		this.file = dbFile;
 		this.plugin = plugin;
-		this.connection = connection;		
+		this.connection = connection;
+		this.tables = new ArrayList<Table>();
 	}
 	
 	public static SQLiteDatabase newConnection(PluginBase plugin, File dbFile) throws SQLException {

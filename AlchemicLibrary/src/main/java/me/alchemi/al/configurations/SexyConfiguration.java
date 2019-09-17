@@ -48,7 +48,9 @@ public class SexyConfiguration extends YamlConfiguration {
 	 * @param comment	The comment
 	 */
 	public void setComment(String key, String comment) {
-		comments.put(key, comment);
+		if (!comment.startsWith("#")) comment = "# ".concat(comment);
+		if (comments.containsKey(key)) comments.put(key, comments.get(key).concat("\n".concat(comment)));
+		else comments.put(key, comment);
 	}
 	
 	@Override
@@ -71,7 +73,7 @@ public class SexyConfiguration extends YamlConfiguration {
 		}
 		
 		for (String key : this.getKeys(true)) {
-			
+			if (key.startsWith(".")) key = key.replaceFirst("\\.", "");
 			if (comments.containsKey(key)) {
 				int i = 0;
 				String comment = comments.get(key);
@@ -87,12 +89,12 @@ public class SexyConfiguration extends YamlConfiguration {
 					}
 				}
 
-				if (calculateTabsOrSpaces(output.get(i)) > 0) {
+				if (calculateIndent(output.get(i)) > 0) {
 					String tabs;
 					if (areTabsUsed(output.get(i))) {
-						tabs = new String(new char[calculateTabsOrSpaces(output.get(i))]).replace("\0", "\t");
+						tabs = new String(new char[calculateIndent(output.get(i))]).replace("\0", "\t");
 					} else {
-						tabs = new String(new char[calculateTabsOrSpaces(output.get(i))]).replace("\0", " ");
+						tabs = new String(new char[calculateIndent(output.get(i))]).replace("\0", " ");
 					}
 					
 					comment = "";
@@ -118,7 +120,7 @@ public class SexyConfiguration extends YamlConfiguration {
 			if (( (l.isEmpty() || l.replaceAll("\\s", "").isEmpty())
 					& !(previous.endsWith("|1-")))) continue;
 			
-			if ((calculateTabsOrSpaces(previous) != calculateTabsOrSpaces(l))
+			if ((calculateIndent(previous) != calculateIndent(l))
 					|| (!(previous.isEmpty() || previous.replaceAll("\\s", "").isEmpty())
 							&& l.contains("#"))) outputString += "\n";
 			
@@ -210,22 +212,15 @@ public class SexyConfiguration extends YamlConfiguration {
 		while (content.hasNext()) {
 			
 			String current = content.next();
-			
-			if (Pattern.compile(".+#.+").matcher(current).find()) {
-				
-				Matcher m = Pattern.compile("(#.+)").matcher(current);
-				if (m.find()) {
-					setComment(findKey(contentList, content.nextIndex() - 1), m.group());
-				}
-				
-			} else if (current.matches("([\\s\\S]*#[\\s\\S]*)")) {
+			Matcher commentMatcher = Pattern.compile(".*#.+").matcher(current);
+			if (commentMatcher.find()) {
 				String comment = current;
-				while (content.hasNext() && contentList.get(content.nextIndex()).matches("([\\s\\S]*#[\\s\\S]*)")) {
-					comment = comment.concat("\n").concat(content.next()); 
+				while (content.hasNext() 
+						&& contentList.get(content.nextIndex()).matches(".*#.+")) {
+					comment = comment.concat("\n").concat(content.next());
 				}
 				setComment(findKey(contentList, content.nextIndex()), comment);
 			}
-			
 		}
 		
 		super.loadFromString(contents);
@@ -237,7 +232,7 @@ public class SexyConfiguration extends YamlConfiguration {
 		return input.replaceAll(" ", "").replaceAll("\t", "");
 	}
 	
-	protected static final int calculateTabsOrSpaces(String input) {
+	protected static final int calculateIndent(String input) {
 		if (!(input.startsWith(" ") 
 				|| input.startsWith("\t"))) {
 			return 0;
@@ -248,7 +243,7 @@ public class SexyConfiguration extends YamlConfiguration {
 	}
 	
 	protected static boolean areTabsUsed(String input) {
-		return calculateTabsOrSpaces(input) == 0 ? false : input.startsWith("\t");
+		return calculateIndent(input) == 0 ? false : input.startsWith("\t");
 	}
 	
 	protected static String findKey(List<String> content, int index) {
@@ -259,31 +254,31 @@ public class SexyConfiguration extends YamlConfiguration {
 		
 		if (!iter.hasNext()) return "";
 		
-		int tabsOrSpaces = -1;
+		int indent = -1;
 		String current = iter.next();
-		
 		Matcher m = keyPattern.matcher(removeTabsAndSpaces(current));
-		while ((!m.find()) && 
-				(iter.hasNext())) {
+		while ((!m.find()
+				|| current.contains("#"))
+				&& iter.hasNext()) {
 			current = iter.next();
 			m = keyPattern.matcher(removeTabsAndSpaces(current));
 		}
 		reverseKey.add(m.group());
-		tabsOrSpaces = calculateTabsOrSpaces(current);
+		indent = calculateIndent(current);
 		
 		while (iter.hasPrevious()) {
-			if (tabsOrSpaces == 0) break;
+			if (indent == 0) break;
 			
 			current = iter.previous();
-			
-			if ((calculateTabsOrSpaces(current) < tabsOrSpaces)
+			if ((calculateIndent(current) < indent)
 					&& !current.contains("#")) {
 				
 				m = keyPattern.matcher(removeTabsAndSpaces(current));
+				
 				if (m.find()) {
 					
 					reverseKey.add(m.group());
-					tabsOrSpaces = calculateTabsOrSpaces(current);
+					indent = calculateIndent(current);
 					
 				}
 			}

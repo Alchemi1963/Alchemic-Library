@@ -248,7 +248,6 @@ public class Library extends PluginBase implements Listener {
 	
 	public static <T extends Comparable<? super T>> List<T> asSortedList(Collection<T> c) {
 	  List<T> list = new ArrayList<T>(c);
-	  System.out.println(list);
 	  if (!list.isEmpty()) Collections.sort(list);
 	  return list;
 	}

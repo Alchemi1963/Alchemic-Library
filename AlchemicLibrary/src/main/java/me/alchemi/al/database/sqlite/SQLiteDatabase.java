@@ -264,9 +264,6 @@ public class SQLiteDatabase implements IDatabase {
 	 * Use this to modify the database.
 	 */
 	public void executeUpdate(String sql) {
-		
-		System.out.println(sql);
-		
 		new BukkitRunnable() {
 
 			@Override

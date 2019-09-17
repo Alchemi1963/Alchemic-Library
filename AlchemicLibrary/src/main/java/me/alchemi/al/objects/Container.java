@@ -124,7 +124,6 @@ public class Container<T extends StringSerializable> implements StringSerializab
 		
 		String content = "";
 		for (Entry<T, Integer> ent : contained_items.entrySet()) {
-			System.out.println(contained_items);
 			if (content.isEmpty()) content = "{" + ent.getKey().serialize_string() + ":" + ent.getValue() + "}";
 			else content = content.concat(", {" + ent.getKey().serialize_string() + ":" + ent.getValue() + "}");
 		}
@@ -164,7 +163,6 @@ public class Container<T extends StringSerializable> implements StringSerializab
 				e.printStackTrace();
 			}
 		}
-		System.out.println(container.contained_items);
 		return container;
 	}
 	

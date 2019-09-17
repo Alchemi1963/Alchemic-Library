@@ -115,8 +115,6 @@ public class ItemFactory extends ItemStack{
 		
 		for (Entry<String, Object> ent : in.entrySet()) {
 			
-			System.out.println(ent.getKey());
-			
 			switch (ent.getKey()) {
 			case "Enchantments":
 				for (Map<String, Object> entry : (List<Map<String, Object>>) ent.getValue()) {

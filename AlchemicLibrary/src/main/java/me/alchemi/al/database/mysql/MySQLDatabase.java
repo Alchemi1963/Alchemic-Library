@@ -16,6 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import me.alchemi.al.database.Column;
+import me.alchemi.al.database.DataQueue;
 import me.alchemi.al.database.IDatabase;
 import me.alchemi.al.database.Table;
 import me.alchemi.al.database.statementbuilder.StatementBuilder;
@@ -152,7 +153,7 @@ public class MySQLDatabase implements IDatabase {
 	 * Use this to modify the database.
 	 */
 	public void executeUpdate(String sql) {
-		new BukkitRunnable() {
+		DataQueue.getQueue().add(new BukkitRunnable() {
 
 			@Override
 			public void run() {
@@ -161,9 +162,9 @@ public class MySQLDatabase implements IDatabase {
 				} catch (SQLException e) {
 					e.printStackTrace();
 				}
-				
+
 			}
-		}.runTaskAsynchronously(plugin);
+		});
 	}
 
 	/* Execute a query.
@@ -172,30 +173,30 @@ public class MySQLDatabase implements IDatabase {
 	 * @return the ResultSet from the query or null on errors.
 	 */
 	public void executeQuery(String sql, Callback<ResultSet> resultCall) {
-		new BukkitRunnable() {
-			
+		DataQueue.getQueue().add(new BukkitRunnable() {
+
 			@Override
 			public void run() {
 
 				try {
 					ResultSet result = connection.prepareStatement(sql).executeQuery();
-					
+
 					new BukkitRunnable() {
-						
+
 						@Override
 						public void run() {
-							
+
 							resultCall.call(result);
-							
+
 						}
 					}.runTask(plugin);
-					
+
 				} catch (SQLException e) {
 					e.printStackTrace();
 				}
-				
+
 			}
-		}.runTaskAsynchronously(plugin);
+		});
 	}
 
 	/**

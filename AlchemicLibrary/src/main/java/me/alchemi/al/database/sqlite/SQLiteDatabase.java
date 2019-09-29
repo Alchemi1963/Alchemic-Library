@@ -17,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import me.alchemi.al.database.Column;
+import me.alchemi.al.database.DataQueue;
 import me.alchemi.al.database.IDatabase;
 import me.alchemi.al.database.Table;
 import me.alchemi.al.database.statementbuilder.StatementBuilder;
@@ -29,6 +30,7 @@ public class SQLiteDatabase implements IDatabase {
 	private static boolean driverAvailable;
 	
 	private final File file;
+	private final String url;
 	private Connection connection;
 	private boolean initialized = false;
 	
@@ -40,6 +42,7 @@ public class SQLiteDatabase implements IDatabase {
 		this.file = dbFile;
 		this.plugin = plugin;
 		this.connection = connection;
+		this.url = "jdbc:sqlite:" + dbFile;
 		this.tables = new ArrayList<Table>();
 	}
 	
@@ -174,7 +177,6 @@ public class SQLiteDatabase implements IDatabase {
 		executeUpdate(new StatementBuilder()
 					.delete(table.getName())
 					.wheres(conditions)
-					.limit(1)
 					.build());
 		
 		return true;
@@ -264,7 +266,7 @@ public class SQLiteDatabase implements IDatabase {
 	 * Use this to modify the database.
 	 */
 	public void executeUpdate(String sql) {
-		new BukkitRunnable() {
+		DataQueue.getQueue().add(new BukkitRunnable() {
 
 			@Override
 			public void run() {
@@ -275,7 +277,7 @@ public class SQLiteDatabase implements IDatabase {
 				}
 				
 			}
-		}.runTaskAsynchronously(plugin);
+		});
 	}
 
 	/* Execute a query.
@@ -284,48 +286,45 @@ public class SQLiteDatabase implements IDatabase {
 	 * @return the ResultSet from the query or null on errors.
 	 */
 	public void executeQuery(String sql, Callback<ResultSet> resultCall) {
-		new BukkitRunnable() {
-			
+		DataQueue.getQueue().add(new BukkitRunnable() {
+
 			@Override
 			public void run() {
 
 				try {
 					ResultSet result = connection.prepareStatement(sql).executeQuery();
-					
+
 					new BukkitRunnable() {
-						
+
 						@Override
 						public void run() {
-							
+
 							resultCall.call(result);
-							
+
 						}
 					}.runTask(plugin);
-					
+
 				} catch (SQLException e) {
 					e.printStackTrace();
 				}
-				
+
 			}
-		}.runTaskAsynchronously(plugin);
+		});
 	}
 
 	@Override
 	public Connection getConnection() {
-		// TODO Auto-generated method stub
-		return null;
+		return connection;
 	}
 
 	@Override
 	public String getUrl() {
-		// TODO Auto-generated method stub
-		return null;
+		return url; 
 	}
 
 	@Override
 	public List<Table> getTables() {
-		// TODO Auto-generated method stub
-		return null;
+		return tables;
 	}
 
 }

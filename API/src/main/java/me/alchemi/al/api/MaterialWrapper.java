@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.block.data.Ageable;
 import org.bukkit.block.data.AnaloguePowerable;
 import org.bukkit.block.data.Bisected;
@@ -74,8 +75,6 @@ import org.bukkit.block.data.type.TripwireHook;
 import org.bukkit.block.data.type.TurtleEgg;
 import org.bukkit.block.data.type.WallSign;
 import org.bukkit.inventory.ItemStack;
-
-import net.minecraft.server.v1_14_R1.Block;
 
 public enum MaterialWrapper {
 	CACTUS_GREEN,

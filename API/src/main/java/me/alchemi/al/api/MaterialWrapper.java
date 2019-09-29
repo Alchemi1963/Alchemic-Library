@@ -75,6 +75,8 @@ import org.bukkit.block.data.type.TurtleEgg;
 import org.bukkit.block.data.type.WallSign;
 import org.bukkit.inventory.ItemStack;
 
+import net.minecraft.server.v1_14_R1.Block;
+
 public enum MaterialWrapper {
 	CACTUS_GREEN,
     DANDELION_YELLOW,
@@ -2366,12 +2368,32 @@ public enum MaterialWrapper {
 		return null;
 	}
 	
+	public static Material getWrapper(Block block) {
+		if (block == null) throw new IllegalArgumentException("Block cannot be null!");
+		
+		Matcher m = Pattern.compile("(type=[A-z])\\w+").matcher(block.toString());
+		if (m.find()) {
+			return getWrapper(m.group().replace("type=", ""));
+		}
+		return null;
+	}
+	
 	public static MaterialWrapper wrap(ItemStack stack) {
 		if (stack == null) throw new IllegalArgumentException("Stack cannot be null!");
 		String input = stack.toString().replace("ItemStack", "");
 		Matcher m = Pattern.compile("([A-Z])\\w+").matcher(input);
 		if (m.find()) {
 			return wrap(m.group());
+		}
+		return null;
+	}
+	
+	public static MaterialWrapper wrap(Block block) {
+		if (block == null) throw new IllegalArgumentException("Block cannot be null!");
+		
+		Matcher m = Pattern.compile("(type=[A-z])\\w+").matcher(block.toString());
+		if (m.find()) {
+			return wrap(m.group().replace("type=", ""));
 		}
 		return null;
 	}

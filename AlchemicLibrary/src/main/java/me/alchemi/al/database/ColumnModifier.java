@@ -4,7 +4,8 @@ public enum ColumnModifier {
 
 	NOT_NULL("NOT NULL"),
 	DEFAULT("DEFAULT"),
-	AUTO_INCREMENT("AUTO_INCREMENT");
+	AUTO_INCREMENT("AUTO_INCREMENT"),
+	UNIQUE("UNIQUE");
 	
 	private String name;
 	

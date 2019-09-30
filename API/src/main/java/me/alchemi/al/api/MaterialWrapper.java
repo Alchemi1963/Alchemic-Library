@@ -2343,6 +2343,16 @@ public enum MaterialWrapper {
 		return valueOf(in);
 	}
 	
+	public static MaterialWrapper wrap(Block block) {
+		if (block == null) throw new IllegalArgumentException("Block cannot be null!");
+		
+		Matcher m = Pattern.compile("(type=[A-z])\\w+").matcher(block.toString());
+		if (m.find()) {
+			return wrap(m.group().replace("type=", ""));
+		}
+		return null;
+	}
+	
 	public static Material getWrapper(String in) {
 		in = in.toUpperCase();
 		
@@ -2383,16 +2393,6 @@ public enum MaterialWrapper {
 		Matcher m = Pattern.compile("([A-Z])\\w+").matcher(input);
 		if (m.find()) {
 			return wrap(m.group());
-		}
-		return null;
-	}
-	
-	public static MaterialWrapper wrap(Block block) {
-		if (block == null) throw new IllegalArgumentException("Block cannot be null!");
-		
-		Matcher m = Pattern.compile("(type=[A-z])\\w+").matcher(block.toString());
-		if (m.find()) {
-			return wrap(m.group().replace("type=", ""));
 		}
 		return null;
 	}

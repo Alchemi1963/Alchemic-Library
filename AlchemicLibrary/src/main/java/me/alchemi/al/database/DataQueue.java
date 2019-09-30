@@ -10,8 +10,8 @@ import me.alchemi.al.Library;
 
 public class DataQueue {
 
-	Set<BukkitRunnable> tasks = new HashSet<BukkitRunnable>();
-	BukkitRunnable scheduler;
+	private Set<BukkitRunnable> tasks = new HashSet<BukkitRunnable>();
+	private BukkitRunnable scheduler;
 	
 	private static DataQueue queue;
 	
@@ -27,6 +27,7 @@ public class DataQueue {
 					public void accept(BukkitRunnable t) {
 						
 						t.run();
+						
 					}
 				});
 				tasks.clear();
@@ -49,6 +50,14 @@ public class DataQueue {
 		scheduler.cancel();
 		scheduler.run();
 		scheduler.runTaskTimerAsynchronously(Library.getInstance(), 10, 20);
+	}
+	
+	public Set<BukkitRunnable> getTasks() {
+		return tasks;
+	}
+	
+	public BukkitRunnable getScheduler() {
+		return scheduler;
 	}
 	
 }

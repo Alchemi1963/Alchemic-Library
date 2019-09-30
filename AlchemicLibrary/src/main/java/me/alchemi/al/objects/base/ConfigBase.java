@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -12,7 +13,9 @@ import org.bukkit.Sound;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.inventory.ItemStack;
 
+import me.alchemi.al.api.MaterialWrapper;
 import me.alchemi.al.configurations.SexyConfiguration;
+import me.alchemi.al.objects.handling.ItemFactory;
 
 /**
  * @author Alchemi
@@ -33,25 +36,69 @@ public abstract class ConfigBase {
 		
 		void get();
 		
-		boolean asBoolean();
+		default boolean asBoolean() {
+			return Boolean.valueOf(asString());
+		}
 		
-		String asString();
+		default String asString() {
+			return String.valueOf(value());
+		}
 		
-		Sound asSound();
+		default Sound asSound() {
+			return Sound.valueOf(asString());
+		}
 		
-		List<String> asStringList();
+		@SuppressWarnings("unchecked")
+		default List<String> asStringList() {
+			if (value() instanceof List) {
+				if (((List<?>)value()).get(0) instanceof String
+						|| ((List<?>)value()).isEmpty()) {
+					return (List<String>)value();
+				}
+			}
+			return new ArrayList<String>();
+		}
 		
-		int asInt();
+		default int asInt() {
+			return Integer.valueOf(asString());
+		}
 		
-		double asDouble();
+		default double asDouble() {
+			return Double.valueOf(asString());
+		}
 		
-		List<Float> asFloatList();
+		@SuppressWarnings("unchecked")
+		default List<Float> asFloatList() {
+			if (value() instanceof List) {
+				if (((List<?>)value()).get(0) instanceof Float
+						|| ((List<?>)value()).isEmpty()) {
+					return (List<Float>)value();
+				}
+			}
+			return new ArrayList<Float>();
+		}
 		
-		List<Integer> asIntList();
+		@SuppressWarnings("unchecked")
+		default List<Integer> asIntList() {
+			if (value() instanceof List) {
+				if (((List<?>)value()).get(0) instanceof Integer
+						|| ((List<?>)value()).isEmpty()) {
+					return (List<Integer>)value();
+				}
+			}
+			return new ArrayList<Integer>();
+		}
 		
-		ItemStack asItemStack();
+		default ItemStack asItemStack() {
+			if (value() instanceof ItemStack) {
+				return (ItemStack)value();
+			}
+			return new ItemFactory(MaterialWrapper.AIR);
+		}
 		
-		Material asMaterial();
+		default Material asMaterial() {
+			return MaterialWrapper.getWrapper(asString());
+		}
 	}
 	
 	public interface IMessage {

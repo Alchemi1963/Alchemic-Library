@@ -102,6 +102,25 @@ public class SQLiteDatabase implements IDatabase {
 		
 		return false;
 	}
+	
+	@Override
+	public boolean insertValueIgnore(Table table, Column column, Object value) {
+		if (tables.contains(table) && table.hasColumn(column) && column.testObject(value)) {
+			
+			if (value instanceof String) value = "\"" + value + "\"";
+			else if (value instanceof StringSerializable) value = "\"" + ((StringSerializable)value).serialize_string() + "\"";
+			
+			executeUpdate(new StatementBuilder()
+					.insertIgnore(table.getName())
+					.column(column.getName())
+					.values(value)
+					.build());
+			return true;
+			
+		}
+		
+		return false;
+	}
 
 	@Override
 	public boolean updateValue(Table table, Column column, Object newValue, @Nullable Map<Column, Object> conditionalValues) {
@@ -154,6 +173,39 @@ public class SQLiteDatabase implements IDatabase {
 			
 			executeUpdate(new StatementBuilder()
 					.insert(table.getName())
+					.columns(columns)
+					.values(elements)
+					.build());
+			return true;
+			
+		}
+		return false;
+	}
+	
+	@Override
+	public boolean insertValuesIgnore(Table table, @NotNull Map<Column, Object> values) {
+		if (tables.contains(table)) {
+			
+			List<String> columnsList = new ArrayList<String>();
+			for (Column c : values.keySet()) {
+				if (table.hasColumn(c)) {
+					columnsList.add(c.getName());
+				}
+			}
+			String[] columns = columnsList.toArray(new String[columnsList.size()]);
+			
+			Object[] elements = values.entrySet().stream()
+					.filter(Entry -> table.hasColumn(Entry.getKey()))
+					.map(Entry ->{
+						Object value = Entry.getValue();
+						if (value instanceof String) value = "\"" + value + "\"";
+						else if (value instanceof StringSerializable) value = "\"" + ((StringSerializable)value).serialize_string() + "\"";
+						return value;
+					})
+					.toArray();
+			
+			executeUpdate(new StatementBuilder()
+					.insertIgnore(table.getName())
 					.columns(columns)
 					.values(elements)
 					.build());

@@ -17,9 +17,13 @@ public interface IDatabase {
 	
 	public boolean insertValue(Table table, Column column, Object value);
 	
+	public boolean insertValueIgnore(Table table, Column column, Object value);
+	
 	public boolean updateValue(Table table, Column column, Object newValue, @Nullable Map<Column, Object> conditionalValues);
 	
 	public boolean insertValues(Table table, @NotNull Map<Column, Object> values);
+
+	public boolean insertValuesIgnore(Table table, @NotNull Map<Column, Object> values);
 	
 	public boolean removeRow(Table table, @NotNull Map<Column, Object> conditionalValues);
 	

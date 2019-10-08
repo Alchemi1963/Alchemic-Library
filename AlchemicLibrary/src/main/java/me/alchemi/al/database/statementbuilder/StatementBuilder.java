@@ -33,6 +33,11 @@ public class StatementBuilder {
 		return new InsertBuilder(this);
 	}
 	
+	public final InsertBuilder insertIgnore(String table) {
+		statement = "INSERT IGNORE INTO " + table + " ";
+		return new InsertBuilder(this);
+	}
+	
 	public final DeleteBuilder delete(String table) {
 		statement = "DELETE FROM " + table + " ";
 		return new DeleteBuilder(this);

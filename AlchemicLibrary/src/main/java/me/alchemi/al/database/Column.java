@@ -10,6 +10,7 @@ public class Column {
 	private final ColumnModifier[] modifiers;
 	private final UUID uuid;
 	private Object defValue = null;
+	private int limit = -1;
 	
 	public Column(String name, DataType datatype, ColumnModifier...columnModifiers) {
 		this.name = name;
@@ -20,6 +21,10 @@ public class Column {
 	
 	public void setDefValue(Object defValue) {
 		if (Arrays.asList(modifiers).contains(ColumnModifier.DEFAULT)) this.defValue = defValue;
+	}
+	
+	public void setValueLimit(int limit) {
+		this.limit = limit;
 	}
 	
 	public boolean testObject(Object o) {
@@ -50,7 +55,9 @@ public class Column {
 	}
 	
 	public String getDeclaration() {
-		return name + " " + datatype.toString() + " " + getStringedModifiers();
+		return limit == -1 
+				? name + " " + datatype.toString() + " " + getStringedModifiers()
+				: name + " " + datatype.toString() + "(" + limit + ") " + getStringedModifiers();
 	}
 	
 	@Override

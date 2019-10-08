@@ -7,6 +7,7 @@ import java.util.function.Consumer;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import me.alchemi.al.Library;
+import me.alchemi.al.configurations.Messenger;
 
 public class DataQueue {
 
@@ -26,6 +27,7 @@ public class DataQueue {
 					@Override
 					public void accept(BukkitRunnable t) {
 						
+						Messenger.printStatic("Running SQL task...");
 						t.run();
 						
 					}

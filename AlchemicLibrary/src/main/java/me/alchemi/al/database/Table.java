@@ -22,6 +22,13 @@ public class Table {
 		this.uuid = UUID.randomUUID();
 	}
 	
+	public Table(String name, Column...columns) {
+		this.columns = Sets.newHashSet(columns);
+		
+		this.name = name;
+		this.uuid = UUID.randomUUID();
+	}
+	
 	public Set<Column> getColumns() {
 		return columns;
 	}

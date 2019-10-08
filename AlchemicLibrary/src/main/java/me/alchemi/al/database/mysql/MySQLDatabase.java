@@ -48,15 +48,15 @@ public class MySQLDatabase implements IDatabase {
 		connection = connect;
 	}
 	
-	public static MySQLDatabase newConnection(PluginBase plugin, String address, String database, String user, String password) throws SQLException {
+	public static MySQLDatabase newConnection(PluginBase plugin, String host, String database, String user, String password) throws SQLException {
 		
 		if (!driverAvailable) throw new SQLException("JDBC Driver not loaded.");
 		
-		if (!address.matches(".*:\\d+")) {
-			address = address.concat(":3306");
+		if (!host.matches(".*:\\d+")) {
+			host = host.concat(":3306");
 		}
 		String url = "jdbc:mysql://%address%/%database%"
-				.replace("%address%", address)
+				.replace("%address%", host)
 				.replace("%database%", database);
 		Connection connection = DriverManager.getConnection(url, user, password);
 		return new MySQLDatabase(plugin, connection, url, user, password);
@@ -80,7 +80,9 @@ public class MySQLDatabase implements IDatabase {
 	
 	public  void onDisable() {
 		try {
-			if (connection != null && !connection.isClosed()) connection.close();
+			plugin.getMessenger().print("Closing connection to " + url.replace("jdbc:mysql://", ""));
+			if (!(connection == null 
+					|| connection.isClosed())) connection.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -110,10 +112,28 @@ public class MySQLDatabase implements IDatabase {
 					.column(column.getName())
 					.values(value)
 					.build());
-			
+			return true;
 		}
 		
-		return true;
+		return false;
+	}
+	
+	@Override
+	public boolean insertValueIgnore(Table table, Column column, Object value) {
+		if (tables.contains(table) && table.hasColumn(column) && column.testObject(value)) {
+			
+			if (value instanceof String) value = "\"" + value + "\"";
+			else if (value instanceof StringSerializable) value = "\"" + ((StringSerializable)value).serialize_string() + "\"";
+			
+			executeUpdate(new StatementBuilder()
+					.insertIgnore(table.getName())
+					.column(column.getName())
+					.values(value)
+					.build());
+			return true;
+		}
+	
+		return false;
 	}
 	
 	@Override
@@ -149,6 +169,39 @@ public class MySQLDatabase implements IDatabase {
 		return false;
 	}
 	
+	@Override
+	public boolean insertValuesIgnore(Table table, @NotNull Map<Column, Object> values) {
+		if (tables.contains(table)) {
+			
+			List<String> columnsList = new ArrayList<String>();
+			for (Column c : values.keySet()) {
+				if (table.hasColumn(c)) {
+					columnsList.add(c.getName());
+				}
+			}
+			String[] columns = columnsList.toArray(new String[columnsList.size()]);
+			
+			Object[] elements = values.entrySet().stream()
+					.filter(Entry -> table.hasColumn(Entry.getKey()))
+					.map(Entry -> {
+						Object value = Entry.getValue();
+						if (value instanceof String) value = "\"" + value + "\"";
+						else if (value instanceof StringSerializable) value = "\"" + ((StringSerializable)value).serialize_string() + "\"";
+						return value;
+					})
+					.toArray();
+
+			executeUpdate(new StatementBuilder()
+					.insertIgnore(table.getName())
+					.columns(columns)
+					.values(elements)
+					.build());
+			return true;
+			
+		}
+		return false;
+	}
+	
 	/* Execute an update.
 	 * Use this to modify the database.
 	 */
@@ -158,6 +211,7 @@ public class MySQLDatabase implements IDatabase {
 			@Override
 			public void run() {
 				try {
+					System.err.println(sql);
 					connection.prepareStatement(sql).executeUpdate();
 				} catch (SQLException e) {
 					e.printStackTrace();

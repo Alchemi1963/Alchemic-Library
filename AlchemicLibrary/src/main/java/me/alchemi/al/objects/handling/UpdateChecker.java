@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -27,6 +28,8 @@ public class UpdateChecker implements Listener {
 		
 		checker = new Thread(runner);
 		checker.start();
+		
+		Bukkit.getPluginManager().registerEvents(this, plugin);
 	}
 	
 	public void check() {
@@ -49,15 +52,31 @@ public class UpdateChecker implements Listener {
 	@EventHandler
 	protected void onAdminLogin(PlayerJoinEvent e) {
 		if (e.getPlayer().hasPermission("al.checkupdate")) {
-			notifyAdmin(e.getPlayer());
+			Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, new Runnable() {
+				
+				@Override
+				public void run() {
+					
+					notifyAdmin(e.getPlayer());
+					
+				}
+			}, 10);
 		}
 	}
 	
 	@EventHandler
 	protected void onCommand(PlayerCommandPreprocessEvent e) {
 		if (e.getMessage().equals("/version " + plugin.getName())) {
-			check();
-			notifyAdmin(e.getPlayer());
+			Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, new Runnable() {
+				
+				@Override
+				public void run() {
+					
+					check();
+					notifyAdmin(e.getPlayer());
+					
+				}
+			}, 10);
 		}
 	}
 	

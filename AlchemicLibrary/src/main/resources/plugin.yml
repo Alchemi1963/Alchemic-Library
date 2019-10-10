@@ -12,7 +12,7 @@ permissions:
     default: op
     description: Allows user to get notifications about plugin updates.
     
-  al.forcecheckupdate:
+  al.checkupdate:
     default: false
     description: Forces an update check when users with this node join. 
     

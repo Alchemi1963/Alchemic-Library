@@ -6,71 +6,63 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 
 import me.alchemi.al.objects.base.PluginBase;
 
-public class UpdateChecker {
+public class UpdateChecker implements Listener {
 
 	protected PluginBase plugin;
 	protected Thread checker;
+	
+	private boolean updateAvailable = false;
 	
 	public UpdateChecker(PluginBase plugin) {
 		
 		this.plugin = plugin;
 		
-		checker = new Thread(new TRunnable(false));
+		checker = new Thread(runner);
 		checker.start();
 	}
 	
 	public void check() {
 	
-		checker = new Thread(new TRunnable(true));
+		checker = new Thread(runner);
 		checker.start();
 		
 	}
 	
-	protected void notifyServer(boolean update, boolean admins) {
-		checker = null;
-		
-		if (!update) {
-			plugin.getMessenger().print("&6Your copy of &o" + plugin.getDescription().getName() + "&6 is the most recent one.");
-			
-			if (admins) {
-			
-				for (Player player : Bukkit.getOnlinePlayers()) {
-					if (!player.hasPermission(Bukkit.getServer().getPluginManager().getPermission("al.notify"))) continue;
-					plugin.getMessenger().sendMessage("&6Your copy of &o" + plugin.getDescription().getName() + "&6 is the most recent one.", player);
-				}
-				
-			}
-			
-		} else {
-			plugin.getMessenger().print("&6There's an update available for &o" + plugin.getDescription().getName()
-					+ "\n&6Download it at &ohttps://www.spigotmc.org/resources/" + plugin.SPIGOT_ID + "/&r");
-			
-			if (admins) {
-				
-				for (Player player : Bukkit.getOnlinePlayers()) {
-					if (!player.hasPermission(Bukkit.getServer().getPluginManager().getPermission("al.notify"))) continue;
-					plugin.getMessenger().sendMessage("&6There's an update available for &o" + plugin.getDescription().getName()
-							+ "\n&6Download it at &ohttps://www.spigotmc.org/resources/" + plugin.SPIGOT_ID, player);
-				}
-				
-			}
-			
-			
+	protected void notifyServer() {
+		if (updateAvailable) plugin.getMessenger().print("&6There's an update available for &o" + plugin.getDescription().getName()
+				+ "\n&6Download it at &ohttps://www.spigotmc.org/resources/" + plugin.SPIGOT_ID + "/&r");
+	}	
+	
+	protected void notifyAdmin(Player admin) {
+		if (updateAvailable) plugin.getMessenger().sendMessage("&6There's an update available for &o" + plugin.getDescription().getName()
+				+ "\n&6Download it at &ohttps://www.spigotmc.org/resources/" + plugin.SPIGOT_ID + "/&r", admin);
+	}
+	
+	@EventHandler
+	protected void onAdminLogin(PlayerJoinEvent e) {
+		if (e.getPlayer().hasPermission("al.checkupdate")) {
+			notifyAdmin(e.getPlayer());
 		}
 	}
 	
-	protected class TRunnable implements Runnable{
-		private boolean admins;
-		
-		public TRunnable(boolean admins) {
-			this.admins = admins;
+	@EventHandler
+	protected void onCommand(PlayerCommandPreprocessEvent e) {
+		if (e.getMessage().equals("/version " + plugin.getName())) {
+			check();
+			notifyAdmin(e.getPlayer());
 		}
-
+	}
+	
+	protected final Runnable runner = new Runnable() {
+		
 		@Override
 		public void run() {
 			
@@ -87,10 +79,9 @@ public class UpdateChecker {
 				BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 				
 				try {
-					if (Integer.valueOf(br.readLine().replaceAll("\\D", "")) <= Integer.valueOf(plugin.getDescription().getVersion().replaceAll("\\D", ""))) {
-						notifyServer(false, admins);
-					} else {
-						notifyServer(true, admins);
+					if (Integer.valueOf(br.readLine().replaceAll("\\D", "")) > Integer.valueOf(plugin.getDescription().getVersion().replaceAll("\\D", ""))) {
+						updateAvailable = true;
+						notifyServer();
 					}
 				} catch (NumberFormatException e) {}
 				
@@ -98,7 +89,7 @@ public class UpdateChecker {
 				plugin.getMessenger().print("&cSPIGOT ID isn't initialized!");
 			} 
 			
+			checker = null;
 		}
-	}
-	
+	};
 }

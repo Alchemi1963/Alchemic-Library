@@ -48,7 +48,7 @@ public class SexyConfiguration extends YamlConfiguration {
 	 * @param comment	The comment
 	 */
 	public void setComment(String key, String comment) {
-		if (!comment.startsWith("#")) comment = "# ".concat(comment);
+		if (!comment.contains("#")) comment = "# ".concat(comment);
 		if (comments.containsKey(key)) comments.put(key, comments.get(key).concat("\n".concat(comment)));
 		else comments.put(key, comment);
 	}
@@ -117,11 +117,15 @@ public class SexyConfiguration extends YamlConfiguration {
 		String previous = "";
 		for (String l : input) {
 			
-			if (( (l.isEmpty() || l.replaceAll("\\s", "").isEmpty())
-					& !(previous.endsWith("|1-")))) continue;
+			if (( (l.isEmpty() 
+					|| l.replaceAll("\\s", "").isEmpty())
+						& !(previous.endsWith("|1-")
+								|| previous.endsWith("|-")
+								|| previous.endsWith("|2-")))) continue;
 			
 			if ((calculateIndent(previous) != calculateIndent(l))
-					|| (!(previous.isEmpty() || previous.replaceAll("\\s", "").isEmpty())
+					|| (!(previous.isEmpty() 
+							|| previous.replaceAll("\\s", "").isEmpty())
 							&& l.contains("#"))) outputString += "\n";
 			
 			outputString += l + "\n";

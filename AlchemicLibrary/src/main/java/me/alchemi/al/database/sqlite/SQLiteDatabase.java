@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 import org.bukkit.scheduler.BukkitRunnable;
@@ -17,6 +18,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import me.alchemi.al.database.Column;
+import me.alchemi.al.database.DataLog;
 import me.alchemi.al.database.DataQueue;
 import me.alchemi.al.database.IDatabase;
 import me.alchemi.al.database.Table;
@@ -34,6 +36,8 @@ public class SQLiteDatabase implements IDatabase {
 	private Connection connection;
 	private boolean initialized = false;
 	
+	private DataLog log;
+	
 	private List<Table> tables;
 	
 	private final PluginBase plugin;
@@ -44,6 +48,9 @@ public class SQLiteDatabase implements IDatabase {
 		this.connection = connection;
 		this.url = "jdbc:sqlite:" + dbFile;
 		this.tables = new ArrayList<Table>();
+		
+		log = new DataLog(plugin);
+		log.log("Established connection to " + url, Level.INFO);
 	}
 	
 	public static SQLiteDatabase newConnection(PluginBase plugin, File dbFile) throws SQLException {
@@ -324,8 +331,10 @@ public class SQLiteDatabase implements IDatabase {
 			public void run() {
 				try {
 					connection.prepareStatement(sql).executeUpdate();
+					log.log(sql, Level.INFO);
 				} catch (SQLException e) {
 					e.printStackTrace();
+					log.log(sql, Level.SEVERE);
 				}
 				
 			}

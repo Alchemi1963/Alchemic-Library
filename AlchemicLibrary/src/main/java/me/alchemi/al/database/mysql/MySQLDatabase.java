@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 import org.bukkit.scheduler.BukkitRunnable;
@@ -16,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import me.alchemi.al.database.Column;
+import me.alchemi.al.database.DataLog;
 import me.alchemi.al.database.DataQueue;
 import me.alchemi.al.database.IDatabase;
 import me.alchemi.al.database.Table;
@@ -34,6 +36,8 @@ public class MySQLDatabase implements IDatabase {
 	private final String url;
 	private boolean initialized = false;
 	
+	private DataLog log;
+	
 	private List<Table> tables;
 	
 	private final PluginBase plugin;
@@ -46,6 +50,8 @@ public class MySQLDatabase implements IDatabase {
 		
 		tables = new ArrayList<Table>();
 		connection = connect;
+		log = new DataLog(plugin);
+		log.log("Established connection to " + url, Level.INFO);
 	}
 	
 	public static MySQLDatabase newConnection(PluginBase plugin, String host, String database, String user, String password) throws SQLException {
@@ -78,13 +84,15 @@ public class MySQLDatabase implements IDatabase {
 		}
 	}
 	
-	public  void onDisable() {
+	public void onDisable() {
 		try {
 			plugin.getMessenger().print("Closing connection to " + url.replace("jdbc:mysql://", ""));
 			if (!(connection == null 
 					|| connection.isClosed())) connection.close();
+			log.log("Connection to " + url + " closed.", Level.INFO);
 		} catch (SQLException e) {
 			e.printStackTrace();
+			log.log("Could not close connection to " + url, Level.SEVERE);
 		}
 	}
 	
@@ -211,10 +219,11 @@ public class MySQLDatabase implements IDatabase {
 			@Override
 			public void run() {
 				try {
-					System.err.println(sql);
 					connection.prepareStatement(sql).executeUpdate();
+					log.log(sql, Level.INFO);
 				} catch (SQLException e) {
 					e.printStackTrace();
+					log.log(sql, Level.SEVERE);
 				}
 
 			}

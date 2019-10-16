@@ -92,6 +92,14 @@
 			<id>placeholderapi</id>
 			<url>http://repo.extendedclip.com/content/repositories/placeholderapi/</url>
 		</repository>
+		<repository>
+			<id>dmulloy2-repo</id>
+			<url>http://repo.dmulloy2.net/nexus/repository/public/</url>
+		</repository>
+		 <repository>
+			<id>shadowvolt-repo</id>
+			<url>http://ci.shadowvolt.com/plugin/repository/everything/</url>
+		  </repository>
 	</repositories>
 
 	<dependencies>
@@ -135,7 +143,7 @@
 		<dependency>
 			<groupId>com.comphenix.protocol</groupId>
 			<artifactId>ProtocolLib-API</artifactId>
-			<version>4.4.0-SNAPSHOT</version>
+			<version>4.4.0</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>

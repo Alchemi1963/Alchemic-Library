@@ -1,0 +1,43 @@
+allprojects {
+	apply plugin: 'java'
+    apply plugin: 'maven-publish'
+	apply plugin: 'eclipse'
+	
+    group = 'me.alchemi'
+    version = '2.5.1'
+}
+
+subprojects {
+	
+	repositories {
+		mavenLocal()
+		mavenCentral()
+		maven {
+			url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
+		}
+
+		maven {
+			url = 'http://repo.maven.apache.org/maven2'
+		}
+
+		maven {
+			url = 'https://nexus.wesjd.net/repository/thirdparty/'
+		}
+
+		maven {
+			url = 'http://repo.extendedclip.com/content/repositories/placeholderapi/'
+		}
+
+		maven {
+			url = 'http://repo.dmulloy2.net/nexus/repository/public/'
+		}
+	}
+	
+	dependencies {
+
+		compileOnly 'org.jetbrains:annotations:17.0.0'
+		
+	}
+
+	
+}

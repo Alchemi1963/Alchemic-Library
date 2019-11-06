@@ -1,0 +1,56 @@
+apply plugin: 'java'
+
+repositories {
+	mavenLocal()
+}
+
+configurations {
+	shade
+	compile.extendsFrom shade
+}
+
+dependencies {
+	
+	compileOnly 'mysql:mysql-connector-java:5.1.41'
+	compileOnly 'org.jetbrains:annotations:17.0.0'
+	compile 'org.spigotmc:spigot-api:1.14.4-R0.1-SNAPSHOT'
+	compile 'com.comphenix.protocol:ProtocolLib-API:4.4.0'
+	compile 'me.clip:placeholderapi:2.10.4'
+	shade 'commons-io:commons-io:2.6'
+	shade 'net.wesjd:anvilgui:1.2.2-SNAPSHOT'
+	shade project(':AlchemicLibrary-api')
+	shade project(':AlchemicLibrary-v1_13_R2')
+	shade project(':AlchemicLibrary-v1_14_R1')
+}
+
+task copy(type: Copy, dependsOn: jar){
+
+	group = "Build"
+	description = "Install project to Test-Server."
+	
+	println "Installing jar file..."
+	
+	from jar.archivePath
+	into '../../Test-Server/plugins/'
+	rename '(.*)-(.*).jar', '$1.jar'
+
+}
+
+jar {
+	
+	println "Building jar file..."
+    configurations.shade.each { dep ->
+        from(project.zipTree(dep)){
+            exclude 'META-INF', 'META-INF/**'
+        }
+    }
+    copy
+}
+
+eclipse {
+
+	autoBuildTasks copy
+	
+}
+
+description = 'AlchemicLibrary'

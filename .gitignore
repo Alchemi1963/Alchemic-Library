@@ -34,3 +34,7 @@ maven-build.xml
 /.externalToolBuilders/
 /.settings/
 *.cmd
+/.gradle/
+/*/bin/
+/*/build/
+/*/target/

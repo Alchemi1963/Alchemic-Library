@@ -12,6 +12,7 @@
   </parent>
 
   <dependencies>
+  
     <dependency>
       <groupId>org.bukkit</groupId>
       <artifactId>craftbukkit</artifactId>

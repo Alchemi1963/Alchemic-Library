@@ -36,6 +36,12 @@ public abstract class ConfigBase {
 		
 		void get();
 		
+		default void set(Object value) throws IOException {
+			getConfig().set(key(), value);
+			getConfig().save();
+			get();
+		}
+		
 		default boolean asBoolean() {
 			return Boolean.valueOf(asString());
 		}

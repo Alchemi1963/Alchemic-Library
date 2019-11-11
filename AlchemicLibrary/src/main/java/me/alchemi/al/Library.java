@@ -26,6 +26,7 @@ import me.alchemi.al.configurations.SexyConfiguration;
 import me.alchemi.al.database.mysql.MySQLDatabase;
 import me.alchemi.al.objects.base.PluginBase;
 import me.alchemi.al.objects.commands.PageCommands;
+import me.alchemi.al.objects.handling.CarbonDating;
 import me.alchemi.al.objects.handling.UpdateChecker;
 import me.alchemi.al.objects.meta.PersistentMeta;
 import me.alchemi.al.objects.placeholder.PapiParser;
@@ -209,6 +210,11 @@ public class Library extends PluginBase implements Listener {
 				@Override
 				public void run() {
 					messenger.broadcast("&7&oGeneral Kenobi...", false);
+					CarbonDating date = CarbonDating.getCurrentDateTime();
+					if (date.month.equals("11")
+							&& (date.day.equals("09") || date.day.equals("9"))) {
+						messenger.broadcast("&6&lHappy birthday, &2&l&oA&a&l&ol&2&l&oc&a&l&oh&2&l&oe&a&l&om&2&l&oi&6!", false);
+					}
 					
 				}
 			}, 5);

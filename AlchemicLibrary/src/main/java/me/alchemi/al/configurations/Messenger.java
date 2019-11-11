@@ -139,8 +139,10 @@ public class Messenger {
 	 * 
 	 * @param msg	The message to be displayed
 	 */
-	public static void printStatic(Object msg) { 
-		Bukkit.getConsoleSender().sendMessage(formatString(String.valueOf(msg))); 
+	public static void printStatic(Object... msgs) { 
+		String msg = "";
+		for (Object o : msgs) msg = msg + String.valueOf(o) + "\t";
+		Bukkit.getConsoleSender().sendMessage(formatString(msg)); 
 	}
 	
 	/**

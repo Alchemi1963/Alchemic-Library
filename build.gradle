@@ -4,7 +4,7 @@ allprojects {
 	apply plugin: 'eclipse'
 	
     group = 'me.alchemi'
-    version = '2.5.1'
+    version = '2.5.2'
 }
 
 subprojects {

@@ -10,15 +10,18 @@ public abstract class CommandBase implements CommandExecutor {
 
 	protected final Messenger messenger;
 	private final String noPerm;
+	private final String usage;
 	
-	public CommandBase(Messenger messenger, String permissionMessage) {
+	public CommandBase(Messenger messenger, String permissionMessage, String usage) {
 		this.messenger = messenger;
 		this.noPerm = permissionMessage;
+		this.usage = usage;
 	}
 	
-	public CommandBase(PluginBase plugin, String permissionMessage) {
+	public CommandBase(PluginBase plugin, String permissionMessage, String usage) {
 		this.messenger = plugin.getMessenger();
 		this.noPerm = permissionMessage;
+		this.usage = usage;
 	}
 	
 	@Override
@@ -30,7 +33,11 @@ public abstract class CommandBase implements CommandExecutor {
 		messenger.sendMessage(noPerm.replace("%command%", command.getName()).replace("%permission%", command.getPermission()), sender);
 	}
 	
-	protected final String compileArgs(String[] args) {
+	protected final void sendUsage(CommandSender sender, String usage) {
+		messenger.sendMessage(this.usage.replace("%usage%", usage), sender);
+	}
+	
+	protected String compileArgs(String[] args) {
 		String string = "";
 		for (String s : args) {
 			string = string.concat(" " + s);

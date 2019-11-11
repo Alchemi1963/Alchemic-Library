@@ -37,4 +37,11 @@ public class TabCompleteBase implements TabCompleter {
 		
 	}
 	
+	protected final boolean ifAny(CommandSender sender, String...perms) {
+		for (String perm : perms) {
+			if (sender.hasPermission(perm)) return true;
+		}
+		return false;
+	}
+	
 }

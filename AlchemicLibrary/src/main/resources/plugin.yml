@@ -14,5 +14,4 @@ permissions:
     
   al.checkupdate:
     default: false
-    description: Forces an update check when users with this node join. 
-    
+    description: Forces an update check when users with this node join.

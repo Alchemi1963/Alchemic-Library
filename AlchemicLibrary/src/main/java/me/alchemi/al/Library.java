@@ -120,7 +120,7 @@ public class Library extends PluginBase implements Listener {
 				"&211   01   10  00      10  00    10    11  01\r\n" + 
 				"&201        10  010111  1111    001001  111010").split("\n")) {
 			Bukkit.getConsoleSender().sendMessage(l);
-		}		
+		}
 	}
 	
 	public static Library getInstance() {

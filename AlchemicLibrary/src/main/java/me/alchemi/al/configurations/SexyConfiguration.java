@@ -7,14 +7,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.ListIterator;
 import java.util.logging.Level;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.Validate;
@@ -23,14 +16,12 @@ import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import com.google.common.base.Charsets;
-import com.google.common.base.Joiner;
-import com.google.common.collect.Lists;
 
 public class SexyConfiguration extends YamlConfiguration {
 	
-	protected HashMap<String, String> comments = new HashMap<String, String>();
-	
 	protected File file;
+	protected String header;
+	private int comments;
 	
 	/**
 	 * Create an empty configuration
@@ -41,98 +32,31 @@ public class SexyConfiguration extends YamlConfiguration {
 		this.setFile(file);
 	}
 	
-	/**
-	 * Set a comment on a key.
-	 * 
-	 * @param key The key to set the comment above
-	 * @param comment	The comment
-	 */
-	public void setComment(String key, String comment) {
-		if (!comment.contains("#")) comment = "# ".concat(comment);
-		if (comments.containsKey(key)) comments.put(key, comments.get(key).concat("\n".concat(comment)));
-		else comments.put(key, comment);
-	}
-	
 	@Override
 	public String saveToString() {
-		Pattern keyPattern = Pattern.compile("\\b.*(?=:)");
-		ArrayList<String> output = new ArrayList<String>(Arrays.asList(super.saveToString().split("\n")));
+		String lastLine = "";
+		StringBuilder config;
 		
-		ArrayList<String> fakeOutput = new ArrayList<String>();
+		if (header != null && !header.isEmpty()) config = new StringBuilder(header + "\n");
+		else config = new StringBuilder("");
 		
-		for (String line : output) {
-			
-			Matcher m = keyPattern.matcher(line);
-			
-			if (m.find()) {
-				fakeOutput.add(m.group());
+		String[] lines = super.saveToString().split("\n");
+		
+		for (String line : lines) {
+			if (line.contains("COMMENT__")) {
+				String comment = line.replaceFirst("(COMMENT__\\d+:\\s)", "#").replace("{colon}", ":");
+				if (!(config.toString().isEmpty() || lastLine.contains("#"))) config.append("\n" + comment + "\n");
+				else config.append(comment + "\n");
+				
+				lastLine = comment;
 			} else {
-				fakeOutput.add(line);
+				config.append(line + "\n");
+				lastLine = line;
 			}
 			
 		}
 		
-		for (String key : this.getKeys(true)) {
-			if (key.startsWith(".")) key = key.replaceFirst("\\.", "");
-			if (comments.containsKey(key)) {
-				int i = 0;
-				String comment = comments.get(key);
-				
-				for (String subPath : key.split("\\.")) {
-					
-					for (String testFor : fakeOutput.subList(i, fakeOutput.size())) {
-						
-						if (subPath.equals(testFor)) {
-							i = fakeOutput.subList(i, fakeOutput.size()).indexOf(testFor) + i;
-							break;
-						}
-					}
-				}
-
-				if (calculateIndent(output.get(i)) > 0) {
-					String tabs;
-					if (areTabsUsed(output.get(i))) {
-						tabs = new String(new char[calculateIndent(output.get(i))]).replace("\0", "\t");
-					} else {
-						tabs = new String(new char[calculateIndent(output.get(i))]).replace("\0", " ");
-					}
-					
-					comment = "";
-					for (String c : comments.get(key).split("\n")) {
-						comment += tabs + c + "\n";
-					}
-					comment = comment.substring(0, comment.length() - 1);
-					
-				}
-				
-				output.set(i, comment + "\n" + output.get(i));
-			}
-		}
-		return listToString(output);
-	}
-	
-
-	protected static final String listToString(List<String> input) {
-		String outputString = "";
-		String previous = "";
-		for (String l : input) {
-			
-			if (( (l.isEmpty() 
-					|| l.replaceAll("\\s", "").isEmpty())
-						& !(previous.endsWith("|1-")
-								|| previous.endsWith("|-")
-								|| previous.endsWith("|2-")))) continue;
-			
-			if ((calculateIndent(previous) != calculateIndent(l))
-					|| (!(previous.isEmpty() 
-							|| previous.replaceAll("\\s", "").isEmpty())
-							&& l.contains("#"))) outputString += "\n";
-			
-			outputString += l + "\n";
-			
-			previous = l;
-		}
-		return outputString;
+		return config.toString().trim();
 	}
 	
 	public static SexyConfiguration loadConfiguration(Reader reader) {
@@ -169,7 +93,6 @@ public class SexyConfiguration extends YamlConfiguration {
 		return config;
 		
 	}
-	
 	/**
 	 * Loads the file from the internally saved file.
 	 * 
@@ -210,88 +133,26 @@ public class SexyConfiguration extends YamlConfiguration {
 	@Override
 	public void loadFromString(String contents) throws InvalidConfigurationException {
 		
-		List<String> contentList = Arrays.asList(contents.split("\n"));
-		ListIterator<String> content = contentList.listIterator();
-		
-		while (content.hasNext()) {
-			
-			String current = content.next();
-			Matcher commentMatcher = Pattern.compile(".*#.+").matcher(current);
-			if (commentMatcher.find()) {
-				String comment = current;
-				while (content.hasNext() 
-						&& contentList.get(content.nextIndex()).matches(".*#.+")) {
-					comment = comment.concat("\n").concat(content.next());
-				}
-				setComment(findKey(contentList, content.nextIndex()), comment);
+		comments = 0;
+		StringBuilder config = new StringBuilder("");
+		StringBuilder header = new StringBuilder("");
+		for (String line : contents.split("\n")) {
+			if (line.contains("#") && !config.toString().isEmpty()) {
+				config.append(line.replace(":", "{colon}").replaceFirst("(#)", "COMMENT__" + comments + ": ") + "\n");
+				comments ++;
+			} else if (line.startsWith("#")) {
+				header.append(line + "\n");
+			} else {
+				config.append(line + "\n");
 			}
 		}
+		this.header = header.toString().trim();
 		
-		super.loadFromString(contents);
-		if (super.options().header() != null) super.options().header("");
-		
-	}
-	
-	protected static final String removeTabsAndSpaces(String input) {
-		return input.replaceAll(" ", "").replaceAll("\t", "");
-	}
-	
-	protected static final int calculateIndent(String input) {
-		if (!(input.startsWith(" ") 
-				|| input.startsWith("\t"))) {
-			return 0;
-		}
-		
-		Matcher m = Pattern.compile("\\s+").matcher(input);
-		return m.find() ? m.group().length() : 0;
-	}
-	
-	protected static boolean areTabsUsed(String input) {
-		return calculateIndent(input) == 0 ? false : input.startsWith("\t");
-	}
-	
-	protected static String findKey(List<String> content, int index) {
-		Pattern keyPattern = Pattern.compile("\\b.*(?=:)");
-		List<String> reverseKey = new ArrayList<String>();
-		
-		ListIterator<String> iter = content.listIterator(index);
-		
-		if (!iter.hasNext()) return "";
-		
-		int indent = -1;
-		String current = iter.next();
-		Matcher m = keyPattern.matcher(removeTabsAndSpaces(current));
-		while ((!m.find()
-				|| current.contains("#"))
-				&& iter.hasNext()) {
-			current = iter.next();
-			m = keyPattern.matcher(removeTabsAndSpaces(current));
-		}
-		reverseKey.add(m.group());
-		indent = calculateIndent(current);
-		
-		while (iter.hasPrevious()) {
-			if (indent == 0) break;
-			
-			current = iter.previous();
-			if ((calculateIndent(current) < indent)
-					&& !current.contains("#")) {
-				
-				m = keyPattern.matcher(removeTabsAndSpaces(current));
-				
-				if (m.find()) {
-					
-					reverseKey.add(m.group());
-					indent = calculateIndent(current);
-					
-				}
-			}
-		}
-		return Joiner.on(".").join(Lists.reverse(reverseKey));
+		super.loadFromString(config.toString());
 	}
 	
 	/**
-	 * Saves the configuration file to the internally determined file.
+	 * Saves the configuration file to the datafolder.
 	 * 
 	 * @throws IOException
 	 */
@@ -316,27 +177,21 @@ public class SexyConfiguration extends YamlConfiguration {
 	 */
 	public void setFile(File file) {
 		this.file = file;
-		try {
-			this.load(file);
-		} catch (IOException e) {} 
-		catch (InvalidConfigurationException e) {
-			Bukkit.getLogger().log(Level.SEVERE, "Invalid Configuration file!");
-			e.printStackTrace();
-		}
 	}
 	
-	@SuppressWarnings("unchecked")
+	/*
+	 * Update from the internal yml file
+	 */
 	public SexyConfiguration update(SexyConfiguration file) throws FileNotFoundException, IOException, InvalidConfigurationException {
+		String lastComment = "";
+		for (String key : getKeys(true)) if (key.contains("COMMENT__")) lastComment = getString(key);
+		
 		for (String key : file.getKeys(true)) {
-			if (!this.contains(key)) {
+			if (!(this.contains(key) || file.getString(key).equals(lastComment))) {
 				this.set(key, file.get(key));
 				this.addDefault(key, file.get(key));
 			}
 		}
-		
-		this.comments.clear();
-		this.comments = (HashMap<String, String>) file.comments.clone();
-		
 		return this;
 	}
 }

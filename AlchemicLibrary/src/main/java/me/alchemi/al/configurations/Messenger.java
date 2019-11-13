@@ -213,7 +213,7 @@ public class Messenger {
 	public void broadcast(String msg, boolean useTag, Predicate<Player> predicate) {
 		
 		if (msg.contains("\n")) {
-			for (String msg2 : msg.split("\n")) {
+			for (String msg2 : colourRest(msg).split("\n")) {
 				broadcast(msg2, useTag, predicate);
 			}
 			return;
@@ -224,7 +224,6 @@ public class Messenger {
 			if (predicate != null && !predicate.test(receiver)) continue;
 			
 			String sendingMsg = Library.getParser().parse(receiver, msg);
-			
 			if (useTag) {
 				if (msg.isEmpty()) return;
 				if (tag.endsWith(" ")) receiver.sendMessage(formatString(tag + sendingMsg));
@@ -233,7 +232,25 @@ public class Messenger {
 			else receiver.sendMessage(formatString(sendingMsg));
 		}
 		
-	} 
+	}
+	
+	
+	private String colourRest(String msg) {
+		Pattern colourCatcher = Pattern.compile("((&[0123456789abcdefklmnor])+)");
+		String lastCol = "";
+		StringBuilder newMsg = new StringBuilder("");
+		for (String subMessage : msg.split("\n")) {
+			for (String sub : msg.split(" ")) {
+				Matcher subMatcher = colourCatcher.matcher(sub);
+				while (subMatcher.find()) {
+					lastCol = subMatcher.group();
+				}
+			}
+			newMsg.append(lastCol);
+			newMsg.append(subMessage);
+		}
+		return newMsg.toString();
+	}
 	
 	public void sendMessage(IStringer string, CommandSender receiver) { sendMessage(string.create(), receiver, false); }
 	

@@ -26,8 +26,8 @@ public enum DataType {
 	TIME(Time.class),
 	BOOLEAN(Boolean.class);
 	
-	private final long maxlength;
-	private final long minlength;
+	private long maxlength;
+	private long minlength;
 	private final Class<?> clazz;
 	
 	private DataType(long maxlength) {
@@ -43,9 +43,17 @@ public enum DataType {
 	}
 	
 	private DataType(Class<?> datatype) {
-		maxlength = 0;
-		minlength = 0;
 		clazz = datatype;
+		try {
+			maxlength = datatype.getField("MAX_VALUE").getLong(null);
+			minlength = datatype.getField("MIN_VALUE").getLong(null);
+			
+		} catch (NoSuchFieldException | IllegalArgumentException | IllegalAccessException | SecurityException e) {
+			
+			maxlength = 0;
+			minlength = 0;
+			
+		}
 	}
 	
 	public long getMaxlength() {

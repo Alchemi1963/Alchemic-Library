@@ -24,6 +24,7 @@ public class UpdateBuilder extends StatementBuilder {
 		for (Entry<String, Object> value : columnVals.entrySet()) {
 			setWrapper(value.getKey(), value.getValue());
 		}
+		this.statement = this.statement.replaceFirst("(,$)", " ");
 		
 		return this;
 		

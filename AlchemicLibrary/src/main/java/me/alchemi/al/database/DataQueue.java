@@ -27,6 +27,7 @@ public class DataQueue {
 					@Override
 					public void accept(BukkitRunnable t) {
 						
+						if (t == null) return;
 						Messenger.printStatic("Running SQL task...");
 						t.run();
 						

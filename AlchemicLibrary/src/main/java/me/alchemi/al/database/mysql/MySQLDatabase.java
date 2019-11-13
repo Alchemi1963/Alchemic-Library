@@ -5,16 +5,15 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import me.alchemi.al.database.Column;
 import me.alchemi.al.database.DataLog;
@@ -230,12 +229,12 @@ public class MySQLDatabase implements IDatabase {
 		});
 	}
 
-	/* Execute a query.
-	 * Use this to get values from the database.
+	/**
+	 *  Execute a query async.
+	 * Use this to get values async from the database.
 	 * 
-	 * @return the ResultSet from the query or null on errors.
 	 */
-	public void executeQuery(String sql, Callback<ResultSet> resultCall) {
+	public void executeQueryAsync(String sql, Callback<ResultSet> resultCall) {
 		DataQueue.getQueue().add(new BukkitRunnable() {
 
 			@Override
@@ -250,16 +249,39 @@ public class MySQLDatabase implements IDatabase {
 						public void run() {
 
 							resultCall.call(result);
-
+							log.log(sql, Level.INFO);
+							
 						}
 					}.runTask(plugin);
 
 				} catch (SQLException e) {
 					e.printStackTrace();
+					log.log(sql, Level.SEVERE);
 				}
 
 			}
 		});
+	}
+	
+	/**
+	 * Execute a query
+	 * Use this to get values from the database.
+	 * 
+	 * @param sql The sql string.
+	 * @return The ResultSet
+	 */
+	public ResultSet executeQuery(String sql) {
+		ResultSet result = null;
+		
+		try {
+			result = connection.prepareStatement(sql).executeQuery();
+			log.log(sql, Level.INFO);
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			log.log(sql, Level.SEVERE);
+		}
+		return result;
 	}
 
 	/**
@@ -305,47 +327,71 @@ public class MySQLDatabase implements IDatabase {
 	}
 
 	@Override
-	public boolean updateValue(Table table, Column column, Object newValue, @Nullable Map<Column, Object> conditionalValues) {
+	public boolean updateValue(Table table, Column column, Object newValue, Column conditionColumn, Object conditionValue) {
 		
-		if (tables.contains(table) && table.hasColumn(column) && column.testObject(newValue)) {
-			
-			Map<String, Object> conditions = new HashMap<String, Object>();
+		if (tables.contains(table) && table.hasColumn(conditionColumn) && table.hasColumn(column) && column.testObject(newValue)) {
 			
 			if (newValue instanceof String) newValue = "\"" + newValue + "\"";
 			else if (newValue instanceof StringSerializable) newValue = "\"" + ((StringSerializable)newValue).serialize_string() + "\"";
 			
-			for (Entry<Column, Object> entry : conditionalValues.entrySet()) {
-				if (!table.hasColumn(entry.getKey())) return false;
-				conditions.put(entry.getKey().getName(), entry.getValue() instanceof String ? "\"" + entry.getValue() + "\"" : entry.getValue());
-			} 
+			if (conditionValue instanceof String) conditionValue = "\"" + conditionValue + "\"";
+			else if (conditionValue instanceof StringSerializable) conditionValue = "\"" + ((StringSerializable)conditionValue).serialize_string() + "\"";
 			
 			executeUpdate(new StatementBuilder()
 					.update()
 					.table(table.getName())
 					.set(column.getName(), newValue)
-					.wheres(conditions)
+					.where(conditionColumn.getName(), conditionValue)
 					.build());
-			
+			return true;
 		}
 		
-		return true;
+		return false;
+	}
+	
+	@Override
+	public boolean updateValues(Table table, Map<Column, Object> values, Column conditionColumn, Object conditionValue) {
+		if (tables.contains(table) && table.hasColumn(conditionColumn)) {
+			
+			Map<String, Object> newValues = new HashMap<String, Object>();
+			
+			values.forEach((Column, Value) ->{
+				if (Value instanceof String) Value = "\"" + Value + "\"";
+				else if (Value instanceof StringSerializable) Value = "\"" + ((StringSerializable)Value).serialize_string() + "\"";
+				
+				if (table.hasColumn(Column) && Column.testObject(Value)) {
+					newValues.put(Column.getName(), Value);
+				}
+			});
+			
+			if (conditionValue instanceof String) conditionValue = "\"" + conditionValue + "\"";
+			else if (conditionValue instanceof StringSerializable) conditionValue = "\"" + ((StringSerializable)conditionValue).serialize_string() + "\"";
+		
+			if (newValues.isEmpty()) return false;
+			
+			executeUpdate(new StatementBuilder()
+					.update()
+					.table(table.getName())
+					.sets(newValues)
+					.where(conditionColumn.getName(), conditionValue)
+					.build());
+			return true;
+		}
+		
+		return false;
 	}
 
 	@Override
-	public boolean removeRow(Table table, @NotNull Map<Column, Object> conditionalValues) {
+	public boolean removeRow(Table table, Column conditionColumn, Object conditionValue) {
 		
-		if (!tables.contains(table)) return false;
+		if (!(tables.contains(table) || table.hasColumn(conditionColumn))) return false;
 		
-		Map<String, Object> conditions = new HashMap<String, Object>();
-		
-		for (Entry<Column, Object> entry : conditionalValues.entrySet()) {
-			if (!table.hasColumn(entry.getKey())) return false;
-			conditions.put(entry.getKey().getName(), entry.getValue() instanceof String ? "\"" + entry.getValue() + "\"" : entry.getValue());
-		}
+		if (conditionValue instanceof String) conditionValue = "\"" + conditionValue + "\"";
+		else if (conditionValue instanceof StringSerializable) conditionValue = "\"" + ((StringSerializable)conditionValue).serialize_string() + "\"";
 		
 		executeUpdate(new StatementBuilder()
 					.delete(table.getName())
-					.wheres(conditions)
+					.where(conditionColumn.getName(), conditionValue)
 					.limit(1)
 					.build());
 		
@@ -383,7 +429,7 @@ public class MySQLDatabase implements IDatabase {
 	public void getValuesAsync(Callback<ResultSet> callback) {
 		
 		for (Table t : tables) {
-			executeQuery(new StatementBuilder()
+			executeQueryAsync(new StatementBuilder()
 					.select(t.getName())
 					.build(), callback);
 		}
@@ -395,8 +441,20 @@ public class MySQLDatabase implements IDatabase {
 		
 		if (!(tables.contains(table) && table.hasColumn(column) && table.hasColumn(conditionColumn))) return;
 		
-		executeQuery(new StatementBuilder()
+		executeQueryAsync(new StatementBuilder()
 				.select(column.getName(), table.getName())
+				.where(conditionColumn.getName(), conditionValue instanceof String ? "\"" + conditionValue + "\"" : conditionValue)
+				.build(), callback);
+		
+	}
+	
+	@Override
+	public void getValuesAsync(Table table, Column conditionColumn, Object conditionValue, Callback<ResultSet> callback, Column...columns) {
+		
+		if (!(tables.contains(table) && table.hasColumn(conditionColumn))) return;
+		
+		executeQueryAsync(new StatementBuilder()
+				.select(table.getName(), Arrays.asList(columns).stream().map(Column::getName).collect(Collectors.toSet()).toArray(new String[columns.length]))
 				.where(conditionColumn.getName(), conditionValue instanceof String ? "\"" + conditionValue + "\"" : conditionValue)
 				.build(), callback);
 		
@@ -406,10 +464,20 @@ public class MySQLDatabase implements IDatabase {
 	public ResultSet getValue(Table table, Column column, Column conditionColumn, Object conditionValue) throws SQLException {
 		if (!(tables.contains(table) && table.hasColumn(column) && table.hasColumn(conditionColumn))) return null;
 		
-		return connection.prepareStatement(new StatementBuilder()
+		return executeQuery(new StatementBuilder()
 				.select(column.getName(), table.getName())
 				.where(conditionColumn.getName(), conditionValue instanceof String ? "\"" + conditionValue + "\"" : conditionValue)
-				.build()).executeQuery();
+				.build());
+	}
+	
+	@Override
+	public ResultSet getValues(Table table, Column conditionColumn, Object conditionValue, Column...columns) throws SQLException {
+		if (!(tables.contains(table) && table.hasColumn(conditionColumn))) return null;
+		
+		return executeQuery(new StatementBuilder()
+				.select(table.getName(), Arrays.asList(columns).stream().map(Column::getName).collect(Collectors.toSet()).toArray(new String[columns.length]))
+				.where(conditionColumn.getName(), conditionValue instanceof String ? "\"" + conditionValue + "\"" : conditionValue)
+				.build());
 	}
 
 	@Override

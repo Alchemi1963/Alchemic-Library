@@ -13,7 +13,7 @@ public class Column {
 	private int limit = -1;
 	
 	public Column(String name, DataType datatype, ColumnModifier...columnModifiers) {
-		this.name = name;
+		this.name = name.replace("-", "_").replace(" ", "_");
 		this.datatype = datatype;
 		this.modifiers = columnModifiers;
 		this.uuid = UUID.randomUUID();

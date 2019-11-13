@@ -7,46 +7,51 @@ import java.util.List;
 import java.util.Map;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import me.alchemi.al.objects.Callback;
 
 public interface IDatabase {
 
-	public void createTable(Table table);
+	void createTable(Table table);
 	
-	public boolean insertValue(Table table, Column column, Object value);
+	boolean insertValue(Table table, Column column, Object value);
 	
-	public boolean insertValueIgnore(Table table, Column column, Object value);
+	boolean insertValueIgnore(Table table, Column column, Object value);
 	
-	public boolean updateValue(Table table, Column column, Object newValue, @Nullable Map<Column, Object> conditionalValues);
+	boolean updateValue(Table table, Column column, Object newValue, Column conditionColumn, Object conditionValue);
 	
-	public boolean insertValues(Table table, @NotNull Map<Column, Object> values);
+	boolean updateValues(Table table, @NotNull Map<Column, Object> values, Column conditionColumn, Object conditionValue);
+	
+	boolean insertValues(Table table, @NotNull Map<Column, Object> values);
 
-	public boolean insertValuesIgnore(Table table, @NotNull Map<Column, Object> values);
+	boolean insertValuesIgnore(Table table, @NotNull Map<Column, Object> values);
 	
-	public boolean removeRow(Table table, @NotNull Map<Column, Object> conditionalValues);
+	boolean removeRow(Table table, Column conditionColumn, Object conditionValue);
 	
-	public Column removeColumn(Table table, String column);
+	Column removeColumn(Table table, String column);
 	
-	public Table removeTable(String table);
+	Table removeTable(String table);
 	
-	public void removeTable(Table table);
+	void removeTable(Table table);
 	
-	public Table getTable(String table);
+	Table getTable(String table);
 	
-	public void getValuesAsync(Callback<ResultSet> callback);
+	void getValuesAsync(Callback<ResultSet> callback);
 	
-	public void getValueAsync(Table table, Column column, Column conditionColumn, Object conditionValue, Callback<ResultSet> callback);
+	void getValueAsync(Table table, Column column, Column conditionColumn, Object conditionValue, Callback<ResultSet> callback);
 	
-	public ResultSet getValue(Table table, Column column, Column conditionColumn, Object conditionValue) throws SQLException;
+	ResultSet getValue(Table table, Column column, Column conditionColumn, Object conditionValue) throws SQLException;
 	
-	public boolean doesTableExist(String table);
+	ResultSet getValues(Table table, Column conditionColumn, Object conditionValue, Column... columns) throws SQLException;
 	
-	public Connection getConnection();
+	boolean doesTableExist(String table);
 	
-	public String getUrl();
+	Connection getConnection();
 	
-	public List<Table> getTables();
+	String getUrl();
+	
+	List<Table> getTables();
+
+	void getValuesAsync(Table table, Column conditionColumn, Object conditionValue, Callback<ResultSet> callback, Column...columns);
 	
 }

@@ -18,6 +18,11 @@ public class StatementBuilder {
 		return new UpdateBuilder(this);
 	}
 	
+	public final SelectBuilder select(String table, String...columns) {
+		statement = "SELECT " + String.join(", ", columns) + " FROM " + table + " ";
+		return new SelectBuilder(this);
+	}
+	
 	public final SelectBuilder select(String column, String table) {
 		statement = "SELECT " + column + " FROM " + table + " ";
 		return new SelectBuilder(this);

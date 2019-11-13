@@ -15,18 +15,35 @@ public class Table {
 	private Set<Column> columns;
 	private final UUID uuid;
 	
+	private Table(String name, Set<Column> columns, UUID uuid){
+		this.name = name;
+		this.columns = columns;
+		this.uuid = uuid;
+	}
+	
 	public Table(String name, Column firstColumn) {
 		columns = Sets.newHashSet(firstColumn);
 		
-		this.name = name;
+		this.name = name.replace("-", "_").replace(" ", "_");
 		this.uuid = UUID.randomUUID();
 	}
 	
 	public Table(String name, Column...columns) {
 		this.columns = Sets.newHashSet(columns);
 		
-		this.name = name;
+		this.name = name.replace("-", "_").replace(" ", "_");
 		this.uuid = UUID.randomUUID();
+	}
+	
+	/**
+	 * Returns a new Table instance with the new name.
+	 * 
+	 * @param newName
+	 * @return a new Table instance
+	 * @apiNote You should create the table anew in the database.
+	 */
+	public Table rename(String newName) {
+		return new Table(newName, columns, uuid);
 	}
 	
 	public Set<Column> getColumns() {

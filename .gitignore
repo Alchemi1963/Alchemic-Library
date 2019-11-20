@@ -39,3 +39,4 @@ maven-build.xml
 /*/build/
 /*/target/
 /build/
+*.prefs

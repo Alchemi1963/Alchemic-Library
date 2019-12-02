@@ -1,8 +1,8 @@
 package me.alchemi.al.database;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
-import java.util.function.Consumer;
 
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -23,16 +23,13 @@ public class DataQueue {
 			@Override
 			public void run() {
 				
-				tasks.forEach(new Consumer<BukkitRunnable>() {
-					@Override
-					public void accept(BukkitRunnable t) {
-						
-						if (t == null) return;
-						Messenger.printStatic("Running SQL task...");
-						t.run();
-						
-					}
-				});
+				Iterator<BukkitRunnable> iter = tasks.iterator();
+				while (iter.hasNext()) {
+					
+					Messenger.printStatic("Running SQL task.");
+					iter.next().run();
+					
+				}
 				tasks.clear();
 			}
 		}; 

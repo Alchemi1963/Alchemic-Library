@@ -24,6 +24,11 @@ public class SelectBuilder extends StatementBuilder {
 		return this;
 	}
 	
+	public final SelectBuilder whereMulti(String column, String...values) {
+		statement = statement.concat("WHERE (" + column + " IN (" + String.join(", ", values)) + "))";
+		return this;
+	}
+	
 	public final SelectBuilder where(String column, Object value) {
 		statement = statement.concat("WHERE " + column + "=" + String.valueOf(value) + " ");
 		return this;

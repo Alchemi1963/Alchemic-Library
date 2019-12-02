@@ -1,14 +1,12 @@
-allprojects {
-	apply plugin: 'java'
-    apply plugin: 'maven-publish'
-	apply plugin: 'eclipse'
-	
-    group = 'me.alchemi'
-    version = '2.5.2'
+plugins {
+	id 'java'
+	id 'eclipse'
+	id 'com.github.johnrengelman.shadow' version '5.2.0' apply false	
 }
 
+
 subprojects {
-	
+	group = 'me.alchemi'
 	repositories {
 		mavenLocal()
 		mavenCentral()
@@ -31,12 +29,6 @@ subprojects {
 		maven {
 			url = 'http://repo.dmulloy2.net/nexus/repository/public/'
 		}
-	}
-	
-	dependencies {
-
-		compileOnly 'org.jetbrains:annotations:17.0.0'
-		
 	}
 
 	

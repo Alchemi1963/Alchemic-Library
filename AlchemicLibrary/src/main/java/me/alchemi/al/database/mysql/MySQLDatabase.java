@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
@@ -458,6 +459,36 @@ public class MySQLDatabase implements IDatabase {
 				.where(conditionColumn.getName(), conditionValue instanceof String ? "\"" + conditionValue + "\"" : conditionValue)
 				.build(), callback);
 		
+	}
+	
+	public ResultSet getMultipleValues(Table table, Column column, Column conditionColumn, Object...conditionValues) throws SQLException {
+		if (!(tables.contains(table) && table.hasColumn(column))) return null;
+		
+		String[] values = new String[conditionValues.length];
+		int i = 0;
+		for (Object o : conditionValues) {
+			values[i] = IDatabase.prepareValue(o);
+			i ++;
+		}
+		
+		return executeQuery(new StatementBuilder()
+				.select(column.getName(), table.getName())
+				.whereMulti(conditionColumn.getName(), values)
+				.build());
+	}
+	
+	public ResultSet getValue(Table table, Column column, Map<Column, Object> conditions) throws SQLException {
+		if (!(tables.contains(table) && table.hasColumn(column))) return null;
+		
+		Map<String, Object> conds = new HashMap<String, Object>();
+		for (Entry<Column, Object> entry : conditions.entrySet()) {
+			conds.put(entry.getKey().getName(), IDatabase.prepareValue(entry.getValue()));
+		}
+		
+		return executeQuery(new StatementBuilder()
+				.select(column.getName(), table.getName())
+				.wheres(conds)
+				.build());
 	}
 	
 	@Override

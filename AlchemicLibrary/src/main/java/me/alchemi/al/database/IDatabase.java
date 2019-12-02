@@ -3,12 +3,15 @@ package me.alchemi.al.database;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.jetbrains.annotations.NotNull;
 
 import me.alchemi.al.objects.Callback;
+import me.alchemi.al.objects.StringSerializable;
 
 public interface IDatabase {
 
@@ -53,5 +56,19 @@ public interface IDatabase {
 	List<Table> getTables();
 
 	void getValuesAsync(Table table, Column conditionColumn, Object conditionValue, Callback<ResultSet> callback, Column...columns);
+	
+	static String prepareValue(Object input) {
+		if (input instanceof String
+				&& !((String)input).matches(".+\\(.*\\)")) {
+			return "\"" + input + "\"";
+		} else if (input instanceof StringSerializable) {
+			return "\"" + ((StringSerializable)input).serialize_string() + "\"";
+		} else if (input instanceof UUID) {
+			return "\"" + ((UUID)input).toString() + "\"";
+		} else if (input instanceof Timestamp) {
+			return ((Timestamp)input).toString();
+		}
+		return String.valueOf(input);
+	}
 	
 }

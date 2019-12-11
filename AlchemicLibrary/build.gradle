@@ -33,7 +33,7 @@ shadowJar {
 	
 	doFirst{
 		relocate 'net.wesjd', 'net.shade.wesjd'
-		relocate 'org.apache', 'org.shade.apache'
+		relocate 'org.apache.commons.io', 'org.shade.apache.commons.io'
 	
 		println 'Building jar file...'
 		println 'Version ' + project.version

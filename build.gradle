@@ -1,35 +1,129 @@
-plugins {
-	id 'java'
-	id 'eclipse'
-	id 'com.github.johnrengelman.shadow' version '5.2.0' apply false	
+buildscript {
+  repositories {
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+  }
+  dependencies {
+    classpath "com.github.jengelman.gradle.plugins:shadow:5.2.0"
+  }
 }
 
+plugins {
+	id 'java'
+	id 'maven-publish'
+	id 'eclipse'
+}
 
-subprojects {
-	group = 'me.alchemi'
-	repositories {
-		mavenLocal()
-		mavenCentral()
-		maven {
-			url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
-		}
+apply plugin: 'com.github.johnrengelman.shadow'
 
-		maven {
-			url = 'http://repo.maven.apache.org/maven2'
-		}
+group = 'me.alchemi'
+description = 'AlchemicLibrary'
+version = '3.0.0'
 
-		maven {
-			url = 'https://nexus.wesjd.net/repository/thirdparty/'
-		}
-
-		maven {
-			url = 'http://repo.extendedclip.com/content/repositories/placeholderapi/'
-		}
-
-		maven {
-			url = 'http://repo.dmulloy2.net/nexus/repository/public/'
-		}
+repositories {
+	mavenLocal()
+	mavenCentral()
+	maven {
+		url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
 	}
 
+	maven {
+		url = 'https://repo.maven.apache.org/maven2'
+	}
+
+	maven {
+		url = 'https://nexus.wesjd.net/repository/thirdparty/'
+	}
+
+	maven {
+		url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/'
+	}
+
+	maven {
+		url = 'https://repo.dmulloy2.net/nexus/repository/public/'
+	}
+}
+
+dependencies {
 	
+	compileOnly 'mysql:mysql-connector-java:5.1.41'
+	compileOnly 'org.jetbrains:annotations:17.0.0'
+	
+	implementation 'org.spigotmc:spigot-api:1.15.2-R0.1-SNAPSHOT'
+	implementation 'com.comphenix.protocol:ProtocolLib:4.5.0'
+	implementation 'me.clip:placeholderapi:2.10.6'
+	
+	shadow 'commons-io:commons-io:2.6'
+	shadow 'net.wesjd:anvilgui:1.2.2-SNAPSHOT'
+}
+
+shadowJar {
+	baseName = project.description
+	classifier = ''
+	archiveVersion = project.version
+	
+	doFirst{
+		relocate 'net.wesjd', 'net.shade.wesjd'
+		relocate 'org.apache.commons.io', 'org.shade.apache.commons.io'
+	
+		println 'Building jar file...'
+		println 'Version ' + project.version
+	}
+	
+	exclude 'config.yml'
+	minimize()
+
+}
+
+task copy(type: Copy) {
+	dependsOn 'shadowJar'
+	group = 'Build'
+	description = 'Install project to Test-Server.'
+
+	doFirst{
+		println 'Installing jar file from ${jar.archivePath}'
+
+		from jar.archivePath
+		into '../../Test-Server/plugins/'
+		rename '(.*)-(.*).jar', '$1.jar'
+	}
+}
+
+processResources {
+	filter  { line -> line.replaceAll('\\$\\{project.version\\}', project.version)}
+}
+
+task export {
+	dependsOn 'shadowJar'
+	dependsOn 'publishToMavenLocal'
+	finalizedBy 'incrementVersion'
+
+	doLast{
+		println 'Exporting to jar file.'
+	}
+}
+
+publishing {
+  publications {
+    shadow(MavenPublication) { publication ->
+      project.shadow.component(publication)
+    }
+  }
+}
+
+task incrementVersion {
+	doFirst{
+		String minor=version.substring(version.lastIndexOf('.')+1)
+		int m=minor.toInteger()+1
+		String major=version.substring(0,version.length()-1)
+		String s=buildFile.getText().replaceFirst('version = \'' + project.version + '\'','version = \''+major+m+'\'')
+		buildFile.setText(s)
+
+		println 'New version ' + major + m
+	}
+}
+
+eclipse {
+	autoBuildTasks copy
 }

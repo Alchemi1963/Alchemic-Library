@@ -26,7 +26,7 @@ public class DataQueue {
 				Iterator<BukkitRunnable> iter = tasks.iterator();
 				while (iter.hasNext()) {
 					
-					Messenger.printStatic("Running SQL task.");
+					Messenger.printS("Running SQL task.");
 					iter.next().run();
 					
 				}

@@ -33,7 +33,7 @@ repositories {
 	}
 
 	maven {
-		url = 'https://nexus.wesjd.net/repository/thirdparty/'
+		url = 'https://jitpack.io'
 	}
 
 	maven {
@@ -47,15 +47,15 @@ repositories {
 
 dependencies {
 	
-	compileOnly 'mysql:mysql-connector-java:5.1.41'
-	compileOnly 'org.jetbrains:annotations:17.0.0'
+	shadow 'mysql:mysql-connector-java:5.1.41'
+	shadow 'org.jetbrains:annotations:17.0.0'
 	
-	implementation 'org.spigotmc:spigot-api:1.15.2-R0.1-SNAPSHOT'
-	implementation 'com.comphenix.protocol:ProtocolLib:4.5.0'
-	implementation 'me.clip:placeholderapi:2.10.6'
+	shadow 'org.spigotmc:spigot-api:1.15.2-R0.1-SNAPSHOT'
+	shadow 'com.comphenix.protocol:ProtocolLib:4.5.0'
+	shadow 'me.clip:placeholderapi:2.10.6'
 	
-	shadow 'commons-io:commons-io:2.6'
-	shadow 'net.wesjd:anvilgui:1.2.2-SNAPSHOT'
+	implementation 'commons-io:commons-io:2.6'
+	implementation 'com.github.WesJD.AnvilGUI:anvilgui:master-SNAPSHOT'
 }
 
 shadowJar {
@@ -64,11 +64,11 @@ shadowJar {
 	archiveVersion = project.version
 	
 	doFirst{
-		relocate 'net.wesjd', 'net.shade.wesjd'
-		relocate 'org.apache.commons.io', 'org.shade.apache.commons.io'
+		relocate 'net.wesjd', 'net.alchemi.wesjd'
+		relocate 'org.apache.commons.io', 'org.alchemi.apache.commons.io'
 	
-		println 'Building jar file...'
-		println 'Version ' + project.version
+		project.logger.lifecycle 'Building jar file...'
+		project.logger.lifecycle 'Version ' + project.version
 	}
 	
 	exclude 'config.yml'
@@ -80,13 +80,13 @@ task copy(type: Copy) {
 	dependsOn 'shadowJar'
 	group = 'Build'
 	description = 'Install project to Test-Server.'
-
-	doFirst{
-		println 'Installing jar file from ${jar.archivePath}'
-
-		from jar.archivePath
-		into '../../Test-Server/plugins/'
-		rename '(.*)-(.*).jar', '$1.jar'
+	
+	from jar.archivePath
+	into '../Test-Server/plugins/'
+	rename '(.*)-(.*).jar', '$1.jar'
+	
+	doLast{
+		project.logger.lifecycle 'Installing jar file from ' + jar.archivePath
 	}
 }
 
@@ -100,7 +100,7 @@ task export {
 	finalizedBy 'incrementVersion'
 
 	doLast{
-		println 'Exporting to jar file.'
+		project.logger.lifecycle 'Exporting to jar file.'
 	}
 }
 
@@ -120,10 +120,11 @@ task incrementVersion {
 		String s=buildFile.getText().replaceFirst('version = \'' + project.version + '\'','version = \''+major+m+'\'')
 		buildFile.setText(s)
 
-		println 'New version ' + major + m
+		project.logger.lifecycle 'New version ' + major + m
 	}
 }
 
 eclipse {
 	autoBuildTasks copy
+	project.natures 'org.eclipse.buildship.core.gradleprojectnature'
 }

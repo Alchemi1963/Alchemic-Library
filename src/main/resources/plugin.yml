@@ -1,7 +1,7 @@
 name: AlchemicLibrary
 main: me.alchemi.al.Library
 version: ${project.version}
-api-version: 1.13
+api-version: 1.15
 author: Alchemi
 description: A library for all my plugins
 softdepend:

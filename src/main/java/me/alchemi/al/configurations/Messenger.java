@@ -2,6 +2,7 @@ package me.alchemi.al.configurations;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
@@ -13,12 +14,15 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import me.alchemi.al.Library;
 import me.alchemi.al.objects.base.PluginBase;
 import me.alchemi.al.objects.meta.ChatPagesMeta;
-import me.alchemi.al.objects.placeholder.IStringer;
+import me.alchemi.al.objects.placeholder.IStringParser;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
@@ -27,7 +31,8 @@ import net.md_5.bungee.api.chat.TextComponent;
 public class Messenger {
 
 	protected final PluginBase plugin;
-	protected SexyConfiguration messages;
+	protected @NotNull FileConfiguration messages;
+	protected IMessage[] imessages;
 	protected String tag;
 	protected String header;
 	
@@ -41,10 +46,20 @@ public class Messenger {
 		this.plugin = plugin;
 		
 		if (new File(plugin.getDataFolder(), "messages.yml").exists()) {
-			this.messages = SexyConfiguration.loadConfiguration(new File(plugin.getDataFolder(), "messages.yml"));
+			this.messages = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), "messages.yml"));
 			
 			tag = getTag();
 			header = getHeader();
+			this.messages.setDefaults(YamlConfiguration.loadConfiguration(new InputStreamReader(plugin.getResource("messages.yml"))));
+			
+		} else if (plugin.getResource("messages.yml") != null) {
+			
+			plugin.saveResource("messages.yml", true);
+			this.messages = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), "messages.yml"));
+			
+			tag = getTag();
+			header = getHeader();
+			this.messages.setDefaults(YamlConfiguration.loadConfiguration(new InputStreamReader(plugin.getResource("messages.yml"))));
 			
 		} else {
 			this.messages = null;
@@ -55,31 +70,25 @@ public class Messenger {
 		
 	}
 	
-	/**
-	 * Creates a Messenger instance, with the option of setting a custom messagesFile.
-	 *   
-	 * @param fileManager	The {@link FileManager} to base the Messenger instance from.
-	 * @param messagesFile	The messages file (should end in .yml) - default is messages.yml
-	 * @see {@link FileManager}
-	 */
-	public Messenger(PluginBase plugin, String messagesFile) {
-		this.plugin = plugin;
-		
-		if (new File(plugin.getDataFolder(), messagesFile).exists()) {
-			this.messages = SexyConfiguration.loadConfiguration(new File(plugin.getDataFolder(), messagesFile));
-			tag = getTag();
-			header = getHeader();
-			
-		} else {
-			this.messages = null;
-			
-			tag = generateTag(plugin.getName());
-			header = generateHeader(plugin.getName());
-
+	protected boolean save() {
+		try {
+			messages.save("messages.yml");
+			return true;
+		} catch (IOException e) {
+			return false;
 		}
 	}
 	
-	private static String generateHeader(String pluginName) {
+	protected void updateFile(String key) { 
+		if (messages.getDefaults().contains(key)) {
+			if (!messages.contains(key, true)) {
+				messages.set(key, messages.getDefaults().get(key));
+				save();
+			}
+		}
+	}
+	
+	protected static String generateHeader(String pluginName) {
 		double l = (52 - pluginName.length())/2;
 		if (String.valueOf(l).endsWith(".5")) {
 			l = Math.round(l) - 1;
@@ -96,15 +105,13 @@ public class Messenger {
 	}
 	
 	private static String generateTag(String pluginName) {
-		
 		return "[" + pluginName + "]";
-		
 	}
 	
 	/**
 	 * Gets the plugin tag
 	 * 
-	 * @return The plugin tag, null if it isn't found
+	 * @return The plugin tag, generated one if it doesn't exist
 	 */
 	public String getTag() {
 		tag = messages.getString(plugin.getDescription().getName() + ".Tag");
@@ -114,6 +121,11 @@ public class Messenger {
 		return tag;
 	}
 	
+	/**
+	 * Gets the plugin header
+	 * 
+	 * @return The plugin header, generated one if it doesn't exist
+	 */
 	public String getHeader() {
 		header = messages.getString(plugin.getDescription().getName() + ".Header");
 		if (header == null || header.isEmpty()) {
@@ -122,6 +134,46 @@ public class Messenger {
 			
 		}
 		return header;
+	}
+	
+	/**
+	 * Get a message by key
+	 * 
+	 * @param key	the key for the message
+	 * @return the message
+	 */
+	public String get(String key) {
+		if (!messages.contains(key, true) && messages.getDefaults().contains(key)) {
+			updateFile(key);
+			return messages.getString(key);
+		}		
+		return messages.getString(key, "");
+	}
+	
+	/**
+	 * Points Messenger to the IMessage implementing enum and loads them in memory.
+	 * 
+	 * @param imessages
+	 */
+	public void setMessages(IMessage[] imessages) {
+		this.imessages = imessages;
+		loadMessages();
+	}
+	
+	protected void loadMessages() {
+		for (IMessage imsg : imessages) {
+			imsg.setValue(get(imsg.key()));
+		}
+	}
+	
+	/**
+	 * Reloads the messages file.
+	 */
+	public void reloadMessages() {
+		try {
+			messages.load(new File(plugin.getDataFolder(), "messages.yml"));
+			loadMessages();
+		} catch (IOException | InvalidConfigurationException e) {}
 	}
 	
 	/**
@@ -139,10 +191,10 @@ public class Messenger {
 	 * 
 	 * @param msg	The message to be displayed
 	 */
-	public static void printStatic(Object... msgs) { 
+	public static void printS(Object... msgs) { 
 		String msg = "";
 		for (Object o : msgs) msg = msg + String.valueOf(o) + "\t";
-		Bukkit.getConsoleSender().sendMessage(formatString(msg)); 
+		Bukkit.getConsoleSender().sendMessage(formatString(msg));
 	}
 	
 	/**
@@ -151,9 +203,10 @@ public class Messenger {
 	 * @param msg	The message to be displayed
 	 * @param tag	The plugin tag to be put in front of the message
 	 */
-	public static void printStatic(Object msg, String tag) { 
+	public static void printS(Object msg, String tag) {
 		Bukkit.getConsoleSender().sendMessage(formatString(tag + " " + String.valueOf(msg))); 
 	}
+	
 	/**
 	 * Sends a message to the console.
 	 * 
@@ -178,14 +231,59 @@ public class Messenger {
 		plugin.getLogger().info(formatString(String.valueOf(msg)));
 	} 
 	
-	public void broadcast(IStringer string) { broadcast(string.create()); }
-	
-	public void broadcast(IStringer string, boolean useTag) { broadcast(string.create(), useTag); }
-	
-	public void broadcast(IStringer string, boolean useTag, Predicate<Player> predicate) { broadcast(string.create(), useTag, predicate); }
+	/**
+	 * Broadcasts a message to the whole server.
+	 * Assumes using a tag.
+	 * 
+	 * @param msg The message to be broadcast
+	 */
+	public void broadcast(IMessage msg) { broadcast(msg.toString()); }
 	
 	/**
 	 * Broadcasts a message to the whole server.
+	 * 
+	 * @param msg The message to be broadcast
+	 * @param useTag Should the tag be displayed
+	 */
+	public void broadcast(IMessage msg, boolean useTag) {broadcast(msg.toString(), useTag); }
+	
+	/**
+	 * Broadcasts a message to the server.
+	 * 
+	 * @param msg 		The message to be broadcast
+	 * @param useTag 	Should the tag be displayed
+	 * @param predicate The statement receivers should test true for.
+	 */
+	public void broadcast(IMessage msg, boolean useTag, Predicate<Player> predicate) { broadcast(msg.toString(), useTag, predicate); }
+	
+	/**
+	 * Broadcasts a message to the whole server.
+	 * Assumes using a tag.
+	 * 
+	 * @param msg The message to be broadcast
+	 */
+	public void broadcast(IStringParser msg) { broadcast(msg.create()); }
+	
+	/**
+	 * Broadcasts a message to the whole server.
+	 * 
+	 * @param msg The message to be broadcast
+	 * @param useTag Should the tag be displayed
+	 */
+	public void broadcast(IStringParser msg, boolean useTag) { broadcast(msg.create(), useTag); }
+	
+	/**
+	 * Broadcasts a message to the server.
+	 * 
+	 * @param msg 		The message to be broadcast
+	 * @param useTag 	Should the tag be displayed
+	 * @param predicate The statement receivers should test true for.
+	 */
+	public void broadcast(IStringParser msg, boolean useTag, Predicate<Player> predicate) { broadcast(msg.create(), useTag, predicate); }
+	
+	/**
+	 * Broadcasts a message to the whole server.
+	 * Assumes using a tag.
 	 * 
 	 * @param msg The message to be broadcast
 	 */
@@ -204,16 +302,16 @@ public class Messenger {
 	}
 	
 	/**
-	 * Broadcasts a message to the whole server.
+	 * Broadcasts a message to the server.
 	 * 
-	 * @param msg The message to be broadcast
-	 * @param useTag Should the tag be displayed
+	 * @param msg 		The message to be broadcast
+	 * @param useTag 	Should the tag be displayed
 	 * @param predicate The statement receivers should test true for.
 	 */
 	public void broadcast(String msg, boolean useTag, Predicate<Player> predicate) {
 		
 		if (msg.contains("\n")) {
-			for (String msg2 : colourRest(msg).split("\n")) {
+			for (String msg2 : colourMessageInternally(msg).split("\n")) {
 				broadcast(msg2, useTag, predicate);
 			}
 			return;
@@ -222,7 +320,7 @@ public class Messenger {
 		
 		for (Player receiver : Bukkit.getOnlinePlayers()) {
 			if (predicate != null && !predicate.test(receiver)) continue;
-			
+			 
 			String sendingMsg = Library.getParser().parse(receiver, msg);
 			if (useTag) {
 				if (msg.isEmpty()) return;
@@ -234,8 +332,7 @@ public class Messenger {
 		
 	}
 	
-	
-	private String colourRest(String msg) {
+	private String colourMessageInternally(String msg) {
 		Pattern colourCatcher = Pattern.compile("((&[0123456789abcdefklmnor])+)");
 		String lastCol = "";
 		StringBuilder newMsg = new StringBuilder("");
@@ -252,11 +349,13 @@ public class Messenger {
 		return newMsg.toString();
 	}
 	
-	public void sendMessage(IStringer string, CommandSender receiver) { sendMessage(string.create(), receiver, false); }
-	
-	public void sendMessage(IStringer string, CommandSender receiver, boolean tagged) { sendMessage(string.create(), receiver, tagged); }
-	
-	public void sendMessage(String msg, CommandSender receiver) { sendMessage(msg, receiver, false); }
+	/**
+	 * Sends a string to a {@link CommandSender}
+	 * 
+	 * @param msg		The string to be sent
+	 * @param reciever	The {@link CommandSender}
+	 */
+	public void sendMessage(IMessage msg, CommandSender receiver) { sendMessage(msg.toString(), receiver); }
 	
 	/**
 	 * Sends a string to a {@link CommandSender}
@@ -264,18 +363,31 @@ public class Messenger {
 	 * @param msg		The string to be sent
 	 * @param reciever	The {@link CommandSender}
 	 */
-	public void sendMessage(String msg, CommandSender reciever, boolean tagged){
+	public void sendMessage(IStringParser msg, CommandSender receiver) { sendMessage(msg.create(), receiver); }
+	
+	/**
+	 * Sends a string to a {@link CommandSender}
+	 * 
+	 * @param msg		The string to be sent
+	 * @param reciever	The {@link CommandSender}
+	 */
+	public void sendMessage(String msg, CommandSender receiver) { 
+		
 		if (msg.isEmpty()) return;
 		
-		String sendingMsg = Library.getParser().parse(reciever, msg);
+		String sendingMsg = Library.getParser().parse(receiver, msg);
 		
-		if (tagged && tag.endsWith(" ")) reciever.sendMessage(formatString(tag + sendingMsg));
-		else if (tagged) reciever.sendMessage(formatString(tag + " " + sendingMsg));
-		else reciever.sendMessage(formatString(sendingMsg));
+		if (tag.endsWith(" ")) receiver.sendMessage(formatString(tag + sendingMsg));
+		else receiver.sendMessage(formatString(tag + " " + sendingMsg));
 	}
 	
-	public void sendMessages(Player receiver, String...msgs) {
-		
+	/**
+	 * Sends pages to receiver in chat
+	 * 
+	 * @param receiver
+	 * @param msgs
+	 */
+	public void sendPages(Player receiver, String...msgs) {
 		String symbol = header.substring(0, 1);
 		Matcher matcher = Pattern.compile("((&[0123456789abcdefklmnor])+.)").matcher(header);
 		if (matcher.find()) symbol = matcher.group();
@@ -355,7 +467,7 @@ public class Messenger {
 			return;
 		}
 		for (Player r : Library.getInstance().getServer().getOnlinePlayers()) {
-			sendHoverMsg(r, tag + " " + mainText, hoverText);
+			sendMessageHover(r, tag + " " + mainText, hoverText);
 		}
 	}
 	
@@ -366,7 +478,7 @@ public class Messenger {
 	 * @param mainText	The main text to be sent
 	 * @param hoverText	The text the receiver should see when hovering over the main text
 	 */
-	public static void sendHoverMsg(Player reciever, String mainText, String hoverText) {
+	public static void sendMessageHover(Player reciever, String mainText, String hoverText) {
 		
 		if (hoverText.substring(0, 1).equals("\n")) hoverText = hoverText.replaceFirst("\n", "");
 		
@@ -407,12 +519,5 @@ public class Messenger {
 		
 	}
 	
-	/**
-	 * Reloads the messages file.
-	 */
-	public void reloadMessages() {
-		try {
-			messages.load();
-		} catch (IOException | InvalidConfigurationException e) {}
-	}
+	
 }

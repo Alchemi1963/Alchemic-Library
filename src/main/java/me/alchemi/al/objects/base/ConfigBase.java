@@ -106,17 +106,6 @@ public abstract class ConfigBase {
 		}
 	}
 	
-	public interface IMessage {
-		
-		public void get();
-		
-		public String value();
-		
-		public String key();
-		
-		SexyConfiguration getConfig();
-	}
-	
 	public interface IConfigEnum{
 		
 		SexyConfiguration getConfig();
@@ -166,11 +155,6 @@ public abstract class ConfigBase {
 				if (value == null) continue;
 				value.get();
 			}
-				
-			if (getMessages() != null) for (IMessage value : getMessages()) {
-				if (value == null) continue;
-				value.get();
-			}
 			
 		} catch (IOException | InvalidConfigurationException e) {
 			e.printStackTrace();
@@ -192,11 +176,6 @@ public abstract class ConfigBase {
 			value.getConfig().set(value.key(), value.value());
 		}
 		
-		if (getMessages() != null) for (IMessage value : getMessages()) {
-			if (value == null) continue;
-			value.getConfig().set(value.key(), value.value());
-		}
-		
 		try {
 			if (getConfigs() != null) for (IConfigEnum c : getConfigs()) {
 				if (c == null) continue;
@@ -208,6 +187,4 @@ public abstract class ConfigBase {
 	protected abstract IConfigEnum[] getConfigs();
 	
 	protected abstract Set<IConfig> getEnums();
-	
-	protected abstract Set<IMessage> getMessages();
 }

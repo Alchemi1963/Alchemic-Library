@@ -1,5 +1,7 @@
 package me.alchemi.al;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -23,6 +25,7 @@ import org.bukkit.inventory.ItemStack;
 import me.alchemi.al.configurations.Messenger;
 import me.alchemi.al.configurations.SexyConfiguration;
 import me.alchemi.al.database.mysql.MySQLDatabase;
+import me.alchemi.al.objects.ReflectionUtil;
 import me.alchemi.al.objects.base.PluginBase;
 import me.alchemi.al.objects.commands.PageCommands;
 import me.alchemi.al.objects.handling.CarbonDating;
@@ -252,6 +255,29 @@ public class Library extends PluginBase implements Listener {
 	  List<T> list = new ArrayList<T>(c);
 	  if (!list.isEmpty()) Collections.sort(list);
 	  return list;
+	}
+	
+	public static String itemStackToJson(ItemStack in) {
+		// ItemStack methods to get a net.minecraft.server.ItemStack object for serialization
+		Class<?> craftItemStackClazz = ReflectionUtil.getOBCClass("inventory.CraftItemStack");
+		Method asNMSCopyMethod = ReflectionUtil.getMethod(craftItemStackClazz, "asNMSCopy", ItemStack.class);
+		Object nmsItemStackObj;
+		try {
+			nmsItemStackObj = asNMSCopyMethod.invoke(null, in);
+			// NMS Method to serialize a net.minecraft.server.ItemStack to a valid Json string
+			Class<?> nmsItemStackClazz = ReflectionUtil.getNMSClass("ItemStack");
+			Class<?> nbtTagCompoundClazz = ReflectionUtil.getNMSClass("NBTTagCompound");
+			Method saveNmsItemStackMethod = ReflectionUtil.getMethod(nmsItemStackClazz, "save", nbtTagCompoundClazz);
+
+			Object nmsNbtTagCompoundObj; // This will just be an empty NBTTagCompound instance to invoke the saveNms method
+			Object itemAsJsonObject; // This is the net.minecraft.server.ItemStack after being put through saveNmsItem method
+			nmsNbtTagCompoundObj = nbtTagCompoundClazz.newInstance(); // Create the instance
+			itemAsJsonObject = saveNmsItemStackMethod.invoke(nmsItemStackObj, nmsNbtTagCompoundObj);
+			return itemAsJsonObject.toString();
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | InstantiationException e) {
+			e.printStackTrace();
+			return "";
+		}
 	}
 	
 	public static PersistentMeta getMeta() {

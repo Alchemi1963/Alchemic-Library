@@ -23,6 +23,7 @@ import me.alchemi.al.Library;
 import me.alchemi.al.objects.base.PluginBase;
 import me.alchemi.al.objects.meta.ChatPagesMeta;
 import me.alchemi.al.objects.placeholder.IStringParser;
+import me.alchemi.al.util.NumUtil;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
@@ -425,14 +426,14 @@ public class Messenger {
 				TextComponent main = new TextComponent(formatString(msg));
 				
 				TextComponent previous = new TextComponent(formatString("&c&oPrev&r"));
-				previous.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + Library.toBinary("previous")));
+				previous.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + NumUtil.toBinary("previous")));
 				
 				TextComponent between = new TextComponent(formatString(footer
 						.replace("x", String.valueOf(messages.size() + 1))
 								.replace("y", String.valueOf(Math.round(msgs.length/8.0)))));
 				
 				TextComponent next = new TextComponent(formatString("&a&oNext&r"));
-				next.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + Library.toBinary("next")));
+				next.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + NumUtil.toBinary("next")));
 				
 				main.addExtra(previous);
 				main.addExtra(between);

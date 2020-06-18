@@ -6,10 +6,10 @@ import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import me.alchemi.al.Library;
 import me.alchemi.al.configurations.Messenger;
 import me.alchemi.al.objects.ChatListener;
 import me.alchemi.al.objects.GUI.BookGUI;
+import me.alchemi.al.util.NumUtil;
 import net.wesjd.anvilgui.AnvilGUI;
 
 public class InputRequest {
@@ -85,14 +85,14 @@ public class InputRequest {
 		 * @return the input as int
 		 */
 		public int asInt() {
-			return Library.testIfNumber(input) ? Integer.valueOf(input) : -1;
+			return NumUtil.testIfNumber(input) ? Integer.valueOf(input) : -1;
 		}
 		
 		/**
 		 * @return the input as double
 		 */
 		public double asDouble() {
-			return Library.testIfNumber(input) ? Double.valueOf(input) : -1.0D;
+			return NumUtil.testIfNumber(input) ? Double.valueOf(input) : -1.0D;
 		}
 		
 		/**

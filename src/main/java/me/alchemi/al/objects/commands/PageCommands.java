@@ -5,9 +5,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 
-import me.alchemi.al.Library;
 import me.alchemi.al.objects.meta.ChatPagesMeta;
 import me.alchemi.al.objects.meta.PersistentMeta;
+import me.alchemi.al.util.NumUtil;
 
 public class PageCommands implements Listener {
 	
@@ -23,14 +23,14 @@ public class PageCommands implements Listener {
 			return;
 		}
 		
-		if (e.getMessage().equals("/" + Library.toBinary("next")) && meta.getPages().hasNext()) {
+		if (e.getMessage().equals("/" + NumUtil.toBinary("next")) && meta.getPages().hasNext()) {
 			
 			if (!meta.goNext()) meta.getPages().next();
 			player.spigot().sendMessage(meta.getPages().next());
 			player.setMetadata(ChatPagesMeta.class.getName(), new ChatPagesMeta(meta.getPages(), true));
 			e.setCancelled(true);
 			
-		} else if (e.getMessage().equals("/" + Library.toBinary("previous")) && meta.getPages().hasPrevious()) {
+		} else if (e.getMessage().equals("/" + NumUtil.toBinary("previous")) && meta.getPages().hasPrevious()) {
 			
 			if (meta.goNext()) meta.getPages().previous();
 			player.spigot().sendMessage(meta.getPages().previous());

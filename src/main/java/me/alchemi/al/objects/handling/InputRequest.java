@@ -22,10 +22,15 @@ public class InputRequest {
 		
 		switch(preferred_option) {
 		case ANVIL:
-			new AnvilGUI(plugin, object, Messenger.formatString(quest), (player, reply) -> { 
+			new AnvilGUI.Builder()
+			.plugin(plugin)
+			.title(Messenger.formatString(quest))
+			.onComplete((player, reply) -> { 
 				Bukkit.getPluginManager().callEvent(new InputReceivedEvent(reply, object, preferred_option));
 				return null;
-			});
+			})
+			.preventClose()
+			.open(object);
 			break;
 		case BOOK:
 			new BookGUI(plugin, object, (player, reply) -> { 

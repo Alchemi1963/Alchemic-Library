@@ -19,7 +19,7 @@ apply plugin: 'com.github.johnrengelman.shadow'
 
 group = 'me.alchemi'
 description = 'AlchemicLibrary'
-version = '3.0.0'
+version = '3.0.2'
 
 repositories {
 	mavenLocal()
@@ -43,6 +43,10 @@ repositories {
 	maven {
 		url = 'https://repo.dmulloy2.net/nexus/repository/public/'
 	}
+	
+	maven {
+    	url = 'https://repo.codemc.org/repository/maven-public/'
+    }
 }
 
 dependencies {
@@ -56,6 +60,7 @@ dependencies {
 	
 	implementation 'commons-io:commons-io:2.6'
 	implementation 'com.github.WesJD.AnvilGUI:anvilgui:master-SNAPSHOT'
+	implementation 'de.tr7zw:item-nbt-api:2.3.1'
 }
 
 shadowJar {
@@ -65,6 +70,7 @@ shadowJar {
 	
 	doFirst{
 		relocate 'net.wesjd', 'net.alchemi.wesjd'
+		relocate 'de.tr7zw.changeme.nbtapi', 'de.tr7zw.alchemiclibrary.nbtapi'
 		relocate 'org.apache.commons.io', 'org.alchemi.apache.commons.io'
 	
 		project.logger.lifecycle 'Building jar file...'
@@ -94,10 +100,13 @@ processResources {
 	filter  { line -> line.replaceAll('\\$\\{project.version\\}', project.version)}
 }
 
-task export {
+task export(type: Copy) {
 	dependsOn 'shadowJar'
 	dependsOn 'publishToMavenLocal'
 	finalizedBy 'incrementVersion'
+
+	from jar.archivePath
+	into 'target/'
 
 	doLast{
 		project.logger.lifecycle 'Exporting to jar file.'

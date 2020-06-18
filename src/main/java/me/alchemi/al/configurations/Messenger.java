@@ -72,7 +72,7 @@ public class Messenger {
 	
 	protected boolean save() {
 		try {
-			messages.save("messages.yml");
+			messages.save(new File(plugin.getDataFolder(), "messages.yml"));
 			return true;
 		} catch (IOException e) {
 			return false;
@@ -151,6 +151,17 @@ public class Messenger {
 	}
 	
 	/**
+	 * Get a message by key
+	 * This method asks for multiple keys and concatenates them into a string
+	 * 
+	 * @param keys	the keys for the message
+	 * @return 	the message
+	 */
+	public String get(String...keys) {
+		return get(String.join(".", keys));
+	}
+	
+	/**
 	 * Points Messenger to the IMessage implementing enum and loads them in memory.
 	 * 
 	 * @param imessages
@@ -172,6 +183,8 @@ public class Messenger {
 	public void reloadMessages() {
 		try {
 			messages.load(new File(plugin.getDataFolder(), "messages.yml"));
+			tag = getTag();
+			header = getHeader();
 			loadMessages();
 		} catch (IOException | InvalidConfigurationException e) {}
 	}

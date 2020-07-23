@@ -1,5 +1,7 @@
 package me.alchemi.al.util;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -74,6 +76,17 @@ public class NumUtil {
 		Matcher m = Pattern.compile("\\d+(,|.)*").matcher(input);
 		
 		return m.matches();
+	}
+	
+	public static boolean isPrimitive(String input, Class<? extends Number> primitive){
+		try {
+			Method pMethod = primitive.getMethod("valueOf", String.class);
+			pMethod.invoke(null, input);
+			return true;
+		} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			return false;
+		}
+		
 	}
 
 	public static String toBinary(String from) {

@@ -18,7 +18,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import me.alchemi.al.objects.handling.ItemFactory;
 import me.alchemi.al.objects.handling.SexyRunnable;
 import me.alchemi.al.objects.meta.GUIPageMeta;
-import me.alchemi.al.objects.meta.PersistentMeta;
+import me.alchemi.al.objects.meta.MetaUtil;
 
 public abstract class GUIBase {
 	
@@ -53,8 +53,8 @@ public abstract class GUIBase {
 	public void generateGUI() {
 		int page = 0;
 		
-		if (!PersistentMeta.hasMeta(sender, GUIPageMeta.class)) sender.setMetadata(GUIPageMeta.class.getName(), new GUIPageMeta(GUIBase.plugin, page));
-		else page = PersistentMeta.getMeta(sender, GUIPageMeta.class).asInt();
+		if (!MetaUtil.hasMeta(sender, GUIPageMeta.KEY, GUIPageMeta.class)) sender.setMetadata(GUIPageMeta.class.getName(), new GUIPageMeta(GUIBase.plugin, page));
+		else page = MetaUtil.getMeta(sender, GUIPageMeta.KEY, GUIPageMeta.class).asInt();
 		
 		TreeMap<Integer, ItemStack> mapped = new TreeMap<>(contents);
 		
@@ -165,7 +165,7 @@ public abstract class GUIBase {
 		public void run(Object... args) {
 			// player
 			gui.clear();
-			int page = PersistentMeta.getMeta((Player) args[0], GUIPageMeta.class).asInt();
+			int page = MetaUtil.getMeta((Player) args[0], GUIPageMeta.KEY, GUIPageMeta.class).asInt();
 			page ++;
 			((Player) args[0]).setMetadata(GUIPageMeta.class.getName(), new GUIPageMeta(GUIBase.plugin, page));
 			updateGUI();
@@ -178,7 +178,7 @@ public abstract class GUIBase {
 		public void run(Object... args) {
 			// player
 			gui.clear();
-			int page = PersistentMeta.getMeta((Player) args[0], GUIPageMeta.class).asInt();
+			int page = MetaUtil.getMeta((Player) args[0], GUIPageMeta.KEY, GUIPageMeta.class).asInt();
 			page --;
 			((Player) args[0]).setMetadata(GUIPageMeta.class.getName(), new GUIPageMeta(GUIBase.plugin, page));
 			updateGUI();

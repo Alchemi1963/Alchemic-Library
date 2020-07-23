@@ -1,142 +1,185 @@
 package me.alchemi.al.objects.meta;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.io.Serializable;
 
 import org.bukkit.Bukkit;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.MetadataValue;
+import org.bukkit.metadata.MetadataValueAdapter;
+import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.Nullable;
 
-import me.alchemi.al.Library;
+import de.tr7zw.changeme.nbtapi.NBTCompound;
+import de.tr7zw.changeme.nbtapi.NBTEntity;
 
-public class PersistentMeta implements Listener{
-
-	protected static Map<UUID, FileConfiguration> persistentMetas = new HashMap<UUID, FileConfiguration>();
-
-	protected static List<UUID> changeUUIDs = new ArrayList<UUID>();
+public class PersistentMeta {
 	
-	protected static final File metaFiles = new File(Library.getInstance().getDataFolder(), "metas");
-	
-	protected static String getName(Player player) {
-		return player.getUniqueId().toString() + ".yml";
-	}
-	
-	protected static File getFile(Player player) {
-		return new File(metaFiles, getName(player));
-	}
-	
-	public void enable(String plugin) {
-		if (!metaFiles.exists()) metaFiles.mkdirs();
-		
+	public void enable(Plugin plugin) {
 		for (Player player : Bukkit.getOnlinePlayers()) {
 			initializePlayer(player, plugin);
 		}
-		
-		Bukkit.getPluginManager().registerEvents(Library.getMeta(), Library.getInstance());
 	}
 	
-	public static void initializePlayer(Player player, String plugin) {
-		if (getFile(player).exists()) {
-			FileConfiguration file = YamlConfiguration.loadConfiguration(getFile(player));
-			persistentMetas.put(player.getUniqueId(), file);
-			
-			List<Map<String, Object>> desMaps = new ArrayList<Map<String,Object>>();
-			for (String key : file.getValues(true).keySet()) {
-				if (key.endsWith("owner")) {
-					String k = key.substring(0, key.lastIndexOf("."));
-					Map<String, Object> m = file.getConfigurationSection(k).getValues(true);
-					m.put("==", k);
-					desMaps.add(m);
-					continue;
+	/**
+	 * Initialize the player for the given plugin
+	 * 
+	 * @param player
+	 * @param plugin
+	 */
+	public static void initializePlayer(Player player, Plugin plugin) {
+		
+		NBTEntity nbtp = new NBTEntity(player);
+		NBTCompound compound = nbtp.getPersistentDataContainer();
+		if (compound.hasKey("metadata." + plugin.getName())) {
+			NBTCompound pCompound = compound.getCompound("metadata." + plugin.getName());
+			for (String key : pCompound.getKeys()) {
+				Type type = pCompound.getObject(key + ".type", Type.class);
+				Object value;
+				
+				switch(type) {
+				case BOOLEAN:
+					value = pCompound.getBoolean(key + ".value");
+					break;
+				case BYTE:
+					value = pCompound.getByte(key + ".value");
+					break;
+				case BYTE_ARRAY:
+					value = pCompound.getByteArray(key + ".value");
+					break;
+				case DOUBLE:
+					value = pCompound.getDouble(key + ".value");
+					break;
+				case FLOAT:
+					value = pCompound.getFloat(key + ".value");
+					break;
+				case INT:
+					value = pCompound.getInteger(key + ".value");
+					break;
+				case INT_ARRAY:
+					value = pCompound.getIntArray(key + ".value");
+					break;
+				case ITEMSTACK:
+					value = pCompound.getItemStack(key + ".value");
+					break;
+				case LONG:
+					value = pCompound.getFloat(key + ".value");
+					break;
+				case OBJECT:
+					try {
+						value = pCompound.getObject(key + ".value", Class.forName(pCompound.getString(key + ".valueClass")));
+					} catch (ClassNotFoundException e) {
+						plugin.getLogger().warning("Could not get metadata value " + key + " for " + player.getName());
+						plugin.getLogger().warning(e.getMessage());
+						continue;
+					}
+					break;
+				case SHORT:
+					value = pCompound.getShort(key + ".value");
+					break;
+				case STRING:
+					value = pCompound.getString(key + ".value");
+					break;
+				default:
+					value = null;
+					break;
 				}
+				
+				player.setMetadata(key, new MetadataValueAdapter(plugin) {
+
+					private Object valueMeta = value;
+					
+					@Override
+					public @Nullable Object value() {
+						return valueMeta;
+					}
+					
+					@Override
+					public void invalidate() {
+						valueMeta = null;
+					}
+				});
+				
 			}
-			for (Map<String, Object> m : desMaps) {
-				if (m.get("owner").equals(plugin)) player.setMetadata((String) m.get("=="), BaseMeta.deserialize(m));
-			}
-		}
+		}		
 	}
 	
-	public static void setMeta(Player player, BaseMeta metaValue) {
+	/**
+	 * Set a meta value
+	 * 
+	 * @param player the {@link Player}
+	 * @param key the meta key
+	 * @param metaValue the {@link MetadataValue}
+	 */
+	public static void setMeta(Player player, String key, MetadataValue metaValue) {
 		
-		player.setMetadata(metaValue.getClass().getName(), metaValue);
-		
-		FileConfiguration file;
-		if (persistentMetas.containsKey(player.getUniqueId())) {
-			file = persistentMetas.get(player.getUniqueId());
-		} else if (getFile(player).exists()) {
-			file = YamlConfiguration.loadConfiguration(getFile(player));
+		NBTEntity nbtp = new NBTEntity(player);
+		NBTCompound compound = nbtp.getPersistentDataContainer();
+		NBTCompound metaCompound = compound.addCompound("metadata." + metaValue.getOwningPlugin().getName() + "." + key);
+		if (metaValue.value() instanceof Boolean) {
+			metaCompound.setObject("type", Type.BOOLEAN);
+			metaCompound.setBoolean("value", metaValue.asBoolean());
+		} else if (metaValue.value() instanceof Byte) {
+			metaCompound.setObject("type", Type.BYTE);
+			metaCompound.setByte("value", metaValue.asByte());
+		} else if (metaValue.value() instanceof byte[]) {
+			metaCompound.setObject("type", Type.BYTE_ARRAY);
+			metaCompound.setByteArray("value", (byte[])metaValue.value());
+		} else if (metaValue.value() instanceof Double) {
+			metaCompound.setObject("type", Type.DOUBLE);
+			metaCompound.setDouble("value", metaValue.asDouble());
+		} else if (metaValue.value() instanceof Float) {
+			metaCompound.setObject("type", Type.FLOAT);
+			metaCompound.setFloat("value", metaValue.asFloat());
+		} else if (metaValue.value() instanceof int[]) {
+			metaCompound.setObject("type", Type.INT_ARRAY);
+			metaCompound.setIntArray("value", (int[]) metaValue.value());
+		} else if (metaValue.value() instanceof Integer) {
+			metaCompound.setObject("type", Type.INT);
+			metaCompound.setInteger("value", metaValue.asInt());
+		} else if (metaValue.value() instanceof ItemStack) {
+			metaCompound.setObject("type", Type.ITEMSTACK);
+			metaCompound.setItemStack("value", (ItemStack) metaValue.value());
+		} else if (metaValue.value() instanceof Long) {
+			metaCompound.setObject("type", Type.LONG);
+			metaCompound.setLong("value", metaValue.asLong());
+		} else if (metaValue.value() instanceof Short) {
+			metaCompound.setObject("type", Type.SHORT);
+			metaCompound.setShort("value", metaValue.asShort());
+		} else if (metaValue.value() instanceof String) {
+			metaCompound.setObject("type", Type.STRING);
+			metaCompound.setObject("value", metaValue.asString());
+		} else if (metaValue.value() instanceof Serializable) {
+			metaCompound.setObject("type", Type.OBJECT);
+			metaCompound.setObject("value", metaValue.value());
+			metaCompound.setString("valueClass", metaValue.value().getClass().getName());
 		} else {
-			file = new YamlConfiguration();
+			throw new IllegalArgumentException("Metadata of class " + metaValue.getClass().getName() + " is not supported.");
 		}
 		
-		file.set(metaValue.getClass().getName(), metaValue.serialize());
-		
-		if (!changeUUIDs.contains(player.getUniqueId())) changeUUIDs.add(player.getUniqueId());
-		persistentMetas.put(player.getUniqueId(), file);
-		
-	}
-	
-	public static void save(Player player) {
-		if (persistentMetas.containsKey(player.getUniqueId()) && changeUUIDs.contains(player.getUniqueId())) {
-			FileConfiguration file = persistentMetas.get(player.getUniqueId());
-			try {
-				file.save(getFile(player));
-				changeUUIDs.remove(player.getUniqueId());
-			} catch (IOException e) {}
-		} 
+		player.setMetadata(key, metaValue);
 	}
 	
 	/**
-	 * Test if a player has a certain meta value.
+	 * Remove a metadata entry for the player
 	 * 
-	 * @param player	The player to test
-	 * @param metaKey	The meta key to test for
-	 * @param clazz		The class of the key
-	 * @return			true or false
+	 * @param player the {@link Player}
+	 * @param key the meta key
+	 * @param plugin the owning {@link Plugin}
 	 */
-	public static boolean hasMeta(Player player, Class<? extends BaseMeta> clazz) {
+	public static void removeMeta(Player player, String key, Plugin plugin) {
+		if (!player.hasMetadata(key)) return;
 		
-		if (!player.hasMetadata(clazz.getName())) return false;
+		NBTEntity nbtp = new NBTEntity(player);
+		if (!nbtp.hasKey("metadata." + plugin.getName())) return;
 		
-		for (MetadataValue meta : player.getMetadata(clazz.getName())) {
-			if (clazz.isInstance(meta)) {
-				return true;
-			}
-		}
-		return false;
+		NBTCompound compound = nbtp.getCompound("metadata." + plugin.getName());
+		compound.removeKey(key);
+		
+		player.removeMetadata(key, plugin);
 	}
 	
-	/**
-	 * Get a meta value from a player
-	 * 
-	 * @param player	The player to get the meta from
-	 * @param metaKey	The meta key to get
-	 * @param clazz		The class the key belongs to
-	 * @return			{@link MetadataValue} of the key, {@code null} of not found
-	 */
-	public static MetadataValue getMeta(Player player, Class<? extends BaseMeta> clazz) {
-		if (!hasMeta(player, clazz)) return null;
-		
-		for (MetadataValue meta : player.getMetadata(clazz.getName())) {
-			if (clazz.isInstance(meta)) {
-				return meta;
-			}
-		}
-		return null;
-	}
-	
-	@EventHandler
-	public static void onLogout(PlayerQuitEvent e) {
-		save(e.getPlayer());
+	public static enum Type implements Serializable {
+		BOOLEAN, BYTE, BYTE_ARRAY, DOUBLE, FLOAT, INT_ARRAY, INT, ITEMSTACK, LONG, SHORT, STRING, OBJECT;
 	}
 }

@@ -102,7 +102,7 @@ public abstract class ConfigBase {
 		}
 		
 		default Material asMaterial() {
-			return Material.getMaterial(asString());
+			return Material.getMaterial(asString().toUpperCase());
 		}
 	}
 	
@@ -139,6 +139,7 @@ public abstract class ConfigBase {
 				file.save();
 				plugin.getMessenger().print("File successfully updated!");
 			}
+			file.addDefaults(SexyConfiguration.loadConfiguration(new InputStreamReader(plugin.getResource(file.getFile().getName()))));
 		}
 		
 		reload();

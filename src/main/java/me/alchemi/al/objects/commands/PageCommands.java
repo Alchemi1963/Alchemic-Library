@@ -6,7 +6,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 
 import me.alchemi.al.objects.meta.ChatPagesMeta;
-import me.alchemi.al.objects.meta.PersistentMeta;
+import me.alchemi.al.objects.meta.MetaUtil;
 import me.alchemi.al.util.NumUtil;
 
 public class PageCommands implements Listener {
@@ -17,8 +17,8 @@ public class PageCommands implements Listener {
 		Player player = e.getPlayer();
 		ChatPagesMeta meta = null;
 		
-		if (PersistentMeta.hasMeta(player, ChatPagesMeta.class)) {
-			meta = (ChatPagesMeta) PersistentMeta.getMeta(player, ChatPagesMeta.class);
+		if (MetaUtil.hasMeta(player, ChatPagesMeta.KEY, ChatPagesMeta.class)) {
+			meta = MetaUtil.getMeta(player, ChatPagesMeta.KEY, ChatPagesMeta.class);
 		} else {
 			return;
 		}

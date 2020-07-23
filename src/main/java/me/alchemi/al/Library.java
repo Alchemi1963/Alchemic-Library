@@ -21,6 +21,7 @@ import me.alchemi.al.objects.base.PluginBase;
 import me.alchemi.al.objects.commands.PageCommands;
 import me.alchemi.al.objects.handling.CarbonDating;
 import me.alchemi.al.objects.handling.UpdateChecker;
+import me.alchemi.al.objects.listeners.ArmourListener;
 import me.alchemi.al.objects.meta.PersistentMeta;
 import me.alchemi.al.objects.placeholder.PapiParser;
 import me.alchemi.al.objects.placeholder.Parser;
@@ -56,6 +57,7 @@ public class Library extends PluginBase implements Listener {
 		
 		Bukkit.getPluginManager().registerEvents(this, this);
 		Bukkit.getPluginManager().registerEvents(new PageCommands(), this);
+		Bukkit.getPluginManager().registerEvents(new ArmourListener(), this);
 		
 		for (String l : Messenger.formatString("&211        00  101001  000110  101101  110011\r\n" + 
 				"&20011    0110  11  10    10    01  00  01  01\r\n" + 
@@ -81,13 +83,9 @@ public class Library extends PluginBase implements Listener {
 	}
 	
 	public void onDisable(){
-	
-		getLogger().info(Messenger.formatString("&6Saving player metadata..."));
-		for (Player player : Bukkit.getOnlinePlayers()) {
-			PersistentMeta.save(player);
-		}
 		
 		getLogger().info(Messenger.formatString("&7I don't wanna go..."));
+		
 	}
 	
 	/**

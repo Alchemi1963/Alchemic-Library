@@ -25,9 +25,9 @@ import me.alchemi.al.objects.meta.ChatPagesMeta;
 import me.alchemi.al.objects.placeholder.IStringParser;
 import me.alchemi.al.util.NumUtil;
 import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.hover.content.Text;
 
 public class Messenger {
 
@@ -497,20 +497,22 @@ public class Messenger {
 	/**
 	 * Sends a message with hovering text.
 	 * 
-	 * @param reciever	The {@link CommandSender} receiver
+	 * @param receiver	The {@link CommandSender} receiver
 	 * @param mainText	The main text to be sent
 	 * @param hoverText	The text the receiver should see when hovering over the main text
 	 */
-	public static void sendMessageHover(Player reciever, String mainText, String hoverText) {
+	public static void sendMessageHover(Player receiver, String mainText, String hoverText) {
 		
 		if (hoverText.substring(0, 1).equals("\n")) hoverText = hoverText.replaceFirst("\n", "");
 		
 		mainText = colourMessage(mainText);
 		
-		TextComponent mainComponent = new TextComponent(formatString(Library.getParser().parse(reciever, mainText)));
-		mainComponent.setHoverEvent(new HoverEvent( HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(formatString(Library.getParser().parse(reciever, hoverText))).create()));
+		TextComponent mainComponent = new TextComponent(formatString(Library.getParser().parse(receiver, mainText)));
 		
-		reciever.spigot().sendMessage(mainComponent);
+		mainComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+				new Text(formatString(Library.getParser().parse(receiver, hoverText)))));
+		
+		receiver.spigot().sendMessage(mainComponent);
 	}
 	/**
 	 * Colours the rest of a string before it gets chopped.

@@ -71,7 +71,7 @@ public class Messenger {
 		
 	}
 	
-	protected boolean save() {
+	public boolean save() {
 		try {
 			messages.save(new File(plugin.getDataFolder(), "messages.yml"));
 			return true;
@@ -170,6 +170,15 @@ public class Messenger {
 	public void setMessages(IMessage[] imessages) {
 		this.imessages = imessages;
 		loadMessages();
+	}
+	
+	/**
+	 * Gets the config file.
+	 * 
+	 * @return	the Messages config file
+	 */
+	public @NotNull FileConfiguration getFile() {
+		return this.messages;
 	}
 	
 	protected void loadMessages() {

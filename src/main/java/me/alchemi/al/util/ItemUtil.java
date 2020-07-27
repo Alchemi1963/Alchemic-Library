@@ -84,4 +84,20 @@ public class ItemUtil {
 		
 	}
 
+	/**
+	 * Get the item name to display in chat.
+	 * 
+	 * @param item the item for which the name is required
+	 * @return	the item name
+	 */
+	public static String getItemName(ItemStack item) {
+
+		return item.hasItemMeta() 
+				? item.getItemMeta().hasDisplayName() 
+						? item.getItemMeta().getDisplayName() 
+								: item.getType().getKey().getKey().replaceAll("_", " ").toLowerCase() 
+								: item.getType().getKey().getKey().replaceAll("_", " ").toLowerCase();
+		
+	}
+
 }

@@ -33,8 +33,8 @@ public abstract class CommandBase implements CommandExecutor {
 		messenger.sendMessage(noPerm.replace("%command%", command.getName()).replace("%permission%", command.getPermission()), sender);
 	}
 	
-	protected final void sendUsage(CommandSender sender, String usage) {
-		messenger.sendMessage(this.usage.replace("%usage%", usage), sender);
+	protected final void sendUsage(CommandSender sender, Command command) {
+		messenger.sendMessage(this.usage.replace("%usage%", command.getUsage()), sender);
 	}
 	
 	protected String compileArgs(String[] args) {

@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.function.Predicate;
+import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -233,9 +234,36 @@ public class Messenger {
 	/**
 	 * Sends a message to the console.
 	 * 
-	 * @param msg	The message to be sent
+	 * @param msg	The message to send
 	 */
-	public void print(Object... msgs) { 
+	public void print(Object...msgs) { 
+		log(Level.INFO, msgs);
+	}
+	
+	/**
+	 * Sends a warning to the console.
+	 * 
+	 * @param msgs The warning to send
+	 */
+	public void warn(Object...msgs) {
+		log(Level.WARNING, msgs);
+	}
+	
+	/**
+	 * Sends an error to the console.
+	 * 
+	 * @param msgs	The error to send
+	 */
+	public void error(Object...msgs) {
+		log(Level.SEVERE, msgs);
+	}
+	
+	/**
+	 * Log a message to console.
+	 * @param level	the appropiate level
+	 * @param msg	the message to log
+	 */
+	public void log(Level level, Object...msgs) {
 		String msg = "";
 		
 		for (Object m : msgs) {
@@ -251,8 +279,8 @@ public class Messenger {
 			return;
 		}
 		
-		plugin.getLogger().info(formatString(String.valueOf(msg)));
-	} 
+		plugin.getLogger().log(level, formatString(String.valueOf(msg)));
+	}
 	
 	/**
 	 * Broadcasts a message to the whole server.

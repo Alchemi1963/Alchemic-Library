@@ -43,6 +43,11 @@ public class StatementBuilder {
 		return new InsertBuilder(this);
 	}
 	
+	public final InsertBuilder insertIgnoreSQLite(String table) {
+		statement = "INSERT OR IGNORE INTO " + table + " ";
+		return new InsertBuilder(this);
+	}
+	
 	public final DeleteBuilder delete(String table) {
 		statement = "DELETE FROM " + table + " ";
 		return new DeleteBuilder(this);

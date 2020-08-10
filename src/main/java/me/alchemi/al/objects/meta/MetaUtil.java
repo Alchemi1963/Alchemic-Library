@@ -14,9 +14,10 @@ public class MetaUtil {
 	 * @return the MetadataValue, cast to the correct class
 	 */
 	public static <T> T getMeta(Player player, String key, Class<T> clazz) {
-		if (!MetaUtil.hasMeta(player, key, (Class<? extends MetadataValue>)clazz)) return null;
 		
-		for (MetadataValue meta : player.getMetadata(clazz.getName())) {
+		if (!MetaUtil.hasMeta(player, key, (Class<? extends MetadataValue>) clazz)) return null;
+		
+		for (MetadataValue meta : player.getMetadata(key)) {
 			if (clazz.isInstance(meta)) {
 				return (T) meta;
 			}
@@ -34,9 +35,9 @@ public class MetaUtil {
 	 */
 	public static boolean hasMeta(Player player, String key, Class<? extends MetadataValue> clazz) {
 		
-		if (!player.hasMetadata(clazz.getName())) return false;
+		if (!player.hasMetadata(key)) return false;
 		
-		for (MetadataValue meta : player.getMetadata(clazz.getName())) {
+		for (MetadataValue meta : player.getMetadata(key)) {
 			if (clazz.isInstance(meta)) {
 				return true;
 			}

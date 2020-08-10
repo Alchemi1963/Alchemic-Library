@@ -27,14 +27,14 @@ public class PageCommands implements Listener {
 			
 			if (!meta.goNext()) meta.getPages().next();
 			player.spigot().sendMessage(meta.getPages().next());
-			player.setMetadata(ChatPagesMeta.class.getName(), new ChatPagesMeta(meta.getPages(), true));
+			player.setMetadata(ChatPagesMeta.KEY, new ChatPagesMeta(meta.getPages(), true));
 			e.setCancelled(true);
 			
 		} else if (e.getMessage().equals("/" + NumUtil.toBinary("previous")) && meta.getPages().hasPrevious()) {
 			
 			if (meta.goNext()) meta.getPages().previous();
 			player.spigot().sendMessage(meta.getPages().previous());
-			player.setMetadata(ChatPagesMeta.class.getName(), new ChatPagesMeta(meta.getPages(), false));
+			player.setMetadata(ChatPagesMeta.KEY, new ChatPagesMeta(meta.getPages(), false));
 			e.setCancelled(true);
 			
 		}

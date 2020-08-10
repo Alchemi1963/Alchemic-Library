@@ -19,11 +19,9 @@ public class DataLog {
 	
 	protected static final File logsFolder = new File(Library.getInstance().getDataFolder(), "sql-logs");
 	
-	static {
-		if (!logsFolder.exists()) logsFolder.mkdir();
-	}
-	
 	public DataLog(PluginBase plugin) {
+		if (!logsFolder.exists()) logsFolder.mkdirs();
+		
 		this.plugin = plugin;
 		this.log = new File(logsFolder, plugin.getName() + ".log");
 		try {

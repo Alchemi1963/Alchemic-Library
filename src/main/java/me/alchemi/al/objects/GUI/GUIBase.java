@@ -53,7 +53,7 @@ public abstract class GUIBase {
 	public void generateGUI() {
 		int page = 0;
 		
-		if (!MetaUtil.hasMeta(sender, GUIPageMeta.KEY, GUIPageMeta.class)) sender.setMetadata(GUIPageMeta.class.getName(), new GUIPageMeta(GUIBase.plugin, page));
+		if (!MetaUtil.hasMeta(sender, GUIPageMeta.KEY, GUIPageMeta.class)) sender.setMetadata(GUIPageMeta.KEY, new GUIPageMeta(GUIBase.plugin, page));
 		else page = MetaUtil.getMeta(sender, GUIPageMeta.KEY, GUIPageMeta.class).asInt();
 		
 		TreeMap<Integer, ItemStack> mapped = new TreeMap<>(contents);
@@ -167,7 +167,7 @@ public abstract class GUIBase {
 			gui.clear();
 			int page = MetaUtil.getMeta((Player) args[0], GUIPageMeta.KEY, GUIPageMeta.class).asInt();
 			page ++;
-			((Player) args[0]).setMetadata(GUIPageMeta.class.getName(), new GUIPageMeta(GUIBase.plugin, page));
+			((Player) args[0]).setMetadata(GUIPageMeta.KEY, new GUIPageMeta(GUIBase.plugin, page));
 			updateGUI();
 		}
 	};
@@ -180,7 +180,7 @@ public abstract class GUIBase {
 			gui.clear();
 			int page = MetaUtil.getMeta((Player) args[0], GUIPageMeta.KEY, GUIPageMeta.class).asInt();
 			page --;
-			((Player) args[0]).setMetadata(GUIPageMeta.class.getName(), new GUIPageMeta(GUIBase.plugin, page));
+			((Player) args[0]).setMetadata(GUIPageMeta.KEY, new GUIPageMeta(GUIBase.plugin, page));
 			updateGUI();
 		}
 	};

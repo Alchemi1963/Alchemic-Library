@@ -497,7 +497,7 @@ public class Messenger {
 		
 		if (iter.hasNext()) receiver.spigot().sendMessage(iter.next());
 		
-		receiver.setMetadata(ChatPagesMeta.class.getName(), new ChatPagesMeta(iter));
+		receiver.setMetadata(ChatPagesMeta.KEY, new ChatPagesMeta(iter));
 		
 	}
 	

@@ -117,7 +117,7 @@ public class SQLiteDatabase implements IDatabase {
 			else if (value instanceof StringSerializable) value = "\"" + ((StringSerializable)value).serialize_string() + "\"";
 			
 			executeUpdate(new StatementBuilder()
-					.insertIgnore(table.getName())
+					.insertIgnoreSQLite(table.getName())
 					.column(column.getName())
 					.values(value)
 					.build());
@@ -234,7 +234,7 @@ public class SQLiteDatabase implements IDatabase {
 					.toArray();
 			
 			executeUpdate(new StatementBuilder()
-					.insertIgnore(table.getName())
+					.insertIgnoreSQLite(table.getName())
 					.columns(columns)
 					.values(elements)
 					.build());

@@ -56,7 +56,9 @@ public abstract class ConfigBase {
 		@SuppressWarnings("unchecked")
 		default List<String> asStringList() {
 			if (value() instanceof List) {
-				if (((List<?>)value()).get(0) instanceof String
+				if (((List<?>)value()).isEmpty()) {
+					return new ArrayList<String>();
+				} else if (((List<?>)value()).get(0) instanceof String
 						|| ((List<?>)value()).isEmpty()) {
 					return (List<String>)value();
 				}
@@ -75,7 +77,9 @@ public abstract class ConfigBase {
 		@SuppressWarnings("unchecked")
 		default List<Float> asFloatList() {
 			if (value() instanceof List) {
-				if (((List<?>)value()).get(0) instanceof Float
+				if (((List<?>)value()).isEmpty()) {
+					return new ArrayList<Float>();
+				} else if (((List<?>)value()).get(0) instanceof Float
 						|| ((List<?>)value()).isEmpty()) {
 					return (List<Float>)value();
 				}
@@ -86,7 +90,9 @@ public abstract class ConfigBase {
 		@SuppressWarnings("unchecked")
 		default List<Integer> asIntList() {
 			if (value() instanceof List) {
-				if (((List<?>)value()).get(0) instanceof Integer
+				if (((List<?>)value()).isEmpty()) {
+					return new ArrayList<Integer>();
+				} else if (((List<?>)value()).get(0) instanceof Integer
 						|| ((List<?>)value()).isEmpty()) {
 					return (List<Integer>)value();
 				}

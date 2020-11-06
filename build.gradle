@@ -55,7 +55,7 @@ dependencies {
 	shadow 'mysql:mysql-connector-java:5.1.41'
 	shadow 'org.jetbrains:annotations:17.0.0'
 	
-	shadow 'org.spigotmc:spigot-api:1.16.3-R0.1-SNAPSHOT'
+	shadow 'org.spigotmc:spigot-api:1.16.4-R0.1-SNAPSHOT'
 	shadow 'com.comphenix.protocol:ProtocolLib:4.6.0-SNAPSHOT'
 	shadow 'me.clip:placeholderapi:2.10.9'
 	

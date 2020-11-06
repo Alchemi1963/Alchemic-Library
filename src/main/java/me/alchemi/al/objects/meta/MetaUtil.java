@@ -1,22 +1,23 @@
 package me.alchemi.al.objects.meta;
 
-import org.bukkit.entity.Player;
 import org.bukkit.metadata.MetadataValue;
+import org.bukkit.metadata.Metadatable;
 
 public class MetaUtil {
 
 	/**
 	 * 
 	 * @param <T>
-	 * @param player the {@link Player}
+	 * @param metadatable the {@link Metadatable} object
 	 * @param key the meta key
 	 * @param clazz the {@link Class} from the metadata, should implement {@link MetadataValue}
 	 * @return the MetadataValue, cast to the correct class
 	 */
-	public static <T> T getMeta(Player player, String key, Class<T> clazz) {
-		if (!MetaUtil.hasMeta(player, key, (Class<? extends MetadataValue>)clazz)) return null;
+	public static <T> T getMeta(Metadatable metadatable, String key, Class<T> clazz) {
 		
-		for (MetadataValue meta : player.getMetadata(clazz.getName())) {
+		if (!MetaUtil.hasMeta(metadatable, key, (Class<? extends MetadataValue>) clazz)) return null;
+		
+		for (MetadataValue meta : metadatable.getMetadata(key)) {
 			if (clazz.isInstance(meta)) {
 				return (T) meta;
 			}
@@ -27,16 +28,16 @@ public class MetaUtil {
 	/**
 	 * Test if a player has a certain meta value.
 	 * 
-	 * @param player the {@link Player}
+	 * @param metadatable the {@link Metadatable} object
 	 * @param key the meta key
 	 * @param clazz the {@link Class} from the metadata
 	 * @return
 	 */
-	public static boolean hasMeta(Player player, String key, Class<? extends MetadataValue> clazz) {
+	public static boolean hasMeta(Metadatable metadatable, String key, Class<? extends MetadataValue> clazz) {
 		
-		if (!player.hasMetadata(clazz.getName())) return false;
+		if (!metadatable.hasMetadata(key)) return false;
 		
-		for (MetadataValue meta : player.getMetadata(clazz.getName())) {
+		for (MetadataValue meta : metadatable.getMetadata(key)) {
 			if (clazz.isInstance(meta)) {
 				return true;
 			}

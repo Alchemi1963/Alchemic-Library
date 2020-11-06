@@ -13,7 +13,6 @@ import java.util.regex.Pattern;
 
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
-@SuppressWarnings({ "unchecked", "serial" })
 public class Container<T extends StringSerializable> implements StringSerializable, Serializable, ConfigurationSerializable {
 
 	private Map<T, Integer> contained_items;

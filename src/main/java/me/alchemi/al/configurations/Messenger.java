@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.function.Predicate;
+import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,9 +26,9 @@ import me.alchemi.al.objects.meta.ChatPagesMeta;
 import me.alchemi.al.objects.placeholder.IStringParser;
 import me.alchemi.al.util.NumUtil;
 import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.hover.content.Text;
 
 public class Messenger {
 
@@ -71,7 +72,7 @@ public class Messenger {
 		
 	}
 	
-	protected boolean save() {
+	public boolean save() {
 		try {
 			messages.save(new File(plugin.getDataFolder(), "messages.yml"));
 			return true;
@@ -143,12 +144,12 @@ public class Messenger {
 	 * @param key	the key for the message
 	 * @return the message
 	 */
-	public String get(String key) {
+	public Object get(String key) {
 		if (!messages.contains(key, true) && messages.getDefaults().contains(key)) {
 			updateFile(key);
-			return messages.getString(key);
+			return messages.get(key);
 		}		
-		return messages.getString(key, "");
+		return messages.get(key, "");
 	}
 	
 	/**
@@ -158,7 +159,7 @@ public class Messenger {
 	 * @param keys	the keys for the message
 	 * @return 	the message
 	 */
-	public String get(String...keys) {
+	public Object get(String...keys) {
 		return get(String.join(".", keys));
 	}
 	
@@ -170,6 +171,15 @@ public class Messenger {
 	public void setMessages(IMessage[] imessages) {
 		this.imessages = imessages;
 		loadMessages();
+	}
+	
+	/**
+	 * Gets the config file.
+	 * 
+	 * @return	the Messages config file
+	 */
+	public @NotNull FileConfiguration getFile() {
+		return this.messages;
 	}
 	
 	protected void loadMessages() {
@@ -224,9 +234,36 @@ public class Messenger {
 	/**
 	 * Sends a message to the console.
 	 * 
-	 * @param msg	The message to be sent
+	 * @param msg	The message to send
 	 */
-	public void print(Object... msgs) { 
+	public void print(Object...msgs) { 
+		log(Level.INFO, msgs);
+	}
+	
+	/**
+	 * Sends a warning to the console.
+	 * 
+	 * @param msgs The warning to send
+	 */
+	public void warn(Object...msgs) {
+		log(Level.WARNING, msgs);
+	}
+	
+	/**
+	 * Sends an error to the console.
+	 * 
+	 * @param msgs	The error to send
+	 */
+	public void error(Object...msgs) {
+		log(Level.SEVERE, msgs);
+	}
+	
+	/**
+	 * Log a message to console.
+	 * @param level	the appropiate level
+	 * @param msg	the message to log
+	 */
+	public void log(Level level, Object...msgs) {
 		String msg = "";
 		
 		for (Object m : msgs) {
@@ -242,8 +279,8 @@ public class Messenger {
 			return;
 		}
 		
-		plugin.getLogger().info(formatString(String.valueOf(msg)));
-	} 
+		plugin.getLogger().log(level, formatString(String.valueOf(msg)));
+	}
 	
 	/**
 	 * Broadcasts a message to the whole server.
@@ -460,7 +497,7 @@ public class Messenger {
 		
 		if (iter.hasNext()) receiver.spigot().sendMessage(iter.next());
 		
-		receiver.setMetadata(ChatPagesMeta.class.getName(), new ChatPagesMeta(iter));
+		receiver.setMetadata(ChatPagesMeta.KEY, new ChatPagesMeta(iter));
 		
 	}
 	
@@ -488,20 +525,22 @@ public class Messenger {
 	/**
 	 * Sends a message with hovering text.
 	 * 
-	 * @param reciever	The {@link CommandSender} receiver
+	 * @param receiver	The {@link CommandSender} receiver
 	 * @param mainText	The main text to be sent
 	 * @param hoverText	The text the receiver should see when hovering over the main text
 	 */
-	public static void sendMessageHover(Player reciever, String mainText, String hoverText) {
+	public static void sendMessageHover(Player receiver, String mainText, String hoverText) {
 		
 		if (hoverText.substring(0, 1).equals("\n")) hoverText = hoverText.replaceFirst("\n", "");
 		
 		mainText = colourMessage(mainText);
 		
-		TextComponent mainComponent = new TextComponent(formatString(Library.getParser().parse(reciever, mainText)));
-		mainComponent.setHoverEvent(new HoverEvent( HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(formatString(Library.getParser().parse(reciever, hoverText))).create()));
+		TextComponent mainComponent = new TextComponent(formatString(Library.getParser().parse(receiver, mainText)));
 		
-		reciever.spigot().sendMessage(mainComponent);
+		mainComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+				new Text(formatString(Library.getParser().parse(receiver, hoverText)))));
+		
+		receiver.spigot().sendMessage(mainComponent);
 	}
 	/**
 	 * Colours the rest of a string before it gets chopped.

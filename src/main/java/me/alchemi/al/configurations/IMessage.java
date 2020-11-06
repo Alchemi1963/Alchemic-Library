@@ -2,7 +2,7 @@ package me.alchemi.al.configurations;
 
 public interface IMessage {
 
-	void setValue(String value);
+	void setValue(Object value);
 	
 	String value();
 	

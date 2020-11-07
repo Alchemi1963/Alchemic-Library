@@ -61,7 +61,6 @@ public enum DataType {
 	}
 	
 	public boolean testObject(Object o) {
-		System.out.println(clazz.isInstance(o));
 		return clazz.isInstance(o) && 
 				(maxlength == minlength ||
 				((o instanceof String && 

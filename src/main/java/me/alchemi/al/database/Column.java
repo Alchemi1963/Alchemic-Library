@@ -27,8 +27,8 @@ public class Column {
 		this.limit = limit;
 	}
 	
-	public boolean testObject(Object o) {
-		return (o == null && Arrays.asList(modifiers).contains(ColumnModifier.NOT_NULL))
+	public boolean testObject(Object o) {	
+		return (o == null && !Arrays.asList(modifiers).contains(ColumnModifier.NOT_NULL))
 				|| datatype.testObject(o);
 	}
 	

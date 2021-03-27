@@ -61,12 +61,13 @@ public enum DataType {
 	}
 	
 	public boolean testObject(Object o) {
+		System.out.println(clazz.isInstance(o));
 		return clazz.isInstance(o) && 
 				(maxlength == minlength ||
 				((o instanceof String && 
 						o.toString().length() < maxlength)
-						|| (o instanceof Integer 
-								&& (int)o > minlength
-								&& (int)o < maxlength)));
+						|| (o instanceof Number 
+								&& ((Number)o).longValue() > minlength
+								&& ((Number)o).longValue() < maxlength)));
 	}
 }

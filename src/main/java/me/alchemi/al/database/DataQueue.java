@@ -1,13 +1,11 @@
 package me.alchemi.al.database;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 import org.bukkit.scheduler.BukkitRunnable;
 
 import me.alchemi.al.Library;
-import me.alchemi.al.configurations.Messenger;
 
 public class DataQueue {
 
@@ -23,17 +21,13 @@ public class DataQueue {
 			@Override
 			public void run() {
 				
-				Iterator<BukkitRunnable> iter = tasks.iterator();
-				while (iter.hasNext()) {
-					
-					Messenger.printS("Running SQL task.");
-					iter.next().run();
-					
-				}
+				Set<BukkitRunnable> set = ((HashSet)((HashSet)tasks).clone());
 				tasks.clear();
+				set.forEach(BukkitRunnable::run);
+				
 			}
 		}; 
-		scheduler.runTaskTimerAsynchronously(Library.getInstance(), 10, 20);
+		scheduler.runTaskTimerAsynchronously(Library.getInstance(), 10, 200);
 		
 	}
 	
@@ -49,7 +43,7 @@ public class DataQueue {
 	public void runTasks() {
 		scheduler.cancel();
 		scheduler.run();
-		scheduler.runTaskTimerAsynchronously(Library.getInstance(), 10, 20);
+		scheduler.runTaskTimerAsynchronously(Library.getInstance(), 10, 200);
 	}
 	
 	public Set<BukkitRunnable> getTasks() {

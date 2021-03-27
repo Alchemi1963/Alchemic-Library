@@ -144,12 +144,12 @@ public class Messenger {
 	 * @param key	the key for the message
 	 * @return the message
 	 */
-	public String get(String key) {
+	public Object get(String key) {
 		if (!messages.contains(key, true) && messages.getDefaults().contains(key)) {
 			updateFile(key);
-			return messages.getString(key);
+			return messages.get(key);
 		}		
-		return messages.getString(key, "");
+		return messages.get(key, "");
 	}
 	
 	/**
@@ -159,7 +159,7 @@ public class Messenger {
 	 * @param keys	the keys for the message
 	 * @return 	the message
 	 */
-	public String get(String...keys) {
+	public Object get(String...keys) {
 		return get(String.join(".", keys));
 	}
 	
